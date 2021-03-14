@@ -1,0 +1,82 @@
+# PREPROCESS
+
+# Where the samples will be written
+save_data: run/samples
+# Where the vocab(s) will be written
+src_vocab: ../../vocabs/vocab.en
+tgt_vocab: ../../vocabs/vocab.hu
+
+# Corpus opts:
+data:
+    train:
+        path_src: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-train.en
+        path_tgt: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-train.hu
+        transforms: [sentencepiece]
+        weight: 1
+    valid:
+        path_src: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-valid.en
+        path_tgt: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-valid.hu
+        transforms: [sentencepiece]
+
+#### Subword
+src_subword_model: ../../sp_models/bpe_en.model
+tgt_subword_model: ../../sp_models/bpe_hu.model
+src_subword_nbest: 1
+src_subword_alpha: 0.0
+tgt_subword_nbest: 1
+tgt_subword_alpha: 0.0
+
+# TRAIN
+
+# Train on a single GPU
+world_size: 1
+gpu_ranks: [0]
+
+# Batching
+batch_size: 32
+#queue_size: 16
+#accum_count: [3]
+
+# General opts
+save_model: run/model
+keep_checkpoint: 50 # 5 epoch
+save_checkpoint_steps: 50000
+average_decay: 0.0005
+seed: 1234
+report_every: 100
+train_steps: 1500000 # 5 epoch = 5 * 3_300_000 / 24
+valid_steps: 50000 # 1/2 epoch
+single_pass: False
+early_stopping: 6 # 3 epoch
+early_stopping_criteria: ppl
+
+# Optimization
+model_dtype: "fp16"
+optim: "adam"
+learning_rate: 0.003
+warmup_steps: 8000
+decay_method: "noam"
+adam_beta2: 0.998
+max_grad_norm: 2
+label_smoothing: 0.1
+param_init: 0
+param_init_glorot: true
+normalization: "tokens"
+
+# Model
+train_from: run/model_step_500000.pt
+reset_optim: keep_states
+encoder_type: transformer
+decoder_type: transformer
+enc_layers: 6
+dec_layers: 6
+heads: 8
+rnn_size: 512
+word_vec_size: 512
+transformer_ff: 2048
+dropout_steps: [0]
+dropout: [0.1]
+attention_dropout: [0.1]
+
+# Logging
+log_file: run/logs
