@@ -1,0 +1,1 @@
+BLEU+c.mixed+#.1+s.exp+tok.13a+v.1.5.1 = 27.6 59.3/34.4/23.7/17.4 (BP = 0.910 ratio = 0.913 hyp_len = 169940 ref_len = 186033)
