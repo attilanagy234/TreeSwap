@@ -1,6 +1,9 @@
 import networkx as nx
+import matplotlib.pyplot as plt
 from io import BytesIO
 from IPython.display import Image, display
+from networkx.drawing.nx_agraph import graphviz_layout
+
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
 from hu_nmt.data_augmentator.dependency_parsers.hungarian_dependency_parser import HungarianDependencyParser
 
@@ -22,12 +25,19 @@ class DependencyGraphWrapper:
         return nx.shortest_path_length(self._graph, self.get_root())
 
     def display_graph(self):
-        agraph = nx.nx_agraph.to_agraph(self._graph) # graphviz agraph format
-        agraph.layout('dot', args='-Nfontsize=10 -Nwidth=".2" -Nheight=".2" -Nmargin=0 -Gfontsize=8')
-        imgbuf = BytesIO()
-        agraph.draw(imgbuf, format='png', prog='dot')
-        img = Image(imgbuf.getvalue())
-        display(img)
+        labels = {e: self._graph.get_edge_data(e[0], e[1])["dep"] for e in self._graph.edges()}
+        pos = graphviz_layout(self._graph, prog="dot",
+                              root=1000,
+                              args='-Gsplines=true -Gnodesep=0.6 -Goverlap=scalexy'
+                              )
+        nx.draw(self._graph, pos,
+                with_labels=True,
+                alpha=0.6,
+                node_size=1000,
+                font_size=8
+                )
+        nx.draw_networkx_edge_labels(self._graph, pos, edge_labels=labels)
+        plt.show()
 
     def get_nodes_with_property(self, attribute_key, attribute_value):
         return [x for x, y in self._graph.nodes(data=True) if y[attribute_key] == attribute_value]
