@@ -2,8 +2,7 @@ from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserB
 
 
 class HungarianDependencyParser(DependencyParserBase):
-    def sentence_to_dep_parse_tree(self):
+    def sentence_to_dep_parse_tree(self, sentence):
         pass
 
-    def dep_parse_tree_to_nx_graph(self):
-        pass
+
