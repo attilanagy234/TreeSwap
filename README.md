@@ -16,7 +16,7 @@ All installed dependencies are written to a **poetry.lock** file.
 
 If you already have a Poetry environment and want to resume work:
 ```bash
-cd git pull
+git pull
 poetry update
 ```
 Poetry update will update the lock file.
