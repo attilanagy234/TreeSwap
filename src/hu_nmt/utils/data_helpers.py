@@ -1,5 +1,8 @@
 import yaml
 from dotmap import DotMap
+import numpy as np
+import pandas as pd
+from multiprocessing import Pool
 
 
 def get_config_from_yaml(yaml_file):
@@ -11,3 +14,12 @@ def get_config_from_yaml(yaml_file):
     # Using DotMap we will be able to reference nested parameters via attribute such as x.y instead of x['y']
     config = DotMap(config_yaml)
     return config
+
+
+def parallelize_df_processing(df, func, num_cores, num_partitions):
+    df_split = np.array_split(df, num_partitions)
+    pool = Pool(num_cores)
+    df = pd.concat(pool.map(func, df_split))
+    pool.close()
+    pool.join()
+    return df
