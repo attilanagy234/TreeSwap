@@ -32,3 +32,9 @@ class DependencyGraphWrapper:
     def get_nodes_with_property(self, attribute_key, attribute_value):
         return [x for x, y in self._graph.nodes(data=True) if y[attribute_key] == attribute_value]
 
+    def get_edges_with_property(self, attribute_key, attribute_value):
+        edges_with_property = []
+        for source_node, target_node, edge in self._graph.edges(data=True):
+            if edge[attribute_key] == attribute_value:
+                edges_with_property.append((source_node, target_node, edge))
+        return edges_with_property
