@@ -29,6 +29,6 @@ class DependencyGraphWrapper:
         img = Image(imgbuf.getvalue())
         display(img)
 
-    def get_node_with_property(self, attribute_key, attribute_value):
+    def get_nodes_with_property(self, attribute_key, attribute_value):
         return [x for x, y in self._graph.nodes(data=True) if y[attribute_key] == attribute_value]
 
