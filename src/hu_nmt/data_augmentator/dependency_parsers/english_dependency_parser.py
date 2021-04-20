@@ -5,8 +5,8 @@ from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserB
 
 class EnglishDependencyParser(DependencyParserBase):
 
-    def __init__(self, subsample_df):
-        super().__init__(subsample_df)
+    def __init__(self):
+        super().__init__()
         self._nlp_pipe = spacy.load('en')
 
     def sentence_to_dep_parse_tree(self, sentence):
