@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "data-augmentator"
+version = "0.1.0"
+description = "Data augmentation on textual data based on dependency parsing"
+authors = ["Attila Nagy <attila.nagy234@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "1.1.5"
+dotmap = "^1.3.17"
+networkx= "2.5.1"
+matplotlib = "^3.2.2"
+pyyaml = "^5.4.1"
+spacy= "2.3.4"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
