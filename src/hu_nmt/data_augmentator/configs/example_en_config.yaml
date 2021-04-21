@@ -1,3 +1,9 @@
-data:
+info:
   lang: en
+
+subsampler:
+  TODO: TODO # specify things like length cutoff etc.
+
+augmentation:
   augmentation_type: TODO
+  augmentation_param: TODO
