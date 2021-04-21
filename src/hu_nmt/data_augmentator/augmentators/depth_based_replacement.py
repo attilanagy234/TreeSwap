@@ -6,5 +6,5 @@ class DepthBasedReplacement(DepthBasedAugmentator):
     def __init__(self, config):
         super().__init__(config)
 
-    def augment_sentence(self, sentence):
+    def augment_sentence_from_dep_graph(self, dep_graph):
         pass

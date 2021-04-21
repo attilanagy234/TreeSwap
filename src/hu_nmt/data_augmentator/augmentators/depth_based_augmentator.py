@@ -10,8 +10,8 @@ class DepthBasedAugmentator(AugmentatorBase):
     Syntax-aware Data Augmentation for Neural Machine Translation
     https://arxiv.org/pdf/2004.14200.pdf
     """
-    def __init__(self, config):
+    def __init__(self, config, dep_graph):
         super().__init__(config)
 
-    def augment_sentence(self, sentence):
+    def augment_sentence_from_dep_graph(self, dep_graph):
         raise NotImplementedError()

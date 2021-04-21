@@ -10,5 +10,5 @@ class AugmentatorBase(ABC):
         self._config = config
 
     @abstractmethod
-    def augment_sentence(self, sentence):
+    def augment_sentence_from_dep_graph(self, dep_graph):
         raise NotImplementedError
