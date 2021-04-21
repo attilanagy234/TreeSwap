@@ -2,18 +2,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout
 
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
-from hu_nmt.data_augmentator.dependency_parsers.hungarian_dependency_parser import HungarianDependencyParser
-
 
 class DependencyGraphWrapper:
-    def __init__(self, config, sentence):
+    def __init__(self, config, graph):
         self._config = config
-        if self._config.data.lang == 'en':
-            self._dep_parser = EnglishDependencyParser()
-        if self._config.data.lang == 'hu':
-            self._dep_parser = HungarianDependencyParser()
-        self._graph = self._dep_parser.sentence_to_dep_parse_tree(sentence)
+        self._graph = graph
 
     def get_root(self):
         # since dep parsing always yields a tree, it should always have one element
