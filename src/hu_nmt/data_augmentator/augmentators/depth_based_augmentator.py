@@ -1,6 +1,12 @@
 from abc import ABC
+import numpy as np
 
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
+from hu_nmt.data_augmentator.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.utils.logger import get_logger
+
+log = get_logger(__name__)
+log.setLevel('DEBUG')
 
 
 class DepthBasedAugmentator(AugmentatorBase):
@@ -10,8 +16,35 @@ class DepthBasedAugmentator(AugmentatorBase):
     Syntax-aware Data Augmentation for Neural Machine Translation
     https://arxiv.org/pdf/2004.14200.pdf
     """
-    def __init__(self, config, dep_graph):
+
+    def __init__(self, config):
         super().__init__(config)
 
-    def augment_sentence_from_dep_graph(self, dep_graph):
+    def augment_sentence_from_dep_graph(self, dep_graph: DependencyGraphWrapper):
         raise NotImplementedError()
+
+    def get_probabilities_from_tree_depth(self, dep_graph: DependencyGraphWrapper):
+        def get_depth_factor(depth):
+            return 1 - (1 / (2 ** (depth - 1)))
+
+        # No need to include the artificial ROOT node in augmentation
+        distances_from_root = dep_graph.get_distances_from_root()
+        distances_from_root.pop('root-0', None)
+        distances_from_root = distances_from_root.items()
+        print(distances_from_root)
+
+        node_ids = [x[0] for x in distances_from_root]
+        depth_factors = [get_depth_factor(x[1]) for x in distances_from_root]
+        log.debug(f'Distances from root: {distances_from_root}')
+        log.debug(f'Depth factors: {depth_factors}')
+        probs = self.softmax(np.array(depth_factors))
+        log.debug(f'Probabilities: {probs}')
+        return node_ids, probs
+
+    @staticmethod
+    def sample_from_distribution(words, probs, sample_count=1):
+        return set(np.random.choice(words, sample_count, p=probs))
+
+    @staticmethod
+    def softmax(x):
+        return np.exp(x) / sum(np.exp(x))
