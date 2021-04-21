@@ -1,7 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from io import BytesIO
-from IPython.display import Image, display
 from networkx.drawing.nx_agraph import graphviz_layout
 
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser

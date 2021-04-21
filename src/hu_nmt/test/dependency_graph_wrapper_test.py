@@ -55,6 +55,11 @@ class DependencyGraphWrapperTest(unittest.TestCase):
         actual_adps = ['for', 'in']
         assert stripped_adps == actual_adps
 
+        punct_positions = self.dep_graph_wrapper.get_nodes_with_property('postag', 'PUNCT')
+        stripped_puncts = [x.split('-')[0] for x in punct_positions]
+        actual_puncts = ['.']
+        assert stripped_puncts == actual_puncts
+
     def test_get_edges_with_property(self):
         edges_with_property = self.dep_graph_wrapper.get_edges_with_property('dep', 'punct')
         source_node, target_node, edge = edges_with_property[0]
