@@ -37,3 +37,15 @@ You can obtain the path for the virtualenv by:
 ```bash
 poetry env info --path
 ```
+
+## Dependency parsing for Hungarian
+We use [emtsv](https://github.com/nytud/emtsv) for creating the dependency parse trees for Hungarian sentences.
+
+To get the docker image:
+```bash
+docker pull mtaril/emtsv:latest
+```
+Processing data:
+```bash
+cat input.txt | docker run -i mtaril/emtsv tok-dep > output.txt
+```
