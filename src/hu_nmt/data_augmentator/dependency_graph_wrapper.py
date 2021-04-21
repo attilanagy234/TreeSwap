@@ -9,8 +9,14 @@ class DependencyGraphWrapper:
         self._graph = graph
 
     def get_root(self):
-        # since dep parsing always yields a tree, it should always have one element
+        # This should yield the artificial ROOT node on top of the dependency tree
         return [n for n, d in self._graph.in_degree() if d == 0][0]
+
+    def get_root_token(self):
+        # Get the token that is connected to the ROOT node with the root deplabel
+        root_edge = self.get_edges_with_property('dep', 'root')[0]
+        return root_edge[1]  # target node
+        pass
 
     def get_distances_from_root(self):
         return nx.shortest_path_length(self._graph, self.get_root())
@@ -35,6 +41,7 @@ class DependencyGraphWrapper:
 
     def get_edges_with_property(self, attribute_key, attribute_value):
         edges_with_property = []
+        attribute_value = attribute_value.lower()  # because of the different taxonomies
         for source_node, target_node, edge in self._graph.edges(data=True):
             if edge[attribute_key] == attribute_value:
                 edges_with_property.append((source_node, target_node, edge))

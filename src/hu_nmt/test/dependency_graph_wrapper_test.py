@@ -2,6 +2,7 @@ import os
 import unittest
 
 from hu_nmt.data_augmentator.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
 from hu_nmt.data_augmentator.utils.data_helpers import get_config_from_yaml
 
 dirname = os.path.dirname(__file__)
@@ -13,26 +14,36 @@ class DependencyGraphWrapperTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.config = get_config_from_yaml(os.path.join(dirname, 'resources/configs/en_test_config.yaml'))
         sentence = 'Helen took her dog for a walk in the woods.'
-        cls.dep_graph_wrapper = DependencyGraphWrapper(cls.config, sentence)
+        cls.eng_dep_parser = EnglishDependencyParser()
+        graph = cls.eng_dep_parser.sentence_to_dep_parse_tree(sentence)
+        cls.dep_graph_wrapper = DependencyGraphWrapper(cls.config, graph)
 
     def test_get_root(self):
-        actual_root = 'took'
+        # Should always return the root node
+        actual_root = 'root'
+        print(self.dep_graph_wrapper.get_root().split('-')[0])
         assert actual_root == self.dep_graph_wrapper.get_root().split('-')[0]  # strip id from node_name
+
+    def test_get_root_token(self):
+        actual_root = 'took'
+        assert actual_root == self.dep_graph_wrapper.get_root_token().split('-')[0]  # strip id from node_name
 
     def test_get_distances_from_root(self):
         actual_distances = {
-            'took': 0,
-            'helen': 1,
-            'dog': 1,
-            'for': 1,
-            '.': 1,
-            'her': 2,
+            'root': 0,
+            'took': 1,
+            'helen': 2,
+            'dog': 2,
             'walk': 2,
+            '.': 2,
+            'her': 3,
+            'for': 3,
             'a': 3,
-            'in': 3,
-            'woods': 4,
-            'the': 5
+            'woods': 3,
+            'in': 4,
+            'the': 4
         }
+        self.dep_graph_wrapper.display_graph()
         distances = self.dep_graph_wrapper.get_distances_from_root()
         stripped_distances = {}
         for key, value in distances.items(): # strip id from node_name
