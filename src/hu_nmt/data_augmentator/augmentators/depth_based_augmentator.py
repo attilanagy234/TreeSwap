@@ -31,7 +31,6 @@ class DepthBasedAugmentator(AugmentatorBase):
         distances_from_root = dep_graph.get_distances_from_root()
         distances_from_root.pop('root-0', None)
         distances_from_root = distances_from_root.items()
-        print(distances_from_root)
 
         node_ids = [x[0] for x in distances_from_root]
         depth_factors = [get_depth_factor(x[1]) for x in distances_from_root]
