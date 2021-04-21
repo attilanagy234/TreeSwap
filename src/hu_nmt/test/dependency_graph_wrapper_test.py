@@ -43,7 +43,6 @@ class DependencyGraphWrapperTest(unittest.TestCase):
             'in': 4,
             'the': 4
         }
-        self.dep_graph_wrapper.display_graph()
         distances = self.dep_graph_wrapper.get_distances_from_root()
         stripped_distances = {}
         for key, value in distances.items(): # strip id from node_name
