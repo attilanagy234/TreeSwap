@@ -1,5 +1,6 @@
 from hu_nmt.data_augmentator.augmentators.depth_based_augmentator import DepthBasedAugmentator
 from hu_nmt.data_augmentator.augmentators.depth_based_blanking import DepthBasedBlanking
+from hu_nmt.data_augmentator.augmentators.depth_based_dropout import DepthBasedDropout
 from hu_nmt.data_augmentator.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
 from hu_nmt.data_augmentator.dependency_parsers.hungarian_dependency_parser import HungarianDependencyParser
@@ -29,6 +30,9 @@ if __name__ == '__main__':
 
 # ------------ Test augmentators ------------
 
-    depth_based_augmentator = DepthBasedBlanking(config)
-    augmented_sentence = depth_based_augmentator.augment_sentence_from_dep_graph(hun_dep_graph_wrapper)
+    depth_based_blanker = DepthBasedBlanking(config)
+    depth_based_dropout = DepthBasedDropout(config)
+    augmented_sentence = depth_based_blanker.augment_sentence_from_dep_graph(hun_dep_graph_wrapper)
+    print(augmented_sentence)
+    augmented_sentence = depth_based_dropout.augment_sentence_from_dep_graph(hun_dep_graph_wrapper)
     print(augmented_sentence)

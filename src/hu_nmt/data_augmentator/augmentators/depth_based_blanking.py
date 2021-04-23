@@ -18,8 +18,6 @@ class DepthBasedBlanking(DepthBasedAugmentator):
         sentence = self.reconstruct_sentence_from_node_ids(node_ids)
         log.debug(f'Original list of tokens: {sentence}')
         for idx in indices_to_blank:
-            # idx-1, because we removed the artifical ROOT node
-            # from the first position in the sentence
-            sentence[idx-1] = self.BLANK
+            sentence[idx] = self.BLANK
         log.debug(f'A list of tokens: {sentence}')
         return ' '.join(sentence)
