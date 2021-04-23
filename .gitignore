@@ -137,3 +137,6 @@ run/
 *.bi
 *.pt
 marian/
+
+.idea/
+.DS_Store
