@@ -47,3 +47,10 @@ class DepthBasedAugmentator(AugmentatorBase):
     @staticmethod
     def softmax(x):
         return np.exp(x) / sum(np.exp(x))
+
+    def get_word_indicies_to_blank(self, dep_graph: DependencyGraphWrapper):
+        node_ids, probs = self.get_probabilities_from_tree_depth(dep_graph)
+        words_to_augment = self.sample_from_distribution(node_ids, probs, 3)
+        log.debug(f'Words selected to augment: {words_to_augment}')
+        indices_to_blank = [int(x.split('-')[1]) for x in words_to_augment]
+        return node_ids, indices_to_blank
