@@ -21,7 +21,6 @@ class DependencyGraphWrapperTest(unittest.TestCase):
     def test_get_root(self):
         # Should always return the root node
         actual_root = 'root'
-        print(self.dep_graph_wrapper.get_root().split('-')[0])
         assert actual_root == self.dep_graph_wrapper.get_root().split('-')[0]  # strip id from node_name
 
     def test_get_root_token(self):
