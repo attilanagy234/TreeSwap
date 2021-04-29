@@ -3,6 +3,7 @@ import pandas as pd
 import networkx as nx
 from tqdm import tqdm
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
+from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
@@ -87,8 +88,27 @@ class EnglishDependencyParser(DependencyParserBase):
 
             file.write('\n')  # Separate sentences with a new line
 
-            if (progress_idx+1) % file_batch_size == 0:
+            if (progress_idx + 1) % file_batch_size == 0:
                 file.close()
                 file_idx += 1
                 open_new_file = True
 
+    @staticmethod
+    def read_parsed_dep_trees_from_files(data_dir):
+        files_to_read = get_files_in_folder(data_dir)
+        dep_graphs = []
+        for file in files_to_read:
+            with open(f'{data_dir}/{file}') as f:
+                graph = nx.DiGraph()
+                for line in f:
+                    if line == '\n':
+                        dep_graphs.append(graph)
+                        graph = nx.DiGraph()
+                    else:
+                        target_key, target_postag, target_lemma, target_deprel, \
+                        source_key, source_postag, source_lemma = line.split('\t')
+
+                        graph.add_node(source_key, postag=source_postag, lemma=source_lemma)
+                        graph.add_node(target_key, postag=target_postag, lemma=target_lemma)
+                        graph.add_edge(source_key, target_key, dep=target_deprel)
+        return dep_graphs

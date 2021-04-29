@@ -3,6 +3,8 @@ from dotmap import DotMap
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool
+from os import listdir
+from os.path import isfile, join
 
 
 def get_config_from_yaml(yaml_file):
@@ -23,3 +25,7 @@ def parallelize_df_processing(df, func, num_cores, num_partitions):
     pool.close()
     pool.join()
     return df
+
+
+def get_files_in_folder(folder_path):
+    return [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
