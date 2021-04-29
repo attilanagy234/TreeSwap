@@ -5,6 +5,14 @@ class SubSampler:
     """
     def __init__(self, df, config):
         self._df = df
+        self._config = config
 
     def subsample(self):
+
         raise NotImplementedError()
+
+    @staticmethod
+    def add_length_fields_to_df(df):
+        df['char_length'] = df['sentence'].apply(len)
+        df['token_length'] = df['sentence'].apply(lambda x: len(x.split(' ')))
+        return df
