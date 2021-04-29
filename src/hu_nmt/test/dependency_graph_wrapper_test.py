@@ -70,6 +70,11 @@ class DependencyGraphWrapperTest(unittest.TestCase):
         actual_puncts = ['.']
         assert stripped_puncts == actual_puncts
 
+        node_with_lemma_wood = self.dep_graph_wrapper.get_nodes_with_property('lemma', 'wood')
+        node_name_with_lemma_wood =  [x.split('-')[0] for x in node_with_lemma_wood]
+        actual_node_name = ['woods']
+        assert node_name_with_lemma_wood == actual_node_name
+
     def test_get_edges_with_property(self):
         edges_with_property = self.dep_graph_wrapper.get_edges_with_property('dep', 'punct')
         source_node, target_node, edge = edges_with_property[0]
