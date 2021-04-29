@@ -53,53 +53,42 @@ class EnglishDependencyParser(DependencyParserBase):
         for row in df.itertuples(index=True, name='Pandas'):
             target_key, target_postag, target_lemma, target_deprel, \
             source_key, source_postag, source_lemma = self.extract_info_from_row(row, df)
-
             dep_graph.add_node(source_key, postag=source_postag, lemma=source_lemma)
             dep_graph.add_node(target_key, postag=target_postag, lemma=target_lemma)
             dep_graph.add_edge(source_key, target_key, dep=target_deprel)
         return dep_graph
 
-    def sentences_to_serialized_dep_graph_files(self, sentences, output_dir):
+    def sentences_to_serialized_dep_graph_files(self, sentences, output_dir, file_batch_size):
         """
         Args:
             sentences: list of sentences to process
             output_dir: location of tsv files containing the dep parsed sentences
+            file_batch_size: amount of sentences to be parsed into a single file
         """
-        file_idx = 0
+        file_idx = 1
         open_new_file = True
 
         for progress_idx, record in tqdm(enumerate(sentences)):
             if open_new_file:
-                file = open(f'{output_dir}/{file_idx}.tsv', 'w')
+                file = open(f'{output_dir}/{file_idx}.tsv', 'w+')
                 open_new_file = False
 
             doc = self.nlp_pipeline(record)
             for sent in doc.sentences:
                 words_dict = [word.to_dict() for word in sent.words]
                 df = pd.DataFrame.from_records(words_dict)
-            # Add ROOT node
-            root_key = 'root-0'
             for row in df.itertuples(index=True, name='Pandas'):
-                target_key = f'{row.text.lower()}-{row.id}'
-                target_postag = row.upos
-                # TODO: add lemma as node attribute
-                target_deprel = row.deprel
-                if row.head != 0:
-                    head = df.iloc[int(row.head) - 1]
-                    source_key = f'{head.text.lower()}-{head.id}'
-                    source_postag = head.upos
-                else:
-                    source_key = root_key
-                    source_postag = None
+                target_key, target_postag, target_lemma, target_deprel, \
+                source_key, source_postag, source_lemma = self.extract_info_from_row(row, df)
 
-                graph_record = ''
+                graph_record = f'{target_key}\t{target_postag}\t{target_lemma}' \
+                               f'\t{target_deprel}\t{source_key}\t{source_postag}\t{source_lemma}\n'
                 file.write(graph_record)
 
-            if progress_idx % 50000 == 0:
+            file.write('\n')  # Separate sentences with a new line
+
+            if (progress_idx+1) % file_batch_size == 0:
                 file.close()
                 file_idx += 1
                 open_new_file = True
 
-                dep_graph.add_node(source_key, postag=source_postag)
-                dep_graph.add_node(target_key, postag=target_postag)
-                dep_graph.add_edge(source_key, target_key, dep=target_deprel)
