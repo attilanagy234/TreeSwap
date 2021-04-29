@@ -2,6 +2,8 @@ from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserB
 import pandas as pd
 import networkx as nx
 
+ROOT_KEY = 'root-0'
+
 
 class HungarianDependencyParser(DependencyParserBase):
     """
@@ -55,8 +57,7 @@ class HungarianDependencyParser(DependencyParserBase):
     def emtsv_dataframe_to_nxgraph(df):
         dep_graph = nx.DiGraph()
         # Add ROOT node
-        root_key = 'root-0'
-        dep_graph.add_node(root_key)
+        dep_graph.add_node(ROOT_KEY)
         for row in df.itertuples(index=True, name='Pandas'):
             target_key = f'{row.form.lower()}-{row.id}'
             target_postag = row.upostag
@@ -66,7 +67,7 @@ class HungarianDependencyParser(DependencyParserBase):
                 source_key = f'{head.form.lower()}-{head.id}'
                 source_postag = head.upostag
             else:
-                source_key = root_key
+                source_key = ROOT_KEY
                 source_postag = None
             dep_graph.add_node(source_key, postag=source_postag)
             dep_graph.add_node(target_key, postag=target_postag)

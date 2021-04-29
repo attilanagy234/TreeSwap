@@ -8,13 +8,14 @@ OUTPUT_FOLDER_NAME = 'parsed_sentences'
 
 
 if __name__ == '__main__':
+    # TODO: convert this to easily runnable scripts
     eng_dep_parser = EnglishDependencyParser()
     sentences = []
     with open(ENG_INPUT_PATH_BASE + ENG_INPUT_FILE) as file:
         for line in file:
             sentences.append(line.strip())
 
-    # eng_dep_parser.sentences_to_serialized_dep_graph_files(sentences, f'{ENG_INPUT_PATH_BASE}{OUTPUT_FOLDER_NAME}', 5)
+    # eng_dep_parser.sentences_to_serialized_dep_graph_files(sentences, f'{ENG_INPUT_PATH_BASE}{OUTPUT_FOLDER_NAME}', 2)
 
     dep_graphs = eng_dep_parser.read_parsed_dep_trees_from_files(f'{ENG_INPUT_PATH_BASE}{OUTPUT_FOLDER_NAME}')
     config = get_config_from_yaml('./configs/example_en_config.yaml')
