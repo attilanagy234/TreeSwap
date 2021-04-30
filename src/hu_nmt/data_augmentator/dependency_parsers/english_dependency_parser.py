@@ -1,5 +1,6 @@
 import stanza
 import pandas as pd
+import re
 import networkx as nx
 from tqdm import tqdm
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
@@ -95,9 +96,25 @@ class EnglishDependencyParser(DependencyParserBase):
                 file_idx += 1
                 open_new_file = True
 
+
+
+
+
     @staticmethod
     def read_parsed_dep_trees_from_files(data_dir):
+        def atoi(text):
+            return int(text) if text.isdigit() else text
+
+        def natural_keys(text):
+            '''
+            alist.sort(key=natural_keys) sorts in human order
+            http://nedbatchelder.com/blog/200712/human_sorting.html
+            (See Toothy's implementation in the comments)
+            '''
+            return [atoi(c) for c in re.split(r'(\d+)', text)]
+
         files_to_read = get_files_in_folder(data_dir)
+        files_to_read.sort(key=natural_keys)
         dep_graphs = []
         for file in files_to_read:
             with open(f'{data_dir}/{file}') as f:
