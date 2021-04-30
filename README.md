@@ -49,3 +49,10 @@ Processing data:
 ```bash
 cat input.txt | docker run -i mtaril/emtsv tok-dep > output.txt
 ```
+
+## Dependency parsing for English
+We use Stanza for English dependency parsing.
+To precompute dependency graphs and serialize them to TSVs:
+```bash
+./precompute_english_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
+```
