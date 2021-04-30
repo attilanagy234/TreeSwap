@@ -17,8 +17,8 @@ class DepthBasedAugmentator(AugmentatorBase):
     https://arxiv.org/pdf/2004.14200.pdf
     """
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self):
+        super().__init__()
 
     def augment_sentence_from_dep_graph(self, dep_graph: DependencyGraphWrapper):
         raise NotImplementedError()

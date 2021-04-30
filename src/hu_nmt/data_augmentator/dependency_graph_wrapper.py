@@ -4,8 +4,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 
 
 class DependencyGraphWrapper:
-    def __init__(self, config, graph):
-        self._config = config
+    def __init__(self, graph):
         self._graph = graph
 
     def get_root(self):

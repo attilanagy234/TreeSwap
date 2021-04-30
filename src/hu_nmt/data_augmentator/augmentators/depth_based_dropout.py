@@ -6,8 +6,8 @@ log = get_logger(__name__)
 
 class DepthBasedDropout(DepthBasedAugmentator):
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self):
+        super().__init__()
 
     def augment_sentence_from_dep_graph(self, dep_graph):
         node_ids, indices_to_blank = self.get_word_indicies_to_blank(dep_graph)

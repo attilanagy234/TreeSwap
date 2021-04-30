@@ -9,8 +9,8 @@ log.setLevel('DEBUG')
 
 class DepthBasedBlanking(DepthBasedAugmentator):
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self):
+        super().__init__()
         self.BLANK = 'BLANK'
 
     def augment_sentence_from_dep_graph(self, dep_graph: DependencyGraphWrapper):

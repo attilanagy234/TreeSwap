@@ -3,7 +3,6 @@ import unittest
 
 from hu_nmt.data_augmentator.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
-from hu_nmt.data_augmentator.utils.data_helpers import get_config_from_yaml
 
 dirname = os.path.dirname(__file__)
 
@@ -12,11 +11,10 @@ class DependencyGraphWrapperTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.config = get_config_from_yaml(os.path.join(dirname, 'resources/configs/en_test_config.yaml'))
         sentence = 'Helen took her dog for a walk in the woods.'
         cls.eng_dep_parser = EnglishDependencyParser()
         graph = cls.eng_dep_parser.sentence_to_dep_parse_tree(sentence)
-        cls.dep_graph_wrapper = DependencyGraphWrapper(cls.config, graph)
+        cls.dep_graph_wrapper = DependencyGraphWrapper(graph)
 
     def test_get_root(self):
         # Should always return the root node

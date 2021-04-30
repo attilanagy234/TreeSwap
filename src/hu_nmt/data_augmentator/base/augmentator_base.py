@@ -7,8 +7,8 @@ class AugmentatorBase(ABC):
     Base class for different data augmentator algorithms
     """
 
-    def __init__(self, config):
-        self._config = config
+    def __init__(self):
+        pass
 
     @abstractmethod
     def augment_sentence_from_dep_graph(self, dep_graph):

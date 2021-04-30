@@ -14,6 +14,7 @@ pyyaml = "^5.4.1"
 ipython = "7.19.0"
 pygraphviz = "1.7"
 stanza = "1.2"
+click = "7.1.2"
 
 
 [tool.poetry.dev-dependencies]
