@@ -3,6 +3,7 @@ import pandas as pd
 import networkx as nx
 from tqdm import tqdm
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
+from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
@@ -68,6 +69,7 @@ class EnglishDependencyParser(DependencyParserBase):
         """
         file_idx = 1
         open_new_file = True
+        file_batch_size = int(file_batch_size)
 
         for progress_idx, record in tqdm(enumerate(sentences)):
             if open_new_file:
@@ -112,3 +114,7 @@ class EnglishDependencyParser(DependencyParserBase):
                         graph.add_node(target_key, postag=target_postag, lemma=target_lemma)
                         graph.add_edge(source_key, target_key, dep=target_deprel)
         return dep_graphs
+
+    def get_graph_wrappers_from_files(self, data_folder):
+        dep_graphs = self.read_parsed_dep_trees_from_files(data_folder)
+        return [DependencyGraphWrapper(x) for x in dep_graphs]

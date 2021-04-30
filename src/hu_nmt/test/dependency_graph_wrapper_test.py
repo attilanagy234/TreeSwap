@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from hu_nmt.data_augmentator.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
 
 dirname = os.path.dirname(__file__)

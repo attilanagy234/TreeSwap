@@ -1,5 +1,5 @@
 from hu_nmt.data_augmentator.augmentators.depth_based_augmentator import DepthBasedAugmentator
-from hu_nmt.data_augmentator.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
