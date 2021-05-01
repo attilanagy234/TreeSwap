@@ -3,7 +3,6 @@ from hu_nmt.data_augmentator.augmentators.depth_based_dropout import DepthBasedD
 from hu_nmt.data_augmentator.dependency_parsers.hungarian_dependency_parser import HungarianDependencyParser
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
-from hu_nmt.data_augmentator.dependency_parsers.hungarian_dependency_parser_emtsv_docker import HungarianDependencyParserEmtsv
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
