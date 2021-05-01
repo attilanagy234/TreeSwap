@@ -47,3 +47,8 @@ class DependencyGraphWrapper:
             if edge[attribute_key] == attribute_value:
                 edges_with_property.append(EdgeObject(source_node, target_node, edge))
         return edges_with_property
+
+    def get_subtree_node_ids(self, node_id):
+        sub_graph = list(nx.descendants(self._graph, node_id))
+        sub_graph.append(node_id)
+        return sub_graph

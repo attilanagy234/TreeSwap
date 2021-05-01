@@ -54,5 +54,5 @@ class DepthBasedAugmentator(AugmentatorBase):
         # Subtract 1 from index,
         # because we removed the artifical ROOT node
         # from the first position in the sentence
-        indices_to_blank = [int(x.split('-')[1])-1 for x in words_to_augment]
+        indices_to_blank = [int(x.split('-')[-1])-1 for x in words_to_augment]
         return node_ids, indices_to_blank
