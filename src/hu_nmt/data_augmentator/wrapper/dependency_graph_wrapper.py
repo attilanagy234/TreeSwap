@@ -1,7 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout
+from collections import namedtuple
 
+EdgeObject = namedtuple('Edge', 'source_node target_node edge')
 
 class DependencyGraphWrapper:
     def __init__(self, graph):
@@ -43,5 +45,5 @@ class DependencyGraphWrapper:
         attribute_value = attribute_value.lower()  # because of the different taxonomies
         for source_node, target_node, edge in self._graph.edges(data=True):
             if edge[attribute_key] == attribute_value:
-                edges_with_property.append((source_node, target_node, edge))
+                edges_with_property.append(EdgeObject(source_node, target_node, edge))
         return edges_with_property
