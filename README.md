@@ -39,20 +39,18 @@ poetry env info --path
 ```
 
 ## Dependency parsing for Hungarian
-We use [emtsv](https://github.com/nytud/emtsv) for creating the dependency parse trees for Hungarian sentences.
+We use [Spacy](https://github.com/oroszgy/spacy-hungarian-models) for creating the dependency parse trees for Hungarian sentences.
+To precompute dependency graphs and serialize them to TSVs:
+```bash
+cd hu_nmt/src
+./precompute_english_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
 
-To get the docker image:
-```bash
-docker pull mtaril/emtsv:latest
-```
-Processing data:
-```bash
-cat input.txt | docker run -i mtaril/emtsv tok-dep > output.txt
 ```
 
 ## Dependency parsing for English
 We use Stanza for English dependency parsing.
 To precompute dependency graphs and serialize them to TSVs:
 ```bash
+cd hu_nmt/src
 ./precompute_english_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
 ```
