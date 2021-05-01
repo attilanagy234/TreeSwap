@@ -43,7 +43,7 @@ We use [Spacy](https://github.com/oroszgy/spacy-hungarian-models) for creating t
 To precompute dependency graphs and serialize them to TSVs:
 ```bash
 cd hu_nmt/src
-./precompute_english_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
+./precompute_hungarian_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
 
 ```
 
