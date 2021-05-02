@@ -19,4 +19,4 @@ if __name__ == '__main__':
     # eng_graph = DependencyGraphWrapper(eng_dep_parser.sentence_to_dep_parse_tree(eng_sent))
     # hun_graph = DependencyGraphWrapper(hun_dep_parser.sentence_to_dep_parse_tree(hun_sent))
     # augmentator.test_graph_pair(hun_graph, eng_graph)
-    augmentator.find_augmentable_candidates()
+    augmentator.augment(num_sentences_to_produce=300, random_seed=15)

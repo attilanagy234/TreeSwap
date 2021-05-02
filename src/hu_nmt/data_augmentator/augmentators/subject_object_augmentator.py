@@ -1,6 +1,10 @@
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
+from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
+import numpy as np
 from tqdm import tqdm
+
+log = get_logger(__name__)
 
 
 class SubjectObjectAugmentator(AugmentatorBase):
@@ -13,20 +17,55 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self._hun_graphs = hun_graphs
         self._augmentation_candidate_sentence_pairs = []
 
-    def augment(self, eng_dep_graph, hun_dep_graph):
-        raise NotImplementedError()
+    def group_candidates_by_predicate_lemmas(self):
+        lemmas_to_graphs = {}  # tuple(hun_lemma, eng_lemma) --> tuple(hun_graph, eng graph)
+
+        for hun_graph, eng_graph in self._augmentation_candidate_sentence_pairs:
+            hun_nsubj_edge = hun_graph.get_edges_with_property('dep', 'nsubj')[0]  # filtered candidates will only have one
+            eng_nsubj_edge = eng_graph.get_edges_with_property('dep', 'nsubj')[0]
+
+            hun_predicate_lemma = hun_graph.graph.nodes[hun_nsubj_edge.source_node]['lemma'].strip()
+            eng_predicate_lemma = eng_graph.graph.nodes[eng_nsubj_edge.source_node]['lemma'].strip()
+            lemmas_key = (hun_predicate_lemma, eng_predicate_lemma)
+            graph_tup = (hun_graph, eng_graph)
+            if lemmas_key not in lemmas_to_graphs:
+                lemmas_to_graphs[lemmas_key] = []
+                lemmas_to_graphs[lemmas_key].append(graph_tup)
+            else:
+                lemmas_to_graphs[lemmas_key].append(graph_tup)
+
+        return lemmas_to_graphs
+
+    def augment(self, num_sentences_to_produce, random_seed):
+        np.random.seed = random_seed
+        log.info('Finding augmentable sentence pairs...')
+        self.find_augmentable_candidates()
+        log.info(f'Found {len(self._augmentation_candidate_sentence_pairs)} candidate sentence pairs')
+        lemmas_to_graphs = self.group_candidates_by_predicate_lemmas()
+
+        # print common lemmas starting with the most frequent ones.
+        predicate_lemmas_sorted_by_freq = [k for k in sorted(lemmas_to_graphs, key=lambda x: len(lemmas_to_graphs[x]), reverse=True)]
+        print(predicate_lemmas_sorted_by_freq)
+        print(predicate_lemmas_sorted_by_freq[0])
+
+        # most common key experiment
+        for hun_graph, eng_graph in lemmas_to_graphs[predicate_lemmas_sorted_by_freq[0]][3:6]:
+            hun_graph.display_graph()
+            eng_graph.display_graph()
+            # Remove root node from beginning of sentence
+            print(' '.join(self.reconstruct_sentence_from_node_ids(hun_graph.graph.nodes)[1:]))
+            print(' '.join(self.reconstruct_sentence_from_node_ids(eng_graph.graph.nodes)[1:]))
+
+
+
+
+
 
     def find_augmentable_candidates(self):
         for hun_graph, eng_graph in tqdm(zip(self._hun_graphs, self._eng_graphs)):
             if self.test_graph_pair(hun_graph, eng_graph):
                 self._augmentation_candidate_sentence_pairs.append((hun_graph, eng_graph))
 
-        print(len(self._augmentation_candidate_sentence_pairs))
-        for sentence_pair in self._augmentation_candidate_sentence_pairs[0:3]:
-            sentence_pair[0].display_graph()
-            sentence_pair[1].display_graph()
-            print(self.reconstruct_sentence_from_node_ids(sentence_pair[0].graph.nodes))
-            print(self.reconstruct_sentence_from_node_ids(sentence_pair[1].graph.nodes))
 
     def test_graph_pair(self, hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
         """
