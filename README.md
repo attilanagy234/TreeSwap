@@ -38,6 +38,11 @@ You can obtain the path for the virtualenv by:
 poetry env info --path
 ```
 
+## Installing Hungarian Spacy models
+```bash
+pip install https://github.com/oroszgy/spacy-hungarian-models/releases/download/hu_core_ud_lg-0.3.1/hu_core_ud_lg-0.3.1-py3-none-any.whl  
+```
+
 ## Dependency parsing for Hungarian
 We use [Spacy](https://github.com/oroszgy/spacy-hungarian-models) for creating the dependency parse trees for Hungarian sentences.
 To precompute dependency graphs and serialize them to TSVs:
