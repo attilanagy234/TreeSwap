@@ -1,14 +1,20 @@
+from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from tqdm import tqdm
 
 
-class SubjectObjectAugmentator:
+class SubjectObjectAugmentator(AugmentatorBase):
+
     def __init__(self, eng_graphs, hun_graphs):
+        super().__init__()
         if len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
         self._eng_graphs = eng_graphs
         self._hun_graphs = hun_graphs
         self._augmentation_candidate_sentence_pairs = []
+
+    def augment(self, eng_dep_graph, hun_dep_graph):
+        raise NotImplementedError()
 
     def find_augmentable_candidates(self):
         for hun_graph, eng_graph in tqdm(zip(self._hun_graphs, self._eng_graphs)):
@@ -19,6 +25,8 @@ class SubjectObjectAugmentator:
         for sentence_pair in self._augmentation_candidate_sentence_pairs[0:3]:
             sentence_pair[0].display_graph()
             sentence_pair[1].display_graph()
+            print(self.reconstruct_sentence_from_node_ids(sentence_pair[0].graph.nodes))
+            print(self.reconstruct_sentence_from_node_ids(sentence_pair[1].graph.nodes))
 
     def test_graph_pair(self, hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
         """
@@ -72,5 +80,4 @@ class SubjectObjectAugmentator:
         """
         return check([int(x.split('-')[-1]) for x in node_ids])
 
-    def augment(self, eng_dep_graph, hun_dep_graph):
-        raise NotImplementedError()
+

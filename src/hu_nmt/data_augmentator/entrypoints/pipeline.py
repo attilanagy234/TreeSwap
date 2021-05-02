@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # ------------ Test augmentators ------------
     # depth_based_blanker = DepthBasedBlanking()
     # depth_based_dropout = DepthBasedDropout()
-    # augmented_sentence = depth_based_blanker.augment_sentence_from_dep_graph(graph)
+    # augmented_sentence = depth_based_blanker.augment(graph)
     # print(augmented_sentence)
-    # augmented_sentence = depth_based_dropout.augment_sentence_from_dep_graph(graph)
+    # augmented_sentence = depth_based_dropout.augment(graph)
     # print(augmented_sentence)

@@ -19,7 +19,7 @@ class DepthBasedAugmentator(AugmentatorBase):
     def __init__(self):
         super().__init__()
 
-    def augment_sentence_from_dep_graph(self, dep_graph: DependencyGraphWrapper):
+    def augment(self, dep_graph: DependencyGraphWrapper):
         raise NotImplementedError()
 
     def get_probabilities_from_tree_depth(self, dep_graph: DependencyGraphWrapper):

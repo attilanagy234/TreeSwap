@@ -11,7 +11,7 @@ class AugmentatorBase(ABC):
         pass
 
     @abstractmethod
-    def augment_sentence_from_dep_graph(self, dep_graph):
+    def augment(self, *args):
         raise NotImplementedError
 
     @staticmethod

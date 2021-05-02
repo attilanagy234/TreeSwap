@@ -5,9 +5,14 @@ from collections import namedtuple
 
 EdgeObject = namedtuple('Edge', 'source_node target_node edge')
 
+
 class DependencyGraphWrapper:
     def __init__(self, graph):
         self._graph = graph
+
+    @property
+    def graph(self):
+        return self._graph
 
     def get_root(self):
         # This should yield the artificial ROOT node on top of the dependency tree
