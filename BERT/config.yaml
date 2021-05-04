@@ -16,6 +16,7 @@ data:
     valid:
         path_src: E://Data/hu-nmt/combined-en-hu/hunglish2-tiny-valid.en
         path_tgt: E://Data/hu-nmt/combined-en-hu/hunglish2-tiny-valid.hu
+        weight: 1
         transforms: berttokenizer
 
 #### Subword
@@ -36,17 +37,19 @@ gpu_ranks: [0]
 # Batching
 batch_size: 3
 queue_size: 5
+batch_type: sents
+data_type: text
 #accum_count: [3]
 
 # General opts
-save_model: run/model_no_qoutes
+save_model: run/model
 keep_checkpoint: 10
 save_checkpoint_steps: 10000
 average_decay: 0.0005
 seed: 1234
-report_every: 100
-train_steps: 400000
-valid_steps: 10000 
+report_every: 2
+train_steps: 40
+valid_steps: 10
 single_pass: False
 early_stopping: 5 
 early_stopping_criteria: ppl
@@ -58,7 +61,7 @@ learning_rate: 2.0
 warmup_steps: 8000
 decay_method: "noam"
 adam_beta2: 0.998
-max_grad_norm: 0
+max_grad_norm: 2
 label_smoothing: 0.1
 param_init: 0
 param_init_glorot: true
@@ -70,8 +73,12 @@ decoder_type: transformer
 enc_layers: 2
 dec_layers: 2
 heads: 8
-rnn_size: 512
-word_vec_size: 512
+rnn_size: 768
+word_vec_size: 768
+enc_rnn_size: 768
+src_word_vec_size: 768
+tgt_word_vec_size: 768
+dec_rnn_size: 768
 transformer_ff: 2048
 dropout_steps: [0]
 dropout: [0.1]
