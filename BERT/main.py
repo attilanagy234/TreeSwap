@@ -11,12 +11,10 @@ from onmt.opts import dynamic_prepare_opts
 from transformers import AutoTokenizer
 import torch
 
-from onmt.utils.logging import init_logger
+from onmt.utils.logging import init_logger, logger
 
 from bert.models import BertEncoder
 from bert.transforms import BertTransform
-
-init_logger()
 
 
 if __name__ == "__main__":
@@ -25,6 +23,8 @@ if __name__ == "__main__":
 
     base_args = (["-config", "config.yaml"])
     opts, unknown = parser.parse_known_args(base_args)
+
+    init_logger(log_file=opts.log_file)
 
     is_cuda = torch.cuda.is_available()
     set_random_seed(opts.seed, is_cuda)
@@ -82,6 +82,9 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = onmt.models.model.NMTModel(encoder, decoder)
     model.to(device)
+
+    logger.info(model)
+    model.count_parameters(log=logger.info)
 
     # Specify the tgt word generator and loss computation module
     model.generator = nn.Sequential(

@@ -1,26 +1,33 @@
 
-src_vocab_size: 0 #128
-tgt_vocab_size: 128
+src_vocab_size: 1000 # Dummy value, must be greater than number of characters
+tgt_vocab_size: 10000
 
 save_data: run/samples
-src_vocab: _  # vocabs/vocab.en
+src_vocab: vocabs/vocab.en
 tgt_vocab: vocabs/vocab.hu
+utils_path: utils
+sp_models_path: sp_models
 
-# Corpus opts:
+translate_model: run/model_step_14000.pt
+
+# pair options
+pair_n_lines: 50
+pair_output_path: run/pair_out.txt
+
 data:
     corpus:
-        path_src: E://Data/hu-nmt/combined-en-hu/hunglish2-tiny-train.en
-        path_tgt: E://Data/hu-nmt/combined-en-hu/hunglish2-tiny-train.hu
+        path_src: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.en
+        path_tgt: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.hu
         weight: 1
-        transforms: berttokenizer
+        transforms: [berttokenizer]  # Comment this during vocab generation...
     valid:
-        path_src: E://Data/hu-nmt/combined-en-hu/hunglish2-tiny-valid.en
-        path_tgt: E://Data/hu-nmt/combined-en-hu/hunglish2-tiny-valid.hu
+        path_src: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.en
+        path_tgt: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.hu
         weight: 1
-        transforms: berttokenizer
+        transforms: [berttokenizer]  # Comment this during vocab generation...
 
 #### Subword
-src_subword_model: _ #sp_models/bpe_en.model
+src_subword_model: sp_models/bpe_en.model
 tgt_subword_model: sp_models/bpe_hu.model
 tgt_subword_nbest: 1
 tgt_subword_alpha: 0.0
@@ -35,23 +42,23 @@ world_size: 1
 gpu_ranks: [0]
 
 # Batching
-batch_size: 3
-queue_size: 5
+batch_size: 32
+#queue_size: 5
 batch_type: sents
 data_type: text
 #accum_count: [3]
 
 # General opts
 save_model: run/model
-keep_checkpoint: 10
+keep_checkpoint: 50 # 5 epoch
 save_checkpoint_steps: 10000
 average_decay: 0.0005
 seed: 1234
-report_every: 2
-train_steps: 40
-valid_steps: 10
+report_every: 100
+train_steps: 1500000 
+valid_steps: 10000
 single_pass: False
-early_stopping: 5 
+early_stopping: 20
 early_stopping_criteria: ppl
 
 # Optimization
@@ -71,7 +78,7 @@ normalization: "tokens"
 encoder_type: transformer
 decoder_type: transformer
 enc_layers: 2
-dec_layers: 2
+dec_layers: 6
 heads: 8
 rnn_size: 768
 word_vec_size: 768
@@ -86,4 +93,4 @@ attention_dropout: [0.1]
 #share_decoder_embeddings: true
 
 # Logging
-log_file: run/logs_no_qoutes
+log_file: run/logs

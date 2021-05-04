@@ -17,6 +17,8 @@ class BertEncoder(onmt.encoders.EncoderBase):
         super().__init__()
 
         self.base = AutoModel.from_pretrained('bert-base-cased')
+        for p in self.base.parameters():
+            p.requires_grad = False
 
     @classmethod
     def from_opt(cls, opt, embeddings=None):
@@ -40,7 +42,9 @@ class BertEncoder(onmt.encoders.EncoderBase):
 
         self._check_args(src, lengths)
         attention_mask = self.lengths_to_mask(lengths)
-        encoded = self.base(src.squeeze(), attention_mask=attention_mask)[0]
+
+        with torch.no_grad():
+            encoded = self.base(src.squeeze(), attention_mask=attention_mask)[0]
 
         # Dummy final_state to remain compatible to original interface
         final_state = (torch.zeros((1, encoded.shape[1], encoded.shape[2])).to(encoded.device),

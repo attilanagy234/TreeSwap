@@ -1,5 +1,5 @@
-hunglish_src=$(grep -A2 'hunglish:' config.yaml | grep 'path_src:' | awk '{ print $2 }')
-hunglish_tgt=$(grep -A2 'hunglish:' config.yaml | grep 'path_tgt:' | awk '{ print $2 }')
+hunglish_src=$(grep -A2 'corpus:' config.yaml | grep 'path_src:' | awk '{ print $2 }')
+hunglish_tgt=$(grep -A2 'corpus:' config.yaml | grep 'path_tgt:' | awk '{ print $2 }')
 
 sp_models_path=$(grep 'sp_models_path:' config.yaml | awk '{ print $2 }')
 utils_path=$(grep 'utils_path:' config.yaml | awk '{ print $2 }')
