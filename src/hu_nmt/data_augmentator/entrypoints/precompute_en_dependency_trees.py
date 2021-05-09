@@ -22,3 +22,8 @@ def main(data_input_path, dep_tree_output_path, file_batch_size):
 
 if __name__ == '__main__':
     main()
+
+    # During local testing
+    # $1 /Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/data/augmentation_test_data/train_200000_subsample.en
+    # $2 /Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/data/eng/parsed_sentences
+    # $3 10000

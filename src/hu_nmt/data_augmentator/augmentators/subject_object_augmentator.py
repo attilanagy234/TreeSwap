@@ -69,7 +69,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         lemmas_to_graphs = self.group_candidates_by_predicate_lemmas()
 
         self.augment_subtree_swapping_with_same_predicate_lemmas(lemmas_to_graphs)
-        self._augmentation_candidate_sentence_pairs = self._augmentation_candidate_sentence_pairs[0:100]
+        self._augmentation_candidate_sentence_pairs = self._augmentation_candidate_sentence_pairs
         self.augment_predicate_swapping()
         self.augment_subtree_swapping()
 
