@@ -7,6 +7,7 @@ from tqdm import tqdm
 from itertools import combinations
 
 log = get_logger(__name__)
+log.setLevel('DEBUG')
 
 
 class SubjectObjectAugmentator(AugmentatorBase):
@@ -187,8 +188,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         predicate_1 = sentence_graph_1.get_edges_with_property('dep', 'nsubj')[0].source_node
         predicate_2 = sentence_graph_2.get_edges_with_property('dep', 'nsubj')[0].source_node
 
-        predicate_1_word, predicate_1_idx = predicate_1.split('-')
-        predicate_2_word, predicate_2_idx = predicate_2.split('-')
+        predicate_1_word, predicate_1_idx = predicate_1.split('_')
+        predicate_2_word, predicate_2_idx = predicate_2.split('_')
 
         # Swap predicates
         original_sentence_1[int(predicate_1_idx)] = predicate_2_word
@@ -203,8 +204,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         subgraph_2 = self.get_subgraph_from_edge_type(sentence_graph_2, subtree_type)
         subgraph_1_offsets = self.get_offsets_from_node_ids(subgraph_1)
         subgraph_2_offsets = self.get_offsets_from_node_ids(subgraph_2)
-        subgraph_1 = [x.split('-')[0] for x in subgraph_1]
-        subgraph_2 = [x.split('-')[0] for x in subgraph_2]
+        subgraph_1 = [x.split('_')[0] for x in subgraph_1]
+        subgraph_2 = [x.split('_')[0] for x in subgraph_2]
 
         subtree_indices = range(subgraph_1_offsets[0], subgraph_1_offsets[1]+1)
         # remove subtree from sent1
@@ -228,9 +229,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         edges_with_type = graph.get_edges_with_property('dep', edge_type)[0]
         top_node_of_tree = edges_with_type.target_node
         node_ids = graph.get_subtree_node_ids(top_node_of_tree)
-        splitted_node_ids = [x.split('-') for x in node_ids]
+        splitted_node_ids = [x.split('_') for x in node_ids]
         splitted_node_ids = [(x[0], int(x[1])) for x in splitted_node_ids]
-        return [f'{y[0]}-{y[1]}' for y in sorted(splitted_node_ids, key=itemgetter(1))]
+        return [f'{y[0]}_{y[1]}' for y in sorted(splitted_node_ids, key=itemgetter(1))]
 
 
 
@@ -239,7 +240,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         """
         Returns the smallest and largest index from the list of node ids
         """
-        ids = [int(x.split('-')[1]) for x in node_ids]
+        ids = [int(x.split('_')[1]) for x in node_ids]
         return min(ids), max(ids)
 
     def find_augmentable_candidates(self):
@@ -297,7 +298,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
             Boolean value whether the words corresponding to nodes
              are a consecutive subsequence in the original sentence
         """
-        return check([int(x.split('-')[-1]) for x in node_ids])
+        return check([int(x.split('_')[-1]) for x in node_ids])
 
     def dump_augmented_sentences_to_files(self, output_folder_path):
         log.info(f'Saving augmented sentences at {output_folder_path}')

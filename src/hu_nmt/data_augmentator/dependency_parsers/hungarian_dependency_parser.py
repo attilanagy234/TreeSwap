@@ -6,7 +6,7 @@ from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
 
-ROOT_KEY = 'root-0'
+ROOT_KEY = 'root_0'
 
 
 class HungarianDependencyParser(DependencyParserBase):
@@ -25,7 +25,7 @@ class HungarianDependencyParser(DependencyParserBase):
         dep_graph = nx.DiGraph()
         for sent in doc.sents:
             for token in sent:
-                target_key = f'{token}-{token.i+1}'
+                target_key = f'{token}_{token.i+1}'
                 target_postag = token.pos_
                 target_lemma = token.lemma_
                 target_deprel = token.dep_
@@ -34,7 +34,7 @@ class HungarianDependencyParser(DependencyParserBase):
                     source_postag = None
                     source_lemma = None
                 else:
-                    source_key = f'{token.head}-{token.head.i+1}'
+                    source_key = f'{token.head}_{token.head.i+1}'
                     source_postag = token.head.pos_
                     source_lemma = token.head.lemma_
 
@@ -62,7 +62,7 @@ class HungarianDependencyParser(DependencyParserBase):
             doc = self.nlp_pipeline(record)
             for sent in doc.sents:
                 for token in sent:
-                    target_key = f'{token}-{token.i + 1}'
+                    target_key = f'{token}_{token.i + 1}'
                     target_postag = token.pos_
                     target_lemma = token.lemma_
                     target_deprel = token.dep_
@@ -71,7 +71,7 @@ class HungarianDependencyParser(DependencyParserBase):
                         source_postag = None
                         source_lemma = None
                     else:
-                        source_key = f'{token.head}-{token.head.i + 1}'
+                        source_key = f'{token.head}_{token.head.i + 1}'
                         source_postag = token.head.pos_
                         source_lemma = token.head.lemma_
 

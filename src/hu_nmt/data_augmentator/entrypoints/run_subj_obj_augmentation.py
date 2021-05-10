@@ -11,8 +11,7 @@ log = get_logger(__name__)
 @click.argument('eng_data_folder')
 @click.argument('hun_data_folder')
 @click.argument('augmentation_output_path')
-@click.argument('random_seed')
-def main(eng_data_folder, hun_data_folder, augmentation_output_path, random_seed):
+def main(eng_data_folder, hun_data_folder, augmentation_output_path):
     # TODO: Could add a limit on the number of permutations --> should sample from it
     eng_dep_parser = EnglishDependencyParser()
     eng_wrappers = eng_dep_parser.get_graph_wrappers_from_files(eng_data_folder)
@@ -21,7 +20,7 @@ def main(eng_data_folder, hun_data_folder, augmentation_output_path, random_seed
     hun_wrappers = hun_dep_parser.get_graph_wrappers_from_files(hun_data_folder)
     log.info(f'number of Hungarian sentences used for augmentation: {len(eng_wrappers)}')
     augmentator = SubjectObjectAugmentator(eng_wrappers, hun_wrappers)
-    augmentator.augment(random_seed=random_seed, output_path=augmentation_output_path)
+    augmentator.augment(random_seed=15, output_path=augmentation_output_path)
 
 
 if __name__ == '__main__':

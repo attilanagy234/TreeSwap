@@ -1,16 +1,13 @@
 import stanza
 import pandas as pd
-import re
 import networkx as nx
 from tqdm import tqdm
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
-from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
 
-ROOT_KEY = 'root-0'
+ROOT_KEY = 'root_0'
 
 
 class EnglishDependencyParser(DependencyParserBase):
@@ -21,13 +18,13 @@ class EnglishDependencyParser(DependencyParserBase):
 
     @staticmethod
     def extract_info_from_row(row, df):
-        target_key = f'{row.text.lower()}-{row.id}'
+        target_key = f'{row.text.lower()}_{row.id}'
         target_postag = row.upos
         target_lemma = row.lemma
         target_deprel = row.deprel
         if row.head != 0:
             head = df.iloc[int(row.head) - 1]
-            source_key = f'{head.text.lower()}-{head.id}'
+            source_key = f'{head.text.lower()}_{head.id}'
             source_postag = head.upos
             source_lemma = head.lemma
         else:
