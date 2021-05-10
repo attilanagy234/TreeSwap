@@ -24,6 +24,6 @@ if __name__ == '__main__':
     main()
 
     # During local testing
-    # $1 /Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/data/augmentation_test_data/train_200000_subsample.en
+    # $1 /Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/data/augmentation_input_data/train_200000_subsample.en
     # $2 /Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/data/eng/parsed_sentences
     # $3 10000
