@@ -231,7 +231,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         node_ids = graph.get_subtree_node_ids(top_node_of_tree)
         splitted_node_ids = [x.split('_') for x in node_ids]
         splitted_node_ids = [(x[0], int(x[1])) for x in splitted_node_ids]
-        return [f'{y[0]}-{y[1]}' for y in sorted(splitted_node_ids, key=itemgetter(1))]
+        return [f'{y[0]}_{y[1]}' for y in sorted(splitted_node_ids, key=itemgetter(1))]
 
 
 
@@ -307,7 +307,6 @@ class SubjectObjectAugmentator(AugmentatorBase):
             with open(f'{output_folder_path}/{augmentation_type}.tsv', 'w+') as f:
                 zipped = zip(self._augmented_sentence_pairs[augmentation_type]['hun'],
                              self._augmented_sentence_pairs[augmentation_type]['eng'])
-                print(len(list(zipped)))
                 for hun_sent, eng_sent in zipped:
                     f.write(f'{hun_sent}\t{eng_sent}')
                     f.write('\n')
