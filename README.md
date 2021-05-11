@@ -34,6 +34,12 @@ You can obtain the path for the virtualenv by:
 poetry env info --path
 ```
 
+## Installing Stanza models:
+```python
+import stanza
+stanza.download('en')
+```
+
 ## Installing Hungarian Spacy models
 ```bash
 pip install https://github.com/oroszgy/spacy-hungarian-models/releases/download/hu_core_ud_lg-0.3.1/hu_core_ud_lg-0.3.1-py3-none-any.whl  
