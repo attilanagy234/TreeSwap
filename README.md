@@ -26,10 +26,6 @@ You can also launch a shell in your terminal:
 poetry shell
 ```
 
-You also need to download the english pipeline for Spacy
-```bash
- python -m spacy download en
-```
 
 To set up PyCharm with this virtual environment, just configure it as the project interpreter.
 
