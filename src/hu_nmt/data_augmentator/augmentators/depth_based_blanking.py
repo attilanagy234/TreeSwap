@@ -11,7 +11,7 @@ class DepthBasedBlanking(DepthBasedAugmentator):
 
     def __init__(self):
         super().__init__()
-        self.BLANK = 'BLANK'
+        self.BLANK = '[BLANK]'
 
     def augment(self, dep_graph: DependencyGraphWrapper):
         node_ids, indices_to_blank = self.get_word_indicies_to_blank(dep_graph)

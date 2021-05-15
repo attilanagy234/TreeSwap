@@ -3,7 +3,7 @@ import networkx as nx
 from abc import ABC, abstractmethod
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-
+from tqdm import tqdm
 
 class DependencyParserBase(ABC):
     """
@@ -33,7 +33,7 @@ class DependencyParserBase(ABC):
         files_to_read = get_files_in_folder(data_dir)
         files_to_read.sort(key=natural_keys)
         dep_graphs = []
-        for file in files_to_read:
+        for file in tqdm(files_to_read):
             with open(f'{data_dir}/{file}') as f:
                 graph = nx.DiGraph()
                 for line in f:

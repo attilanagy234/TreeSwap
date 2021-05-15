@@ -12,10 +12,14 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, eng_graphs, hun_graphs):
+    def __init__(self, eng_graphs, hun_graphs, augmented_data_ratio, random_seed, output_path):
         super().__init__()
         if len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
+        self._num_augmented_sentences_to_generate_per_method = int(len(eng_graphs) * float(augmented_data_ratio))
+        log.info(f'number of desired sentences/method: {self._num_augmented_sentences_to_generate_per_method}')
+        np.random.seed = random_seed
+        self._output_path = output_path
         self.error_cnt = 0
         self._eng_graphs = eng_graphs
         self._hun_graphs = hun_graphs
@@ -62,8 +66,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return lemmas_to_graphs
 
-    def augment(self, random_seed, output_path):
-        np.random.seed = random_seed
+    def augment(self):
         log.info('Finding augmentable sentence pairs...')
         self.find_augmentable_candidates()
         log.info(f'Found {len(self._augmentation_candidate_sentence_pairs)} candidate sentence pairs')
@@ -77,13 +80,24 @@ class SubjectObjectAugmentator(AugmentatorBase):
         # for i in range(10):
         #     self.print_augmented_pairs(i)
 
-        self.dump_augmented_sentences_to_files(output_path)
+        self.dump_augmented_sentences_to_files()
 
     def augment_predicate_swapping(self):
         log.info('Starting predicate swapping augmentation')
         all_permutations = list(combinations(self._augmentation_candidate_sentence_pairs, 2))
-        self.swap_predicates_in_all_permutations(all_permutations)
+        # We divide the amount we want to generate/method by two,
+        # because a subtree swapping on a sentence pairs, yields
+        # two new augmented sentences.
+        sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
+        permutations = self.sample_permutations(all_permutations, sample_cnt)
+        self.swap_predicates_in_all_permutations(permutations)
         log.info('Finished predicate swapping augmentation')
+
+    @staticmethod
+    def sample_permutations(all_permutations, num_samples):
+        all_indices = [x for x in range(len(all_permutations))]
+        sampled_indices = np.random.choice(all_indices, num_samples, replace=False)
+        return [all_permutations[idx] for idx in sampled_indices]
 
     def swap_predicates_in_all_permutations(self, permutations):
         for permutation in tqdm(permutations):
@@ -102,7 +116,12 @@ class SubjectObjectAugmentator(AugmentatorBase):
         """
         log.info('Starting subtree swapping on all permutations')
         all_permutations = list(combinations(self._augmentation_candidate_sentence_pairs, 2))
-        self.swap_subtrees_among_permutations(all_permutations, same_predicate_lemma=False)
+        # We divide the amount we want to generate/method by two,
+        # because a subtree swapping on a sentence pairs, yields
+        # two new augmented sentences.
+        sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
+        permutations = self.sample_permutations(all_permutations, sample_cnt)
+        self.swap_subtrees_among_permutations(permutations, same_predicate_lemma=False)
         log.info('Finished subtree swapping on all permutations')
 
     def swap_subtrees_among_permutations(self, permutations, same_predicate_lemma: bool):
@@ -134,7 +153,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         """
         predicate_lemmas_sorted_by_freq = [k for k in sorted(lemmas_to_graphs, key=lambda x: len(lemmas_to_graphs[x]),
                                                              reverse=True)]
-        log.info('Augmenting sentences with same lemma...')
+        permutations = []
+        log.info('Starting subtree swapping with same predicate lemma...')
+        log.info('Precomputing same predicate lemma permutations...')
         for lemma_pair in tqdm(predicate_lemmas_sorted_by_freq):
             graph_pairs_with_same_lemma = lemmas_to_graphs[lemma_pair]
             if len(graph_pairs_with_same_lemma) == 1:  # cannot get combinations if only one sentence has that lemma
@@ -142,8 +163,14 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
             # get all permutations from graph_pairs_with_same_lemma
             permutations_per_lemma = list(combinations(graph_pairs_with_same_lemma, 2))
-            self.swap_subtrees_among_permutations(permutations_per_lemma, same_predicate_lemma=True)
-        log.info('Finished augmenting sentences with same lemmas')
+            permutations.extend(permutations_per_lemma)
+        log.info(f'Got {len(permutations)} sentence pair permutations with the same lemma')
+        sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
+        if len(permutations) > sample_cnt:
+            permutations = self.sample_permutations(permutations, sample_cnt)
+
+        self.swap_subtrees_among_permutations(permutations, same_predicate_lemma=True)
+        log.info('Finished subtree swapping with same predicate lemmas')
 
     def augment_pair(self, sample_pair, augmentation_type):
         """
@@ -300,11 +327,11 @@ class SubjectObjectAugmentator(AugmentatorBase):
         """
         return check([int(x.split('_')[-1]) for x in node_ids])
 
-    def dump_augmented_sentences_to_files(self, output_folder_path):
-        log.info(f'Saving augmented sentences at {output_folder_path}')
+    def dump_augmented_sentences_to_files(self):
+        log.info(f'Saving augmented sentences at {self._output_path}')
         augmentation_types = self._augmented_sentence_pairs.keys()
         for augmentation_type in augmentation_types:
-            with open(f'{output_folder_path}/{augmentation_type}.tsv', 'w+') as f:
+            with open(f'{self._output_path}/{augmentation_type}.tsv', 'w+') as f:
                 zipped = zip(self._augmented_sentence_pairs[augmentation_type]['hun'],
                              self._augmented_sentence_pairs[augmentation_type]['eng'])
                 for hun_sent, eng_sent in zipped:
@@ -332,5 +359,12 @@ class SubjectObjectAugmentator(AugmentatorBase):
         print('SUBJECT SWAPPING')
         print(self._augmented_sentence_pairs['subj_swapping']['hun'][idx])
         print(self._augmented_sentence_pairs['subj_swapping']['eng'][idx])
+
+    @staticmethod
+    def softmax_with_temperature(x, t):
+        norm_x = x / np.sqrt(np.sum(x ** 2))
+        return np.exp(norm_x/t) / sum(np.exp(norm_x/t))
+
+
 
 
