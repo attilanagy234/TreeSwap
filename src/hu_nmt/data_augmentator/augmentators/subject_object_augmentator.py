@@ -1,3 +1,4 @@
+from math import sqrt
 from operator import itemgetter
 import numpy as np
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
@@ -84,12 +85,23 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
     def augment_predicate_swapping(self):
         log.info('Starting predicate swapping augmentation')
-        all_permutations = list(combinations(self._augmentation_candidate_sentence_pairs, 2))
+        # all_permutations = list(combinations(self._augmentation_candidate_sentence_pairs, 2))
         # We divide the amount we want to generate/method by two,
         # because a subtree swapping on a sentence pairs, yields
         # two new augmented sentences.
         sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
-        permutations = self.sample_permutations(all_permutations, sample_cnt)
+
+        # sample_cnt = N * (N-1) / 2
+        # 0 = N^2 - N - 2 * sample_cnt
+        # -1 + sqrt(1 + 8 * sample_cnt) / 2
+        N = int(-1 + sqrt(1 + 8 * sample_cnt) / 2)
+        total_sample_cnt = N * (N - 1) / 2
+        while total_sample_cnt < sample_cnt:
+            N += 1
+            total_sample_cnt = N * (N - 1) / 2
+        print(f'Count {total_sample_cnt}, N: {N}')
+        samples = self.sample_permutations(self._augmentation_candidate_sentence_pairs, N)
+        permutations = list(combinations(samples, 2))[0:sample_cnt]
         self.swap_predicates_in_all_permutations(permutations)
         log.info('Finished predicate swapping augmentation')
 
@@ -115,12 +127,19 @@ class SubjectObjectAugmentator(AugmentatorBase):
         Swaps Obj and Nsubj subtrees within all the permutations of sentences
         """
         log.info('Starting subtree swapping on all permutations')
-        all_permutations = list(combinations(self._augmentation_candidate_sentence_pairs, 2))
-        # We divide the amount we want to generate/method by two,
-        # because a subtree swapping on a sentence pairs, yields
-        # two new augmented sentences.
         sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
-        permutations = self.sample_permutations(all_permutations, sample_cnt)
+
+        # sample_cnt = N * (N-1) / 2
+        # 0 = N^2 - N - 2 * sample_cnt
+        # -1 + sqrt(1 + 8 * sample_cnt) / 2
+        N = int(-1 + sqrt(1 + 8 * sample_cnt) / 2)
+        total_sample_cnt = N * (N - 1) / 2
+        while total_sample_cnt < sample_cnt:
+            N += 1
+            total_sample_cnt = N * (N - 1) / 2
+        print(f'Count {total_sample_cnt}, N: {N}')
+        samples = self.sample_permutations(self._augmentation_candidate_sentence_pairs, N)
+        permutations = list(combinations(samples, 2))[0:sample_cnt]
         self.swap_subtrees_among_permutations(permutations, same_predicate_lemma=False)
         log.info('Finished subtree swapping on all permutations')
 
