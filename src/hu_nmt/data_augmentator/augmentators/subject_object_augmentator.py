@@ -3,6 +3,7 @@ from operator import itemgetter
 import numpy as np
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
+from hu_nmt.data_augmentator.utils.translation import TranslationGraph
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from tqdm import tqdm
 from itertools import combinations
@@ -13,7 +14,7 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, eng_graphs, hun_graphs, augmented_data_ratio, random_seed, output_path):
+    def __init__(self, eng_graphs: list[DependencyGraphWrapper], hun_graphs: list[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str):
         super().__init__()
         if len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
@@ -22,9 +23,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         np.random.seed = random_seed
         self._output_path = output_path
         self.error_cnt = 0
-        self._eng_graphs = eng_graphs
-        self._hun_graphs = hun_graphs
-        self._augmentation_candidate_sentence_pairs = []
+        self._eng_graphs: list[DependencyGraphWrapper] = eng_graphs
+        self._hun_graphs: list[DependencyGraphWrapper] = hun_graphs
+        self._augmentation_candidate_translations: list[TranslationGraph] = []
         self._augmented_sentence_pairs = {
             'obj_swapping_same_predicate_lemma': {
                 'hun': [],
@@ -48,33 +49,29 @@ class SubjectObjectAugmentator(AugmentatorBase):
             }
         }
 
-    def group_candidates_by_predicate_lemmas(self):
+    def group_candidates_by_predicate_lemmas(self) -> dict[tuple[str, str], list[TranslationGraph]]:
         lemmas_to_graphs = {}  # tuple(hun_lemma, eng_lemma) --> tuple(hun_graph, eng graph)
 
-        for hun_graph, eng_graph in self._augmentation_candidate_sentence_pairs:
-            hun_nsubj_edge = hun_graph.get_edges_with_property('dep', 'nsubj')[0]  # filtered candidates will only have one
-            eng_nsubj_edge = eng_graph.get_edges_with_property('dep', 'nsubj')[0]
+        for translation in self._augmentation_candidate_translations:
+            hun_nsubj_edge = translation.hun.get_edges_with_property('dep', 'nsubj')[0]  # filtered candidates will only have one
+            eng_nsubj_edge = translation.eng.get_edges_with_property('dep', 'nsubj')[0]
 
-            hun_predicate_lemma = hun_graph.graph.nodes[hun_nsubj_edge.source_node]['lemma'].strip()
-            eng_predicate_lemma = eng_graph.graph.nodes[eng_nsubj_edge.source_node]['lemma'].strip()
+            hun_predicate_lemma = translation.hun.graph.nodes[hun_nsubj_edge.source_node]['lemma'].strip()
+            eng_predicate_lemma = translation.eng.graph.nodes[eng_nsubj_edge.source_node]['lemma'].strip()
             lemmas_key = (hun_predicate_lemma, eng_predicate_lemma)
-            graph_tup = (hun_graph, eng_graph)
             if lemmas_key not in lemmas_to_graphs:
                 lemmas_to_graphs[lemmas_key] = []
-                lemmas_to_graphs[lemmas_key].append(graph_tup)
-            else:
-                lemmas_to_graphs[lemmas_key].append(graph_tup)
+            lemmas_to_graphs[lemmas_key].append(translation)
 
         return lemmas_to_graphs
 
     def augment(self):
         log.info('Finding augmentable sentence pairs...')
         self.find_augmentable_candidates()
-        log.info(f'Found {len(self._augmentation_candidate_sentence_pairs)} candidate sentence pairs')
+        log.info(f'Found {len(self._augmentation_candidate_translations)} candidate sentence pairs')
         lemmas_to_graphs = self.group_candidates_by_predicate_lemmas()
 
         self.augment_subtree_swapping_with_same_predicate_lemmas(lemmas_to_graphs)
-        self._augmentation_candidate_sentence_pairs = self._augmentation_candidate_sentence_pairs
         self.augment_predicate_swapping()
         self.augment_subtree_swapping()
 
@@ -100,13 +97,13 @@ class SubjectObjectAugmentator(AugmentatorBase):
             N += 1
             total_sample_cnt = N * (N - 1) / 2
         print(f'Count {total_sample_cnt}, N: {N}')
-        samples = self.sample_permutations(self._augmentation_candidate_sentence_pairs, N)
-        permutations = list(combinations(samples, 2))[0:sample_cnt]
-        self.swap_predicates_in_all_permutations(permutations)
+        samples = self.sample_list(self._augmentation_candidate_translations, N)
+        translation_combinations = list(combinations(samples, 2))[0:sample_cnt]
+        self.swap_predicates_in_all_permutations(translation_combinations)
         log.info('Finished predicate swapping augmentation')
 
     @staticmethod
-    def sample_permutations(all_permutations, num_samples):
+    def sample_list(all_permutations, num_samples):
         all_indices = [x for x in range(len(all_permutations))]
         sampled_indices = np.random.choice(all_indices, num_samples, replace=False)
         return [all_permutations[idx] for idx in sampled_indices]
@@ -138,22 +135,22 @@ class SubjectObjectAugmentator(AugmentatorBase):
             N += 1
             total_sample_cnt = N * (N - 1) / 2
         print(f'Count {total_sample_cnt}, N: {N}')
-        samples = self.sample_permutations(self._augmentation_candidate_sentence_pairs, N)
+        samples = self.sample_list(self._augmentation_candidate_translations, N)
         permutations = list(combinations(samples, 2))[0:sample_cnt]
-        self.swap_subtrees_among_permutations(permutations, same_predicate_lemma=False)
+        self.swap_subtrees_among_combinations(permutations, same_predicate_lemma=False)
         log.info('Finished subtree swapping on all permutations')
 
-    def swap_subtrees_among_permutations(self, permutations, same_predicate_lemma: bool):
-        for permutation in tqdm(permutations):
+    def swap_subtrees_among_combinations(self, translation_pairs: list[tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
+        for translation_pair in tqdm(translation_pairs):
             try:
-                hun_sents, eng_sents = self.augment_pair(permutation, 'obj')
+                hun_sents, eng_sents = self.augment_pair(translation_pair, 'obj')
                 if same_predicate_lemma:
                     key = 'obj_swapping_same_predicate_lemma'
                 else:
                     key = 'obj_swapping'
                 self._augmented_sentence_pairs[key]['hun'].extend(hun_sents)
                 self._augmented_sentence_pairs[key]['eng'].extend(eng_sents)
-                hun_sents, eng_sents = self.augment_pair(permutation, 'nsubj')
+                hun_sents, eng_sents = self.augment_pair(translation_pair, 'nsubj')
                 if same_predicate_lemma:
                     key = 'subj_swapping_same_predicate_lemma'
                 else:
@@ -165,33 +162,32 @@ class SubjectObjectAugmentator(AugmentatorBase):
                 log.debug(f'Cannot process sentence: {e}')
         log.info(f'Could not perform {self.error_cnt} augmentations so far')
 
-    def augment_subtree_swapping_with_same_predicate_lemmas(self, lemmas_to_graphs):
+    def augment_subtree_swapping_with_same_predicate_lemmas(self, lemmas_to_graphs: dict[tuple[str, str], list[TranslationGraph]]):
         """
-        Swaps Obj and Nsubj subtrees within the permutations of sentences
+        Swaps Obj and Nsubj subtrees within the combinations of sentences
         that have the same same predicate lemma
         """
-        predicate_lemmas_sorted_by_freq = [k for k in sorted(lemmas_to_graphs, key=lambda x: len(lemmas_to_graphs[x]),
-                                                             reverse=True)]
-        permutations = []
+        predicate_lemmas_sorted_by_freq = sorted(lemmas_to_graphs, key=lambda x: len(lemmas_to_graphs[x]), reverse=True)
+        translation_combinations = []
         log.info('Starting subtree swapping with same predicate lemma...')
-        log.info('Precomputing same predicate lemma permutations...')
+        log.info('Precomputing same predicate lemma combinations...')
         for lemma_pair in tqdm(predicate_lemmas_sorted_by_freq):
-            graph_pairs_with_same_lemma = lemmas_to_graphs[lemma_pair]
-            if len(graph_pairs_with_same_lemma) == 1:  # cannot get combinations if only one sentence has that lemma
+            translation_graphs_with_same_lemma = lemmas_to_graphs[lemma_pair]
+            if len(translation_graphs_with_same_lemma) == 1:  # cannot get combinations if only one translation has that lemma
                 break
 
-            # get all permutations from graph_pairs_with_same_lemma
-            permutations_per_lemma = list(combinations(graph_pairs_with_same_lemma, 2))
-            permutations.extend(permutations_per_lemma)
-        log.info(f'Got {len(permutations)} sentence pair permutations with the same lemma')
-        sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
-        if len(permutations) > sample_cnt:
-            permutations = self.sample_permutations(permutations, sample_cnt)
+            # get all combinations from translation_graphs_with_same_lemma
+            combinations_per_lemma = list(combinations(translation_graphs_with_same_lemma, 2))
+            translation_combinations.extend(combinations_per_lemma)
+        log.info(f'Got {len(translation_combinations)} translation combinations with the same lemma')
+        sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)  # = how many translation pairs do we need to sample -> a translation pair/combination gives 2 new translations
+        if len(translation_combinations) > sample_cnt:
+            translation_combinations = self.sample_list(translation_combinations, sample_cnt)
 
-        self.swap_subtrees_among_permutations(permutations, same_predicate_lemma=True)
+        self.swap_subtrees_among_combinations(translation_combinations, same_predicate_lemma=True)
         log.info('Finished subtree swapping with same predicate lemmas')
 
-    def augment_pair(self, sample_pair, augmentation_type):
+    def augment_pair(self, translation_pair: tuple[TranslationGraph, TranslationGraph], augmentation_type) -> tuple[list[str], list[str]]:
         """
         Swaps the subtrees of the sentences
         Params:
@@ -208,10 +204,10 @@ class SubjectObjectAugmentator(AugmentatorBase):
         hun_augmented_sentences = []
         eng_augmented_sentences = []
 
-        hun_graph_1 = sample_pair[0][0]
-        eng_graph_1 = sample_pair[0][1]
-        hun_graph_2 = sample_pair[1][0]
-        eng_graph_2 = sample_pair[1][1]
+        hun_graph_1 = translation_pair[0].hun
+        eng_graph_1 = translation_pair[0].eng
+        hun_graph_2 = translation_pair[1].hun
+        eng_graph_2 = translation_pair[1].eng
 
         # hun_graph_1.display_graph()
         # eng_graph_1.display_graph()
@@ -227,7 +223,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return hun_augmented_sentences, eng_augmented_sentences
 
-    def swap_predicates(self, sentence_graph_1, sentence_graph_2):
+    def swap_predicates(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper) -> list[str, str]:
         original_sentence_1 = self.reconstruct_sentence_from_node_ids(sentence_graph_1.graph.nodes)
         original_sentence_2 = self.reconstruct_sentence_from_node_ids(sentence_graph_2.graph.nodes)
         # Will have one edge only due to filtering. source node of nsubj edge --> predicate of sentence
@@ -243,33 +239,36 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return [' '.join(original_sentence_1[1:]), ' '.join(original_sentence_2[1:])]
 
-    def swap_subtrees(self, sentence_graph_1, sentence_graph_2, subtree_type):
-        original_sentence_1 = self.reconstruct_sentence_from_node_ids(sentence_graph_1.graph.nodes)
-        original_sentence_2 = self.reconstruct_sentence_from_node_ids(sentence_graph_2.graph.nodes)
-        subgraph_1 = self.get_subgraph_from_edge_type(sentence_graph_1, subtree_type)
-        subgraph_2 = self.get_subgraph_from_edge_type(sentence_graph_2, subtree_type)
-        subgraph_1_offsets = self.get_offsets_from_node_ids(subgraph_1)
-        subgraph_2_offsets = self.get_offsets_from_node_ids(subgraph_2)
-        subgraph_1 = [x.split('_')[0] for x in subgraph_1]
-        subgraph_2 = [x.split('_')[0] for x in subgraph_2]
+    def build_original_sentence_with_subgraph(self, sentence_graph: DependencyGraphWrapper, subtree_type: str) -> tuple[list[str], tuple[int, int], list[str]]:
+        original_sentence_words = self.reconstruct_sentence_from_node_ids(sentence_graph.graph.nodes)
+        subgraph_words_with_ids = self.get_subgraph_from_edge_type(sentence_graph, subtree_type)
+        subgraph_offsets = self.get_offsets_from_node_ids(subgraph_words_with_ids)
+        subgraph_words = [x.split('_')[0] for x in subgraph_words_with_ids]
 
-        subtree_indices = range(subgraph_1_offsets[0], subgraph_1_offsets[1]+1)
+        return original_sentence_words, subgraph_offsets, subgraph_words
+
+    @staticmethod
+    def swap_subtree(original_sentence: list[str], subgraph_offsets: tuple[int, int], subgraph_to_insert: list[str]) -> list[str]:
+        subtree_indices = range(subgraph_offsets[0], subgraph_offsets[1] + 1)
         # remove subtree from sent1
-        original_sentence_1 = [i for j, i in enumerate(original_sentence_1) if j not in subtree_indices]
+        original_sentence = [i for j, i in enumerate(original_sentence) if j not in subtree_indices]
         # add new subtree of sent2 to sent1
-        insert_at = subgraph_1_offsets[0]
-        original_sentence_1[insert_at:insert_at] = subgraph_2
+        insert_at = subgraph_offsets[0]
+        original_sentence[insert_at:insert_at] = subgraph_to_insert
 
-        subtree_indices = range(subgraph_2_offsets[0], subgraph_2_offsets[1]+1)
-        # remove subtree from sent2
-        original_sentence_2 = [i for j, i in enumerate(original_sentence_2) if j not in subtree_indices]
-        # add new subtree of sent1 to sent2
-        insert_at = subgraph_2_offsets[0]
-        original_sentence_2[insert_at:insert_at] = subgraph_1
+        return original_sentence
+
+    def swap_subtrees(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper, subtree_type: str) -> list[str, str]:
+        original_sentence_1, subgraph_offsets_1, subgraph_1 = self.build_original_sentence_with_subgraph(sentence_graph_1, subtree_type)
+        original_sentence_2, subgraph_offsets_2, subgraph_2 = self.build_original_sentence_with_subgraph(sentence_graph_2, subtree_type)
+
+        original_sentence_1 = self.swap_subtree(original_sentence_1, subgraph_offsets_1, subgraph_2)
+        original_sentence_2 = self.swap_subtree(original_sentence_2, subgraph_offsets_2, subgraph_1)
+
         return [' '.join(original_sentence_1[1:]), ' '.join(original_sentence_2[1:])]
 
     @staticmethod
-    def get_subgraph_from_edge_type(graph, edge_type):
+    def get_subgraph_from_edge_type(graph, edge_type) -> list[str]:
         # Because of prior filtering, we always will have one edge
 
         edges_with_type = graph.get_edges_with_property('dep', edge_type)[0]
@@ -279,10 +278,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         splitted_node_ids = [(x[0], int(x[1])) for x in splitted_node_ids]
         return [f'{y[0]}_{y[1]}' for y in sorted(splitted_node_ids, key=itemgetter(1))]
 
-
-
     @staticmethod
-    def get_offsets_from_node_ids(node_ids):
+    def get_offsets_from_node_ids(node_ids: list[str]) -> tuple[int, int]:
         """
         Returns the smallest and largest index from the list of node ids
         """
@@ -291,10 +288,10 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
     def find_augmentable_candidates(self):
         for hun_graph, eng_graph in tqdm(zip(self._hun_graphs, self._eng_graphs)):
-            if self.test_graph_pair(hun_graph, eng_graph):
-                self._augmentation_candidate_sentence_pairs.append((hun_graph, eng_graph))
+            if self.is_eligible_for_augmentation(hun_graph, eng_graph):
+                self._augmentation_candidate_translations.append(TranslationGraph(hun_graph, eng_graph))
 
-    def test_graph_pair(self, hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
+    def is_eligible_for_augmentation(self, hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
         """
         Tests if a sentence (graph) pair is eligible for augmentation
         """
@@ -330,7 +327,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return True
 
     @staticmethod
-    def is_consecutive_subsequence(node_ids):
+    def is_consecutive_subsequence(node_ids: list[str]) -> bool:
         def check(lst):
             lst = sorted(lst)
             if lst:
@@ -357,7 +354,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
                     f.write(f'{hun_sent}\t{eng_sent}')
                     f.write('\n')
 
-    def print_augmented_pairs(self, idx):
+    def print_augmented_pairs(self, idx: int):
         """
         Prints augmented sentence pairs at an idx,
         useful for debugging and viewing results

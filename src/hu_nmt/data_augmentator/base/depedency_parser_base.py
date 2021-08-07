@@ -18,7 +18,7 @@ class DependencyParserBase(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def read_parsed_dep_trees_from_files(data_dir):
+    def read_parsed_dep_trees_from_files(data_dir: str) -> list[nx.DiGraph]:
         def atoi(text):
             return int(text) if text.isdigit() else text
 
@@ -49,6 +49,6 @@ class DependencyParserBase(ABC):
                         graph.add_edge(source_key, target_key, dep=target_deprel)
         return dep_graphs
 
-    def get_graph_wrappers_from_files(self, data_folder):
+    def get_graph_wrappers_from_files(self, data_folder) -> list[DependencyGraphWrapper]:
         dep_graphs = self.read_parsed_dep_trees_from_files(data_folder)
         return [DependencyGraphWrapper(x) for x in dep_graphs]
