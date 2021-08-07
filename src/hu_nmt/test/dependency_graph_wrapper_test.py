@@ -76,4 +76,4 @@ class DependencyGraphWrapperTest(unittest.TestCase):
         edges_with_property = self.dep_graph_wrapper.get_edges_with_property('dep', 'punct')
         source_node, target_node, edge = edges_with_property[0]
         assert 'took' == source_node.split('_')[0]
-        assert '.' == target_node.split('-')[0]
+        assert '.' == target_node.split('_')[0]
