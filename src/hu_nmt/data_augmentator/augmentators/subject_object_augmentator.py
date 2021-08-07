@@ -97,7 +97,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         # two new augmented sentences.
         sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
         sampled_translation_pairs = self.sample_item_pairs(self._augmentation_candidate_translations, sample_cnt)
-        self.swap_predicates_in_all_permutations(sampled_translation_pairs)
+        self.swap_predicates_in_all_combinations(sampled_translation_pairs)
         log.info('Finished predicate swapping augmentation')
 
     @staticmethod
@@ -106,10 +106,10 @@ class SubjectObjectAugmentator(AugmentatorBase):
         sampled_indices = np.random.choice(all_indices, num_samples, replace=False)
         return [from_list[idx] for idx in sampled_indices]
 
-    def swap_predicates_in_all_permutations(self, permutations):
-        for permutation in tqdm(permutations):
+    def swap_predicates_in_all_combinations(self, translation_combinations):
+        for translation_pair in tqdm(translation_combinations):
             try:
-                hun_sents, eng_sents = self.augment_pair(permutation, 'predicate')
+                hun_sents, eng_sents = self.augment_pair(translation_pair, 'predicate')
                 self._augmented_sentence_pairs['predicate_swapping']['hun'].extend(hun_sents)
                 self._augmented_sentence_pairs['predicate_swapping']['eng'].extend(eng_sents)
             except Exception as e:
