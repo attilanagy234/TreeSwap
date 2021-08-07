@@ -80,6 +80,15 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         self.dump_augmented_sentences_to_files()
 
+    @staticmethod
+    def sample_item_pairs(items: list, sample_count: int):
+        sampled_index_pairs: set[tuple[int, int]] = set()
+        while len(sampled_index_pairs) < sample_count:
+            random_index_pair = np.random.choice(len(items), 2, replace=False)
+            sampled_index_pairs.add(random_index_pair)
+
+        return [(items[x], items[y]) for x, y in sampled_index_pairs]
+
     def augment_predicate_swapping(self):
         log.info('Starting predicate swapping augmentation')
         # all_permutations = list(combinations(self._augmentation_candidate_sentence_pairs, 2))
@@ -87,31 +96,20 @@ class SubjectObjectAugmentator(AugmentatorBase):
         # because a subtree swapping on a sentence pairs, yields
         # two new augmented sentences.
         sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
-
-        # sample_cnt = N * (N-1) / 2
-        # 0 = N^2 - N - 2 * sample_cnt
-        # -1 + sqrt(1 + 8 * sample_cnt) / 2
-        N = int(-1 + sqrt(1 + 8 * sample_cnt) / 2)
-        total_sample_cnt = N * (N - 1) / 2
-        while total_sample_cnt < sample_cnt:
-            N += 1
-            total_sample_cnt = N * (N - 1) / 2
-        print(f'Count {total_sample_cnt}, N: {N}')
-        samples = self.sample_list(self._augmentation_candidate_translations, N)
-        translation_combinations = list(combinations(samples, 2))[0:sample_cnt]
-        self.swap_predicates_in_all_permutations(translation_combinations)
+        sampled_translation_pairs = self.sample_item_pairs(self._augmentation_candidate_translations, sample_cnt)
+        self.swap_predicates_in_all_combinations(sampled_translation_pairs)
         log.info('Finished predicate swapping augmentation')
 
     @staticmethod
-    def sample_list(all_permutations, num_samples):
-        all_indices = [x for x in range(len(all_permutations))]
+    def sample_list(from_list, num_samples):
+        all_indices = [x for x in range(len(from_list))]
         sampled_indices = np.random.choice(all_indices, num_samples, replace=False)
-        return [all_permutations[idx] for idx in sampled_indices]
+        return [from_list[idx] for idx in sampled_indices]
 
-    def swap_predicates_in_all_permutations(self, permutations):
-        for permutation in tqdm(permutations):
+    def swap_predicates_in_all_combinations(self, translation_combinations):
+        for translation_pair in tqdm(translation_combinations):
             try:
-                hun_sents, eng_sents = self.augment_pair(permutation, 'predicate')
+                hun_sents, eng_sents = self.augment_pair(translation_pair, 'predicate')
                 self._augmented_sentence_pairs['predicate_swapping']['hun'].extend(hun_sents)
                 self._augmented_sentence_pairs['predicate_swapping']['eng'].extend(eng_sents)
             except Exception as e:
@@ -125,19 +123,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         """
         log.info('Starting subtree swapping on all permutations')
         sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
-
-        # sample_cnt = N * (N-1) / 2
-        # 0 = N^2 - N - 2 * sample_cnt
-        # -1 + sqrt(1 + 8 * sample_cnt) / 2
-        N = int(-1 + sqrt(1 + 8 * sample_cnt) / 2)
-        total_sample_cnt = N * (N - 1) / 2
-        while total_sample_cnt < sample_cnt:
-            N += 1
-            total_sample_cnt = N * (N - 1) / 2
-        print(f'Count {total_sample_cnt}, N: {N}')
-        samples = self.sample_list(self._augmentation_candidate_translations, N)
-        permutations = list(combinations(samples, 2))[0:sample_cnt]
-        self.swap_subtrees_among_combinations(permutations, same_predicate_lemma=False)
+        sampled_translation_pairs = self.sample_item_pairs(self._augmentation_candidate_translations, sample_cnt)
+        self.swap_subtrees_among_combinations(sampled_translation_pairs, same_predicate_lemma=False)
         log.info('Finished subtree swapping on all permutations')
 
     def swap_subtrees_among_combinations(self, translation_pairs: list[tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
