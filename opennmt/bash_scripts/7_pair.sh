@@ -6,6 +6,6 @@ output_folder=run
 
 python $utils_path/pair.py \
 --original_path $output_folder/valid.txt \
---predicted_path $output_folder/pred.txt.sp \
+--predicted_path $output_folder/pred.txt \
 --n_lines $pair_n_lines \
 --output_path $pair_output_path

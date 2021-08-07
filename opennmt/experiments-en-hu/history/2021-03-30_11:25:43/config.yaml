@@ -1,0 +1,103 @@
+# https://opennmt.net/OpenNMT-py/options/train.html
+# https://opennmt.net/OpenNMT-py/FAQ.html
+
+
+# PREPROCESS
+
+# Additional paths
+sp_models_path: ../../sp_models
+utils_path: ../../../utils
+pair_n_lines: 100
+pair_output_path: run/paired.text
+
+translate_model: run/model_no_qoutes_step_200000.pt
+
+src_vocab_size: 30000
+tgt_vocab_size: 30000
+
+# Where the samples will be written
+save_data: run/samples
+# Where the vocab(s) will be written
+src_vocab: ../../vocabs/vocab.en
+tgt_vocab: ../../vocabs/vocab.hu
+
+# Corpus opts:
+data:
+    hunglish:
+        path_src: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.en
+        path_tgt: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.hu
+        transforms: [sentencepiece]
+        weight: 1
+    valid:
+        path_src: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.en
+        path_tgt: ../../../../data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.hu
+        transforms: [sentencepiece]
+
+#### Subword
+src_subword_model: ../../sp_models/bpe_en.model
+tgt_subword_model: ../../sp_models/bpe_hu.model
+src_subword_nbest: 1
+src_subword_alpha: 0.0
+tgt_subword_nbest: 1
+tgt_subword_alpha: 0.0
+
+src_seq_length: 16  # maximum source sequence length
+tgt_seq_length: 16  # maximum target sequence length
+
+# TRAIN
+
+# Train on a single GPU
+world_size: 1
+gpu_ranks: [0]
+
+# Batching
+batch_size: 96
+#queue_size: 16
+#accum_count: [3]
+
+# General opts
+save_model: run/model_no_qoutes
+keep_checkpoint: 50 # 50 epoch
+save_checkpoint_steps: 10000
+average_decay: 0.0005
+seed: 1234
+report_every: 100
+train_steps: 200000
+valid_steps: 10000 
+single_pass: False
+early_stopping: 10 
+early_stopping_criteria: ppl
+
+# Optimization
+model_dtype: "fp16"
+optim: "adam"
+learning_rate: 2.0
+warmup_steps: 8000
+decay_method: "noam"
+adam_beta2: 0.998
+max_grad_norm: 0
+label_smoothing: 0.1
+param_init: 0
+param_init_glorot: true
+normalization: "tokens"
+
+# Model
+#train_from: run/model_step_729000.pt
+#reset_optim: keep_states
+encoder_type: transformer
+decoder_type: transformer
+enc_layers: 4
+dec_layers: 4
+heads: 8
+rnn_size: 512
+word_vec_size: 512
+transformer_ff: 2048
+dropout_steps: [0]
+dropout: [0.1]
+attention_dropout: [0.1]
+#share_decoder_embeddings: true
+
+# Logging
+log_file: run/logs_no_qoutes
+tensorboard: true
+tensorboard_log_dir: run/tensorboard
