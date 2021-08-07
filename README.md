@@ -6,11 +6,19 @@
 
 The data augmentator uses [Poetry](https://python-poetry.org/) for packaging and dependency management.
 
+> **_NOTE:_**  Mac users need to install graphviz before following the installation.
+> ```bash
+> sudo chown -R $(whoami) /usr/local/bin
+> brew install graphviz
+> sudo chown -R root /usr/local/bin
+> ```
+
 To install all the necessary dependencies, just run:
 ```bash
 cd src/hu_nmt
 poetry install
 ```
+
 All installed dependencies are written to a **poetry.lock** file.
 
 
