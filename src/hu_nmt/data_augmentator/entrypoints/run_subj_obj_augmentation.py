@@ -12,7 +12,8 @@ log = get_logger(__name__)
 @click.argument('hun_data_folder')
 @click.argument('augmentation_output_path')
 @click.argument('augmented_data_ratio')
-def main(eng_data_folder, hun_data_folder, augmentation_output_path, augmented_data_ratio):
+@click.option('output_format', default='tsv', help='Supported output formats: tsv (default), basic')
+def main(eng_data_folder, hun_data_folder, augmentation_output_path, augmented_data_ratio, output_format):
     eng_dep_parser = EnglishDependencyParser()
     eng_wrappers = eng_dep_parser.get_graph_wrappers_from_files(eng_data_folder)
     log.info(f'Number of English sentences used for augmentation: {len(eng_wrappers)}')
@@ -20,7 +21,7 @@ def main(eng_data_folder, hun_data_folder, augmentation_output_path, augmented_d
     hun_wrappers = hun_dep_parser.get_graph_wrappers_from_files(hun_data_folder)
     log.info(f'Number of Hungarian sentences used for augmentation: {len(eng_wrappers)}')
     augmentator = SubjectObjectAugmentator(eng_wrappers, hun_wrappers, augmented_data_ratio,
-                                           random_seed=15, output_path=augmentation_output_path)
+                                           random_seed=15, output_path=augmentation_output_path, output_format=output_format)
     augmentator.augment()
 
 

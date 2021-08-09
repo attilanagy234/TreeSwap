@@ -14,7 +14,7 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, eng_graphs: list[DependencyGraphWrapper], hun_graphs: list[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str):
+    def __init__(self, eng_graphs: list[DependencyGraphWrapper], hun_graphs: list[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str, output_format: bool):
         super().__init__()
         if len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
@@ -22,6 +22,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         log.info(f'number of desired sentences/method: {self._num_augmented_sentences_to_generate_per_method}')
         np.random.seed = random_seed
         self._output_path = output_path
+        self.output_format = output_format
         self.error_cnt = 0
         self._eng_graphs: list[DependencyGraphWrapper] = eng_graphs
         self._hun_graphs: list[DependencyGraphWrapper] = hun_graphs
@@ -333,13 +334,21 @@ class SubjectObjectAugmentator(AugmentatorBase):
     def dump_augmented_sentences_to_files(self):
         log.info(f'Saving augmented sentences at {self._output_path}')
         augmentation_types = self._augmented_sentence_pairs.keys()
-        for augmentation_type in augmentation_types:
-            with open(f'{self._output_path}/{augmentation_type}.tsv', 'w+') as f:
-                zipped = zip(self._augmented_sentence_pairs[augmentation_type]['hun'],
-                             self._augmented_sentence_pairs[augmentation_type]['eng'])
-                for hun_sent, eng_sent in zipped:
-                    f.write(f'{hun_sent}\t{eng_sent}')
-                    f.write('\n')
+        if self.output_format == 'tsv':
+            for augmentation_type in augmentation_types:
+                with open(f'{self._output_path}/{augmentation_type}.tsv', 'w+') as f:
+                    zipped = zip(self._augmented_sentence_pairs[augmentation_type]['hun'],
+                                 self._augmented_sentence_pairs[augmentation_type]['eng'])
+                    for hun_sent, eng_sent in zipped:
+                        f.write(f'{hun_sent}\t{eng_sent}')
+                        f.write('\n')
+        else:
+            for augmentation_type in augmentation_types:
+                for lang in ['hun', 'eng']:
+                    with open(f'{self._output_path}/augmentation_type.{lang[:2]}') as f:
+                        for sent in self._augmented_sentence_pairs[augmentation_type][lang]:
+                            f.write(sent)
+                            f.write('\n')
 
     def print_augmented_pairs(self, idx: int):
         """
