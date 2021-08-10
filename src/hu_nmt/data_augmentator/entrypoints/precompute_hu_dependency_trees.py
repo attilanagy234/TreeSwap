@@ -2,7 +2,6 @@ import click
 
 from hu_nmt.data_augmentator.dependency_parsers.hungarian_dependency_parser import HungarianDependencyParser
 from hu_nmt.data_augmentator.utils.logger import get_logger
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
 
 log = get_logger(__name__)
 

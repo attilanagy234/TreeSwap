@@ -1,9 +1,12 @@
 import re
+from typing import List
+
 import networkx as nx
 from abc import ABC, abstractmethod
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from tqdm import tqdm
+
 
 class DependencyParserBase(ABC):
     """
@@ -18,7 +21,7 @@ class DependencyParserBase(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def read_parsed_dep_trees_from_files(data_dir: str) -> list[nx.DiGraph]:
+    def read_parsed_dep_trees_from_files(data_dir: str) -> List[nx.DiGraph]:
         def atoi(text):
             return int(text) if text.isdigit() else text
 
@@ -49,6 +52,6 @@ class DependencyParserBase(ABC):
                         graph.add_edge(source_key, target_key, dep=target_deprel)
         return dep_graphs
 
-    def get_graph_wrappers_from_files(self, data_folder) -> list[DependencyGraphWrapper]:
+    def get_graph_wrappers_from_files(self, data_folder) -> List[DependencyGraphWrapper]:
         dep_graphs = self.read_parsed_dep_trees_from_files(data_folder)
         return [DependencyGraphWrapper(x) for x in dep_graphs]

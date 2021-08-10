@@ -1,12 +1,14 @@
-from math import sqrt
+from itertools import combinations
 from operator import itemgetter
+from typing import List
+
 import numpy as np
+from tqdm import tqdm
+
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation import TranslationGraph
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from tqdm import tqdm
-from itertools import combinations
 
 log = get_logger(__name__)
 log.setLevel('DEBUG')
@@ -211,7 +213,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return hun_augmented_sentences, eng_augmented_sentences
 
-    def swap_predicates(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper) -> list[str, str]:
+    def swap_predicates(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper) -> List[str, str]:
         original_sentence_1 = self.reconstruct_sentence_from_node_ids(sentence_graph_1.graph.nodes)
         original_sentence_2 = self.reconstruct_sentence_from_node_ids(sentence_graph_2.graph.nodes)
         # Will have one edge only due to filtering. source node of nsubj edge --> predicate of sentence
@@ -236,7 +238,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return original_sentence_words, subgraph_offsets, subgraph_words
 
     @staticmethod
-    def swap_subtree(original_sentence: list[str], subgraph_offsets: tuple[int, int], subgraph_to_insert: list[str]) -> list[str]:
+    def swap_subtree(original_sentence: list[str], subgraph_offsets: tuple[int, int], subgraph_to_insert: list[str]) -> List[str]:
         subtree_indices = range(subgraph_offsets[0], subgraph_offsets[1] + 1)
         # remove subtree from sent1
         original_sentence = [i for j, i in enumerate(original_sentence) if j not in subtree_indices]
@@ -246,7 +248,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return original_sentence
 
-    def swap_subtrees(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper, subtree_type: str) -> list[str, str]:
+    def swap_subtrees(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper, subtree_type: str) -> List[str, str]:
         original_sentence_1, subgraph_offsets_1, subgraph_1 = self.build_original_sentence_with_subgraph(sentence_graph_1, subtree_type)
         original_sentence_2, subgraph_offsets_2, subgraph_2 = self.build_original_sentence_with_subgraph(sentence_graph_2, subtree_type)
 
@@ -256,7 +258,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return [' '.join(original_sentence_1[1:]), ' '.join(original_sentence_2[1:])]
 
     @staticmethod
-    def get_subgraph_from_edge_type(graph, edge_type) -> list[str]:
+    def get_subgraph_from_edge_type(graph, edge_type) -> List[str]:
         # Because of prior filtering, we always will have one edge
 
         edges_with_type = graph.get_edges_with_property('dep', edge_type)[0]
