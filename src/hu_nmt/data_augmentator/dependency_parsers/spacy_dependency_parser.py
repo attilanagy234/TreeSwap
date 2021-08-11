@@ -1,5 +1,6 @@
 import hu_core_ud_lg
 import networkx as nx
+import spacy
 from tqdm import tqdm
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
@@ -9,10 +10,15 @@ log = get_logger(__name__)
 ROOT_KEY = 'root_0'
 
 
-class HungarianDependencyParser(DependencyParserBase):
-    def __init__(self):
+class SpacyDependencyParser(DependencyParserBase):
+    def __init__(self, lang):
         super().__init__()
-        self.nlp_pipeline = hu_core_ud_lg.load()
+        if lang == 'hu':
+            self.nlp_pipeline = hu_core_ud_lg.load()
+        elif lang == 'de':
+            self.nlp_pipeline = spacy.load("de_core_news_sm")
+        else:
+            raise ValueError(f'Language {lang} is not supported by the SpacyDependencyParser.')
 
     def sentence_to_dep_parse_tree(self, sent):
         """
