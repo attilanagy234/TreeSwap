@@ -17,6 +17,8 @@ class SpacyDependencyParser(DependencyParserBase):
             self.nlp_pipeline = hu_core_ud_lg.load()
         elif lang == 'de':
             self.nlp_pipeline = spacy.load("de_core_news_sm")
+        elif lang == 'fr':
+            self.nlp_pipeline = spacy.load("fr_core_news_sm")
         else:
             raise ValueError(f'Language {lang} is not supported by the SpacyDependencyParser.')
 
