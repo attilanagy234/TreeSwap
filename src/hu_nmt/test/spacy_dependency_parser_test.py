@@ -27,6 +27,13 @@ class SpacyDependencyParserTest(unittest.TestCase):
         if not isinstance(dep_graph, nx.DiGraph):
             raise TypeError('Dependency graph needs to be a nx DiGraph')
 
+    def test_sentence_to_dep_parse_tree_fr(self):
+        de_dep_parser = SpacyDependencyParser(lang='fr')
+        de_sentence = "J'ai 20 ans."
+        dep_graph = de_dep_parser.sentence_to_dep_parse_tree(de_sentence)
+        if not isinstance(dep_graph, nx.DiGraph):
+            raise TypeError('Dependency graph needs to be a nx DiGraph')
+
     def test_sentences_to_serialized_dep_graph_files(self):
         sentences = [
             'Péter elvitte a kutyát sétálni az erdőbe.',
