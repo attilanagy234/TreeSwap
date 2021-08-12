@@ -8,7 +8,7 @@ from hu_nmt.data_augmentator.utils.logger import get_logger
 log = get_logger(__name__)
 
 if __name__ == '__main__':
-    LANG = 'HU'
+    LANG = 'DE'
     # ------------ Test dependency parsers ------------
     if LANG == 'EN':
         #     Test English dependency parser
@@ -24,6 +24,13 @@ if __name__ == '__main__':
    #     emtsv_output_file_path = '/Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/data/hun_output.txt'
         hun_dep_parser = SpacyDependencyParser(lang='hu')
         dep_graph = hun_dep_parser.sentence_to_dep_parse_tree(sentence)
+        hun_dep_graph_wrapper = DependencyGraphWrapper(dep_graph)
+        hun_dep_graph_wrapper.display_graph()
+        graph = hun_dep_graph_wrapper
+    elif LANG == 'DE':
+        sentence = 'Ich liebe lange Spaziergänge in den Bergen.'
+        de_dep_parser = SpacyDependencyParser(lang='de')
+        dep_graph = de_dep_parser.sentence_to_dep_parse_tree(sentence)
         hun_dep_graph_wrapper = DependencyGraphWrapper(dep_graph)
         hun_dep_graph_wrapper.display_graph()
         graph = hun_dep_graph_wrapper
