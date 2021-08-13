@@ -1,7 +1,12 @@
+import multiprocessing as mp
+import os
+import sys
 from dataclasses import dataclass
-from typing import List
+from math import floor
+from typing import List, Iterator, Tuple
 
 import networkx as nx
+import psutil as psutil
 import stanza
 from tqdm import tqdm
 
@@ -47,15 +52,16 @@ class EnglishDependencyParser(DependencyParserBase):
             source_lemma = None
         return NodeRelationship(target_key, target_postag, target_lemma, target_deprel, source_key, source_postag, source_lemma)
 
-    def sentence_to_node_relationship_list(self, sent: str) -> List[NodeRelationship]:
-        doc = self.nlp_pipeline(sent)
+    @staticmethod
+    def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
+        doc = nlp_pipeline(sent)
         # We most likely will only pass single sentences.
         if len(doc.sentences) != 1:
             log.info(f'Sample has multiple sentences: {[s.text for s in doc.sentences]}')
         sent = doc.sentences[0]
         word_dicts = [word.to_dict() for word in sent.words]
 
-        return [self.extract_info_from_token(word, word_dicts) for word in word_dicts]
+        return [EnglishDependencyParser.extract_info_from_token(word, word_dicts) for word in word_dicts]
 
     def sentence_to_dep_parse_tree(self, sent):
         """
@@ -67,36 +73,77 @@ class EnglishDependencyParser(DependencyParserBase):
         dep_graph = nx.DiGraph()
         # Add ROOT node
         dep_graph.add_node(ROOT_KEY)
-        for node_rel in self.sentence_to_node_relationship_list(sent):
+        for node_rel in self.sentence_to_node_relationship_list(self.nlp_pipeline, sent):
             dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
             dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
 
-    def sentences_to_serialized_dep_graph_files(self, sentences, output_dir, file_batch_size):
+    def file_to_serialized_dep_graph_files(self, sentences_path: str, output_dir: str, file_batch_size: int):
+        sentence_generator = self.get_file_line_generator(sentences_path)
+        self.sentences_to_serialized_dep_graph_files(sentence_generator, output_dir, file_batch_size)
+
+    @staticmethod
+    def get_file_line_generator(file_path: str):
+        with open(file_path, 'r') as file:
+            for line in file:
+                yield line
+
+    @staticmethod
+    def _sentence_pipeline_pair_to_node_relationship_list(pair: Tuple[stanza.Pipeline, str]):
+        return EnglishDependencyParser.sentence_to_node_relationship_list(pair[0], pair[1])
+
+    def sentences_to_serialized_dep_graph_files(self, sentences_iter: Iterator[str], output_dir: str, file_batch_size: int):
         """
         Args:
-            sentences: list of sentences to process
+            sentences_iter: iterator for the sentences to process
             output_dir: location of tsv files containing the dep parsed sentences
             file_batch_size: amount of sentences to be parsed into a single file
         """
+
+        batch_of_sentences = []
+        first_run = True
+        have_more_sentences_to_process = True
         file_idx = 1
-        open_new_file = True
-        file_batch_size = int(file_batch_size)
+        with tqdm() as pbar:
+            while have_more_sentences_to_process:
 
-        for progress_idx, sent in tqdm(enumerate(sentences)):
-            if open_new_file:
-                file = open(f'{output_dir}/{file_idx}.tsv', 'w+')
-                open_new_file = False
+                # read one batch
+                log.info('Reading one batch')
+                try:
+                    for _ in range(file_batch_size):
+                        batch_of_sentences.append((self.nlp_pipeline, next(sentences_iter)))
+                except StopIteration:
+                    have_more_sentences_to_process = False
 
-            for dep_rel in self.sentence_to_node_relationship_list(sent):
-                graph_record = f'{dep_rel.target_key}\t{dep_rel.target_postag}\t{dep_rel.target_lemma}' \
-                               f'\t{dep_rel.target_deprel}\t{dep_rel.source_key}\t{dep_rel.source_postag}\t{dep_rel.source_lemma}\n'
-                file.write(graph_record)
+                if first_run:
+                    # decide how many processes to run for optimal speed
+                    process = psutil.Process(os.getpid())
+                    process_used_bytes = process.memory_info().rss
+                    available_bytes = psutil.virtual_memory().available
+                    log.info(f'There could be {available_bytes / process_used_bytes} processes spawned to fill up the available memory')
+                    process_count = max(floor(available_bytes / process_used_bytes), 1)
+                    log.info(f'Decided to use {process_count} processes based on available memory')
+                    first_run = False
 
-            file.write('\n')  # Separate sentences with a new line
+                # map to processes
+                log.info('Mapping sentences to processes')
+                proc_pool = mp.Pool(process_count)
+                list_of_dep_rel_lists = proc_pool.imap(self._sentence_pipeline_pair_to_node_relationship_list,
+                                                       batch_of_sentences,
+                                                       chunksize=int(len(batch_of_sentences)/process_count))
+                proc_pool.close()
+                proc_pool.join()
 
-            if (progress_idx + 1) % file_batch_size == 0:
-                file.close()
+                # dump to file
+                with open(os.path.join(output_dir, f'{file_idx}.tsv'), 'w') as output_file:
+                    for dep_rel_list in list_of_dep_rel_lists:
+                        for dep_rel in dep_rel_list:
+                            graph_record = f'{dep_rel.target_key}\t{dep_rel.target_postag}\t{dep_rel.target_lemma}' \
+                                           f'\t{dep_rel.target_deprel}\t{dep_rel.source_key}\t{dep_rel.source_postag}\t{dep_rel.source_lemma}\n'
+                            output_file.write(graph_record)
+                        output_file.write('\n')
+
+                pbar.update(len(batch_of_sentences))
+
                 file_idx += 1
-                open_new_file = True
