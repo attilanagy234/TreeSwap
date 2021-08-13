@@ -62,11 +62,11 @@ class DependencyParserBase(ABC):
             return int(text) if text.isdigit() else text
 
         def natural_keys(text):
-            '''
+            """
             alist.sort(key=natural_keys) sorts in human order
             http://nedbatchelder.com/blog/200712/human_sorting.html
             (See Toothy's implementation in the comments)
-            '''
+            """
             return [atoi(c) for c in re.split(r'(\d+)', text)]
 
         files_to_read = get_files_in_folder(data_dir)
@@ -93,11 +93,11 @@ class DependencyParserBase(ABC):
         return [DependencyGraphWrapper(x) for x in dep_graphs]
 
     def file_to_serialized_dep_graph_files(self, sentences_path: str, output_dir: str, file_batch_size: int):
-        sentence_generator = self.get_file_line_generator(sentences_path)
+        sentence_generator = self._get_file_line_generator(sentences_path)
         self.sentences_to_serialized_dep_graph_files(sentence_generator, output_dir, file_batch_size)
 
     @staticmethod
-    def get_file_line_generator(file_path: str):
+    def _get_file_line_generator(file_path: str):
         with open(file_path, 'r') as file:
             for line in file:
                 yield line
