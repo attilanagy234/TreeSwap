@@ -11,14 +11,8 @@ log = get_logger(__name__)
 @click.argument('dep_tree_output_path')
 @click.argument('file_batch_size')
 def main(data_input_path, dep_tree_output_path, file_batch_size):
-    sentences = []
-    log.info('Reading sentences...')
-    with open(data_input_path) as file:
-        for line in file:
-            sentences.append(line.strip())
-    log.info(f'Preparing {len(sentences)} sentences for dependency parsing...')
     hun_dep_parser = SpacyDependencyParser(lang='hu')
-    hun_dep_parser.sentences_to_serialized_dep_graph_files(sentences, dep_tree_output_path, file_batch_size)
+    hun_dep_parser.file_to_serialized_dep_graph_files(data_input_path, dep_tree_output_path, int(file_batch_size))
 
 
 if __name__ == '__main__':
