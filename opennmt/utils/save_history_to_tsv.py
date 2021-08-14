@@ -6,6 +6,7 @@ import yaml
 import argparse
 import pandas as pd
 import re
+import git
 
 
 def flatten_dict(d, parent_key='', sep='.'):
@@ -39,6 +40,11 @@ def save_history(yaml_path: str, result_path: str, history_path: str, tsv_path: 
 
     df.loc[df.index[-1], 'date'] = datetime.today()
     df.loc[df.index[-1], 'history_path'] = history_path
+    
+    # get current git commit hash
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    df.loc[df.index[-1], 'git_hash'] = sha
 
     # parse bleu scores
     with open(result_path, 'r') as result_file:
