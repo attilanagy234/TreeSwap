@@ -142,3 +142,4 @@ marian/
 .DS_Store
 mariannmt/
 data/
+src/poetry.lock
