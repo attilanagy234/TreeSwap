@@ -1,7 +1,7 @@
 import click
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
-from hu_nmt.data_augmentator.dependency_parsers.hungarian_dependency_parser import HungarianDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
@@ -17,7 +17,7 @@ def main(eng_data_folder, hun_data_folder, augmentation_output_path, augmented_d
     eng_dep_parser = EnglishDependencyParser()
     eng_wrappers = eng_dep_parser.get_graph_wrappers_from_files(eng_data_folder)
     log.info(f'Number of English sentences used for augmentation: {len(eng_wrappers)}')
-    hun_dep_parser = HungarianDependencyParser()
+    hun_dep_parser = SpacyDependencyParser(lang='hu')
     hun_wrappers = hun_dep_parser.get_graph_wrappers_from_files(hun_data_folder)
     log.info(f'Number of Hungarian sentences used for augmentation: {len(eng_wrappers)}')
     augmentator = SubjectObjectAugmentator(eng_wrappers, hun_wrappers, augmented_data_ratio,

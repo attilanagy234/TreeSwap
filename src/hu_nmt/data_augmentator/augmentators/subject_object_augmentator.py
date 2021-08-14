@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
-from hu_nmt.data_augmentator.utils.translation import TranslationGraph
+from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 log = get_logger(__name__)

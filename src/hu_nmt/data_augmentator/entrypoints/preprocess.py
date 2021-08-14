@@ -7,12 +7,13 @@ log = get_logger(__name__)
 
 
 @click.command()
-@click.argument('eng_input_path')
-@click.argument('hun_input_path')
+@click.argument('src_input_path')
+@click.argument('tgt_input_path')
 @click.argument('config_path')
-@click.argument('output_path')
-def main(eng_input_path, hun_input_path, config_path, output_path):
-    preprocessor = Preprocessor(eng_input_path, hun_input_path, config_path, output_path)
+@click.argument('src_output_path')
+@click.argument('tgt_output_path')
+def main(src_input_path, tgt_input_path, config_path, src_output_path, tgt_output_path):
+    preprocessor = Preprocessor(src_input_path, tgt_input_path, config_path, src_output_path, tgt_output_path)
     preprocessor.preprocess()
 
 

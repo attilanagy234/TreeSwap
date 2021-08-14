@@ -1,7 +1,8 @@
 from typing import List
 
+import hu_core_ud_lg
 import networkx as nx
-import stanza
+import spacy
 
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship
 from hu_nmt.data_augmentator.utils.logger import get_logger
@@ -11,36 +12,43 @@ log = get_logger(__name__)
 ROOT_KEY = 'root_0'
 
 
-class EnglishDependencyParser(DependencyParserBase):
-    def __init__(self):
-        self.nlp_pipeline = stanza.Pipeline(lang='en', processors='tokenize,mwt,pos,lemma,depparse')
-        super().__init__(self.nlp_pipeline, use_multiprocessing=True)
+class SpacyDependencyParser(DependencyParserBase):
+    def __init__(self, lang):
+        if lang == 'hu':
+            self.nlp_pipeline = hu_core_ud_lg.load()
+        elif lang == 'de':
+            self.nlp_pipeline = spacy.load("de_core_news_sm")
+        elif lang == 'fr':
+            self.nlp_pipeline = spacy.load("fr_core_news_sm")
+        else:
+            raise ValueError(f'Language {lang} is not supported by the SpacyDependencyParser.')
+        super().__init__(self.nlp_pipeline, use_multiprocessing=False)
 
     @staticmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
         doc = nlp_pipeline(sent)
+        sents = [s for s in doc.sents]
+        if str(sents[-1]) == '\n':
+            del sents[-1]
         # We most likely will only pass single sentences.
-        if len(doc.sentences) != 1:
-            log.info(f'Sample has multiple sentences: {[s.text for s in doc.sentences]}')
-        sent = doc.sentences[0]
+        if len(sents) > 1:
+            log.info(f'Sample has multiple sentences: {sents}')
+        doc_sent = sents[0]
 
         node_relationship_list = []
-        word_dicts = [word.to_dict() for word in sent.words]
-        for word in sent.words:
-            token = word.to_dict()
-            target_key = f'{token["text"].lower()}_{token["id"]}'
-            target_postag = token['upos']
-            target_lemma = token['lemma']
-            target_deprel = token['deprel']
-            if token['head'] == 0:
+        for token in doc_sent:
+            target_key = f'{token}_{token.i + 1}'
+            target_postag = token.pos_
+            target_lemma = token.lemma_
+            target_deprel = token.dep_
+            if target_deprel == 'ROOT':
                 source_key = ROOT_KEY
                 source_postag = None
                 source_lemma = None
             else:
-                head = word_dicts[int(token['head']) - 1]
-                source_key = f'{head["text"].lower()}_{head["id"]}'
-                source_postag = head['upos']
-                source_lemma = head['lemma']
+                source_key = f'{token.head}_{token.head.i + 1}'
+                source_postag = token.head.pos_
+                source_lemma = token.head.lemma_
 
             node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_deprel, source_key, source_postag, source_lemma))
 
@@ -54,8 +62,6 @@ class EnglishDependencyParser(DependencyParserBase):
             A directed (networkx) graph representation of the dependency tree
         """
         dep_graph = nx.DiGraph()
-        # Add ROOT node
-        dep_graph.add_node(ROOT_KEY)
         for node_rel in self.sentence_to_node_relationship_list(self.nlp_pipeline, sent):
             dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
             dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
@@ -68,4 +74,4 @@ class EnglishDependencyParser(DependencyParserBase):
         Args:
             pair: tuple[pipeline, sentence]
         """
-        return EnglishDependencyParser.sentence_to_node_relationship_list(pair[0], pair[1])
+        return SpacyDependencyParser.sentence_to_node_relationship_list(pair[0], pair[1])
