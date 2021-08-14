@@ -71,9 +71,9 @@ cd hu_nmt/src
 ```
 
 ## Training models
-To train a model you need to specify a config file like [this one](https://github.com/attilanagy234/hu-nmt/blob/experiment-tracking/opennmt/experiments/runs/huen/config.yaml) where you specify all the model parameters and data paths based on the OpenNMT documentation ([build vocab](https://opennmt.net/OpenNMT-py/options/build_vocab.html), [train](https://opennmt.net/OpenNMT-py/options/train.html), [translate](https://opennmt.net/OpenNMT-py/options/translate.html)), and also specify additional parameters for our [scripts](https://github.com/attilanagy234/hu-nmt/tree/experiment-tracking/opennmt/bash_scripts).
+To train a model you need to specify a config file like [this one](hhttps://github.com/attilanagy234/hu-nmt/blob/main/opennmt/experiments/runs/huen/config.yaml) where you specify all the model parameters and data paths based on the OpenNMT documentation ([build vocab](https://opennmt.net/OpenNMT-py/options/build_vocab.html), [train](https://opennmt.net/OpenNMT-py/options/train.html), [translate](https://opennmt.net/OpenNMT-py/options/translate.html)), and also specify additional parameters for our [scripts](https://github.com/attilanagy234/hu-nmt/tree/main/opennmt/bash_scripts).
 
-After you have set up your config.yaml file you should build your vocabularies (you only have to do this once). After the vocabs have been created you can call the [full_train.sh]() script which will train your model based on your config, translate your validation set and evaluate BLEU. It will also track your execution based on the next section.
+After you have set up your config.yaml file you should build your vocabularies (you only have to do this once). After the vocabs have been created you can call the [full_train.sh](https://github.com/attilanagy234/hu-nmt/blob/main/opennmt/bash_scripts/full_train.sh) script which will train your model based on your config, translate your validation set and evaluate BLEU. It will also track your execution based on the next section.
 
 ```bash
 # create directory for new experiment
