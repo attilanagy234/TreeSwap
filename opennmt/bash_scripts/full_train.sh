@@ -7,6 +7,7 @@ $BASEDIR/4_translate.sh
 $BASEDIR/5_evaluate.sh
 $BASEDIR/6_decode_valid.sh
 $BASEDIR/7_pair.sh
+$BASEDIR/8_save_history.sh
 
 HISTORY_DIR=../../history
 SAVE_DIR=$HISTORY_DIR/$(date '+%Y-%m-%d_%H:%M:%S')
