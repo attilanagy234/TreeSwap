@@ -100,7 +100,7 @@ class DependencyParserBase(ABC):
     def _get_file_line_generator(file_path: str):
         with open(file_path, 'r') as file:
             for line in file:
-                yield line
+                yield line.strip()
 
     def sentences_to_serialized_dep_graph_files(self, sentences_iter: Iterator[str], output_dir: str, file_batch_size: int):
         """

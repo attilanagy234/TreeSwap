@@ -27,17 +27,16 @@ class SpacyDependencyParser(DependencyParserBase):
     @staticmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
         doc = nlp_pipeline(sent)
+        sents = [s for s in doc.sents]
+        if str(sents[-1]) == '\n':
+            del sents[-1]
         # We most likely will only pass single sentences.
-        sent = next(doc.sents)
-
-        try:
-            next_part = next(doc.sents)
-            log.info(f'Sample has multiple sentences: {[sent] + [next_part] + [s for s in doc.sents]}')
-        except StopIteration:
-            pass
+        if len(sents) > 1:
+            log.info(f'Sample has multiple sentences: {sents}')
+        doc_sent = sents[0]
 
         node_relationship_list = []
-        for token in sent:
+        for token in doc_sent:
             target_key = f'{token}_{token.i + 1}'
             target_postag = token.pos_
             target_lemma = token.lemma_
