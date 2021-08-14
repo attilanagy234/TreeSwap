@@ -1,0 +1,5 @@
+preprocessor:
+  total_wordcount_min: 0
+  total_wordcount_max: 32
+  wordcount_diff: 75
+  wordcount_ratio_threshold: 1.2
