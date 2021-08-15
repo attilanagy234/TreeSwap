@@ -1,6 +1,6 @@
 from itertools import combinations
 from operator import itemgetter
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 import numpy as np
 from tqdm import tqdm
@@ -16,18 +16,28 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, eng_graphs: List[DependencyGraphWrapper], hun_graphs: List[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str, output_format: str):
+    def __init__(self, eng_graphs: Optional[List[DependencyGraphWrapper]], hun_graphs: Optional[List[DependencyGraphWrapper]],
+                 augmented_data_ratio: float, random_seed: int, output_path: str, output_format: str):
         super().__init__()
-        if len(eng_graphs) != len(hun_graphs):
+        if eng_graphs and hun_graphs and len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
-        self._num_augmented_sentences_to_generate_per_method = int(len(eng_graphs) * float(augmented_data_ratio))
-        log.info(f'number of desired sentences/method: {self._num_augmented_sentences_to_generate_per_method}')
+
+        self.augmented_data_ratio = augmented_data_ratio
+        if eng_graphs is None and hun_graphs is None:
+            self.late_setup = True
+            self._num_augmented_sentences_to_generate_per_method = -1
+        else:
+            self.late_setup = False
+            self._num_augmented_sentences_to_generate_per_method = int(len(eng_graphs) * float(self.augmented_data_ratio))
+            log.info(f'number of desired sentences/method: {self._num_augmented_sentences_to_generate_per_method}')
+            self._eng_graphs: List[DependencyGraphWrapper] = eng_graphs
+            self._hun_graphs: List[DependencyGraphWrapper] = hun_graphs
+
         np.random.seed = random_seed
         self._output_path = output_path
         self.output_format = output_format
         self.error_cnt = 0
-        self._eng_graphs: List[DependencyGraphWrapper] = eng_graphs
-        self._hun_graphs: List[DependencyGraphWrapper] = hun_graphs
+
         self._augmentation_candidate_translations: List[TranslationGraph] = []
         self._augmented_sentence_pairs = {
             'obj_swapping_same_predicate_lemma': {
@@ -69,9 +79,14 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return lemmas_to_graphs
 
     def augment(self):
-        log.info('Finding augmentable sentence pairs...')
-        self.find_augmentable_candidates()
-        log.info(f'Found {len(self._augmentation_candidate_translations)} candidate sentence pairs')
+        if self.late_setup:
+            self._num_augmented_sentences_to_generate_per_method = int(len(self._augmentation_candidate_translations) * float(self.augmented_data_ratio))
+        else:
+            log.info('Finding augmentable sentence pairs...')
+            self._augmentation_candidate_translations = self.find_augmentable_candidates(self._hun_graphs, self._eng_graphs)
+
+        log.info(f'Working with {len(self._augmentation_candidate_translations)} candidate sentence pairs')
+        log.info(f'Going to generate {self._num_augmented_sentences_to_generate_per_method} augmented sentences per method')
         lemmas_to_graphs = self.group_candidates_by_predicate_lemmas()
 
         self.augment_subtree_swapping_with_same_predicate_lemmas(lemmas_to_graphs)
@@ -88,7 +103,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         sampled_index_pairs: set[Tuple[int, int]] = set()
         while len(sampled_index_pairs) < sample_count:
             random_index_pair = np.random.choice(len(items), 2, replace=False)
-            sampled_index_pairs.add(random_index_pair)
+            sampled_index_pairs.add(tuple(random_index_pair))
 
         return [(items[x], items[y]) for x, y in sampled_index_pairs]
 
@@ -276,12 +291,20 @@ class SubjectObjectAugmentator(AugmentatorBase):
         ids = [int(x.split('_')[1]) for x in node_ids]
         return min(ids), max(ids)
 
-    def find_augmentable_candidates(self):
-        for hun_graph, eng_graph in tqdm(zip(self._hun_graphs, self._eng_graphs)):
-            if self.is_eligible_for_augmentation(hun_graph, eng_graph):
-                self._augmentation_candidate_translations.append(TranslationGraph(hun_graph, eng_graph))
+    @staticmethod
+    def find_augmentable_candidates(hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper]) -> List[TranslationGraph]:
+        augmentation_candidate_translations = []
+        for hun_graph, eng_graph in tqdm(zip(hun_graphs, eng_graphs)):
+            if SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph):
+                augmentation_candidate_translations.append(TranslationGraph(hun_graph, eng_graph))
 
-    def is_eligible_for_augmentation(self, hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
+        return augmentation_candidate_translations
+
+    def add_augmentable_candidates(self, hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper]):
+        self._augmentation_candidate_translations = self.find_augmentable_candidates(hun_graphs, eng_graphs)
+
+    @staticmethod
+    def is_eligible_for_augmentation(hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
         """
         Tests if a sentence (graph) pair is eligible for augmentation
         """
@@ -310,9 +333,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         eng_obj_subgraph = eng_graph.get_subtree_node_ids(object_eng)
 
         # Object subtree is consecutive
-        if not self.is_consecutive_subsequence(hun_obj_subgraph):
+        if not SubjectObjectAugmentator.is_consecutive_subsequence(hun_obj_subgraph):
             return False
-        if not self.is_consecutive_subsequence(eng_obj_subgraph):
+        if not SubjectObjectAugmentator.is_consecutive_subsequence(eng_obj_subgraph):
             return False
         return True
 
@@ -334,7 +357,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return check([int(x.split('_')[-1]) for x in node_ids])
 
     def dump_augmented_sentences_to_files(self):
-        log.info(f'Saving augmented sentences at {self._output_path}')
+        log.info(f'Saving augmented sentences at {self._output_path} with output format {self.output_format}')
         augmentation_types = self._augmented_sentence_pairs.keys()
         if self.output_format == 'tsv':
             for augmentation_type in augmentation_types:
@@ -347,7 +370,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         else:
             for augmentation_type in augmentation_types:
                 for lang in ['hun', 'eng']:
-                    with open(f'{self._output_path}/augmentation_type.{lang[:2]}') as f:
+                    with open(f'{self._output_path}/{augmentation_type}.{lang[:2]}', 'w+') as f:
                         for sent in self._augmented_sentence_pairs[augmentation_type][lang]:
                             f.write(sent)
                             f.write('\n')

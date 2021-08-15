@@ -45,7 +45,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         for value, hun_g, eng_g in zip(assert_values, hun_graph_wrappers, eng_graph_wrappers):
             self.assertEqual(value, augmentator.is_eligible_for_augmentation(hun_g, eng_g))
 
-        augmentator.find_augmentable_candidates()
+        augmentator._augmentation_candidate_translations = augmentator.find_augmentable_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(2, len(augmentator._augmentation_candidate_translations))
 
     def test_group_candidates_by_predicate_lemmas(self):
@@ -61,7 +61,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, '', 'tsv')
-        augmentator.find_augmentable_candidates()
+        augmentator._augmentation_candidate_translations = augmentator.find_augmentable_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(4, len(augmentator._augmentation_candidate_translations))
 
         # action
@@ -137,7 +137,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 2, 123, '', 'tsv')
-        augmentator.find_augmentable_candidates()
+        augmentator._augmentation_candidate_translations = augmentator.find_augmentable_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(4, len(augmentator._augmentation_candidate_translations))
 
         # action
@@ -164,7 +164,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, '', 'tsv')
-        augmentator.find_augmentable_candidates()
+        augmentator._augmentation_candidate_translations = augmentator.find_augmentable_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(4, len(augmentator._augmentation_candidate_translations))
 
         translation_sample = [tuple([TranslationGraph(hun_graph_wrappers[i], eng_graph_wrappers[i]) for i in range(2)])]
