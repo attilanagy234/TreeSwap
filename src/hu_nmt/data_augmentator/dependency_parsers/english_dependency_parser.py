@@ -46,7 +46,7 @@ class EnglishDependencyParser(DependencyParserBase):
 
         return node_relationship_list
 
-    def sentence_to_dep_parse_tree(self, sent):
+    def sentence_to_dep_parse_tree(self, sent) -> nx.DiGraph:
         """
         Args:
             sent: space separated string of the input sentence
@@ -63,7 +63,7 @@ class EnglishDependencyParser(DependencyParserBase):
         return dep_graph
 
     @staticmethod
-    def _sentence_pipeline_pair_to_node_relationship_list(pair):
+    def _sentence_pipeline_pair_to_node_relationship_list(pair) -> List[NodeRelationship]:
         """
         Args:
             pair: tuple[pipeline, sentence]
