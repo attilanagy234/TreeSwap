@@ -71,7 +71,7 @@ class DependencyParserBase(ABC):
 
         files_to_read = get_files_in_folder(data_dir)
         files_to_read.sort(key=natural_keys)
-        for file in tqdm(files_to_read):
+        for file in files_to_read:
             dep_graphs = []
             with open(f'{data_dir}/{file}') as f:
                 graph = nx.DiGraph()

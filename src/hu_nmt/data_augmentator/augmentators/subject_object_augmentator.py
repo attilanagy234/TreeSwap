@@ -83,7 +83,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
             self._num_augmented_sentences_to_generate_per_method = int(len(self._augmentation_candidate_translations) * float(self.augmented_data_ratio))
         else:
             log.info('Finding augmentable sentence pairs...')
-            self._augmentation_candidate_translations = self.find_augmentable_candidates(self._hun_graphs, self._eng_graphs)
+            self._augmentation_candidate_translations = self.find_augmentable_candidates(self._hun_graphs, self._eng_graphs, with_progress_bar=True)
 
         log.info(f'Working with {len(self._augmentation_candidate_translations)} candidate sentence pairs')
         log.info(f'Going to generate {self._num_augmented_sentences_to_generate_per_method} augmented sentences per method')
@@ -292,16 +292,22 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return min(ids), max(ids)
 
     @staticmethod
-    def find_augmentable_candidates(hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper]) -> List[TranslationGraph]:
+    def find_augmentable_candidates(hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper], with_progress_bar: bool = False) -> List[TranslationGraph]:
         augmentation_candidate_translations = []
-        for hun_graph, eng_graph in tqdm(zip(hun_graphs, eng_graphs)):
+
+        if with_progress_bar:
+            iterable = tqdm(zip(hun_graphs, eng_graphs))
+        else:
+            iterable = zip(hun_graphs, eng_graphs)
+
+        for hun_graph, eng_graph in iterable:
             if SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph):
                 augmentation_candidate_translations.append(TranslationGraph(hun_graph, eng_graph))
 
         return augmentation_candidate_translations
 
     def add_augmentable_candidates(self, hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper]):
-        self._augmentation_candidate_translations = self.find_augmentable_candidates(hun_graphs, eng_graphs)
+        self._augmentation_candidate_translations += self.find_augmentable_candidates(hun_graphs, eng_graphs)
 
     @staticmethod
     def is_eligible_for_augmentation(hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
