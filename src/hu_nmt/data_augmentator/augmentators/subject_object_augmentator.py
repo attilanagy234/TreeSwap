@@ -26,12 +26,13 @@ class SubjectObjectAugmentator(AugmentatorBase):
         if eng_graphs is None and hun_graphs is None:
             self.late_setup = True
             self._num_augmented_sentences_to_generate_per_method = -1
+            self._pre_filter_sentence_count = 0
         else:
             self.late_setup = False
-            self._num_augmented_sentences_to_generate_per_method = int(len(eng_graphs) * float(self.augmented_data_ratio))
-            log.info(f'number of desired sentences/method: {self._num_augmented_sentences_to_generate_per_method}')
             self._eng_graphs: List[DependencyGraphWrapper] = eng_graphs
             self._hun_graphs: List[DependencyGraphWrapper] = hun_graphs
+            self._pre_filter_sentence_count = len(self._eng_graphs)
+            self._num_augmented_sentences_to_generate_per_method = int(self._pre_filter_sentence_count * float(self.augmented_data_ratio))
 
         np.random.seed = random_seed
         self._output_path = output_path
@@ -80,7 +81,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
     def augment(self):
         if self.late_setup:
-            self._num_augmented_sentences_to_generate_per_method = int(len(self._augmentation_candidate_translations) * float(self.augmented_data_ratio))
+            self._num_augmented_sentences_to_generate_per_method = int(self._pre_filter_sentence_count * float(self.augmented_data_ratio))
         else:
             log.info('Finding augmentable sentence pairs...')
             self._augmentation_candidate_translations = self.find_augmentable_candidates(self._hun_graphs, self._eng_graphs, with_progress_bar=True)
@@ -132,7 +133,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
                 self._augmented_sentence_pairs['predicate_swapping']['eng'].extend(eng_sents)
             except Exception as e:
                 self.error_cnt += 1
-                log.debug(f'Cannot process sentence: {e}')
+                log.exception('Cannot process sentence')
         log.info(f'Could not perform {self.error_cnt} augmentations so far')
 
     def augment_subtree_swapping(self):
@@ -164,7 +165,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
                 self._augmented_sentence_pairs[key]['eng'].extend(eng_sents)
             except Exception as e:
                 self.error_cnt += 1
-                log.debug(f'Cannot process sentence: {e}')
+                log.exception(f'Cannot process sentence')
         log.info(f'Could not perform {self.error_cnt} augmentations so far')
 
     def augment_subtree_swapping_with_same_predicate_lemmas(self, lemmas_to_graphs: Dict[Tuple[str, str], List[TranslationGraph]]):
@@ -235,8 +236,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         predicate_1 = sentence_graph_1.get_edges_with_property('dep', 'nsubj')[0].source_node
         predicate_2 = sentence_graph_2.get_edges_with_property('dep', 'nsubj')[0].source_node
 
-        predicate_1_word, predicate_1_idx = predicate_1.split('_')
-        predicate_2_word, predicate_2_idx = predicate_2.split('_')
+        predicate_1_word, _, predicate_1_idx = predicate_1.rpartition('_')
+        predicate_2_word, _, predicate_2_idx = predicate_2.rpartition('_')
 
         # Swap predicates
         original_sentence_1[int(predicate_1_idx)] = predicate_2_word
@@ -248,7 +249,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         original_sentence_words = self.reconstruct_sentence_from_node_ids(sentence_graph.graph.nodes)
         subgraph_words_with_ids = self.get_subgraph_from_edge_type(sentence_graph, subtree_type)
         subgraph_offsets = self.get_offsets_from_node_ids(subgraph_words_with_ids)
-        subgraph_words = [x.split('_')[0] for x in subgraph_words_with_ids]
+        subgraph_words = [x.rpartition('_')[0] for x in subgraph_words_with_ids]
 
         return original_sentence_words, subgraph_offsets, subgraph_words
 
@@ -279,8 +280,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         edges_with_type = graph.get_edges_with_property('dep', edge_type)[0]
         top_node_of_tree = edges_with_type.target_node
         node_ids = graph.get_subtree_node_ids(top_node_of_tree)
-        splitted_node_ids = [x.split('_') for x in node_ids]
-        splitted_node_ids = [(x[0], int(x[1])) for x in splitted_node_ids]
+        splitted_node_ids = [x.rpartition('_') for x in node_ids]
+        splitted_node_ids = [(x[0], int(x[2])) for x in splitted_node_ids]
         return [f'{y[0]}_{y[1]}' for y in sorted(splitted_node_ids, key=itemgetter(1))]
 
     @staticmethod
@@ -288,7 +289,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         """
         Returns the smallest and largest index from the list of node ids
         """
-        ids = [int(x.split('_')[1]) for x in node_ids]
+        ids = [int(x.rpartition('_')[-1]) for x in node_ids]
         return min(ids), max(ids)
 
     @staticmethod
@@ -307,6 +308,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return augmentation_candidate_translations
 
     def add_augmentable_candidates(self, hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper]):
+        self._pre_filter_sentence_count += len(eng_graphs)
         self._augmentation_candidate_translations += self.find_augmentable_candidates(hun_graphs, eng_graphs)
 
     @staticmethod
@@ -360,7 +362,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
             Boolean value whether the words corresponding to nodes
              are a consecutive subsequence in the original sentence
         """
-        return check([int(x.split('_')[-1]) for x in node_ids])
+        return check([int(x.rpartition('_')[-1]) for x in node_ids])
 
     def dump_augmented_sentences_to_files(self):
         log.info(f'Saving augmented sentences at {self._output_path} with output format {self.output_format}')
