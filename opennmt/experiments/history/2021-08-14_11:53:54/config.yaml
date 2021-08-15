@@ -3,8 +3,8 @@ seed: 1234
 # PREPROCESS
 
 # Additional paths
-sp_models_path: /home1/hu-nmt/hu-nmt/opennmt/experiments/sp_models
-utils_path: /home1/hu-nmt/hu-nmt/opennmt/utils
+sp_models_path: ../../sp_models
+utils_path: ../../../utils
 
 translate_model: run/model.pt
 
@@ -13,8 +13,8 @@ pair_n_lines: 50
 pair_output_path: run/pair_out.txt
 
 # Vocab
-save_data: /home1/hu-nmt/hu-nmt/opennmt/experiments/vocabs
-src_vocab: /home1/hu-nmt/hu-nmt/opennmt/experiments/vocabs/vocab.huen
+save_data: ../../experiments/vocabs
+src_vocab: ../../experiments/vocabs/vocab.huen
 share_vocab: true
 vocab_size_multiple: 1
 src_words_min_frequency: 0
@@ -23,17 +23,17 @@ tgt_words_min_frequency: 0
 # Corpus opts:
 data:
     hunglish:
-        path_src: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-32-simple/hunglish2-train.hu
-        path_tgt: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-32-simple/hunglish2-train.en
+        path_src: ../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
+        path_tgt: ../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
         transforms: [sentencepiece]
         weight: 1
     valid:
-        path_src: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-32-simple/hunglish2-valid.hu
-        path_tgt: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-32-simple/hunglish2-valid.en
+        path_src: ../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.hu
+        path_tgt: ../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.en
         transforms: [sentencepiece]
 
 #### Subword
-src_subword_model: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-32-simple/spm_huen.model
+src_subword_model: ../../../../data/Hunglish2/combined-32-simple/spm_huen.model
 src_subword_nbest: 1
 src_subword_alpha: 0.0
 tgt_subword_nbest: 1

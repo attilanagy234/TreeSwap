@@ -69,3 +69,47 @@ To precompute dependency graphs and serialize them to TSVs:
 cd hu_nmt/src
 ./precompute_english_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
 ```
+
+## Training models
+To train a model you need to specify a config file like [this one](hhttps://github.com/attilanagy234/hu-nmt/blob/main/opennmt/experiments/runs/huen/config.yaml) where you specify all the model parameters and data paths based on the OpenNMT documentation ([build vocab](https://opennmt.net/OpenNMT-py/options/build_vocab.html), [train](https://opennmt.net/OpenNMT-py/options/train.html), [translate](https://opennmt.net/OpenNMT-py/options/translate.html)), and also specify additional parameters for our [scripts](https://github.com/attilanagy234/hu-nmt/tree/main/opennmt/bash_scripts).
+
+After you have set up your config.yaml file you should build your vocabularies (you only have to do this once). After the vocabs have been created you can call the [full_train.sh](https://github.com/attilanagy234/hu-nmt/blob/main/opennmt/bash_scripts/full_train.sh) script which will train your model based on your config, translate your validation set and evaluate BLEU. It will also track your execution based on the next section.
+
+```bash
+# create directory for new experiment
+cd opennmt/experiments/runs
+mkdir new_experiment
+cd new_experiment
+
+# create config file
+vim config.yaml
+
+# build vocabulary
+../../../bash_scripts/1_build_vocab.sh
+
+# run training with evaluation and experiment tracking
+../../../bash_scripts/full_train.sh
+```
+
+You can also run the model training and evaluation steps separately with the scripts found in the `opennmt/bash_scripts` directory.
+
+## Experiment tracking
+When you run a full training or just the `8_save_history.sh` script your experiment will be tracked.
+
+It saves the following files to the history directory in folder specified by the datetime you have ran your experiment:
+- config file
+- final result
+- final translation of the validation set
+- tensorboard logs
+- translation pairs
+- best model
+
+It saves the following in the `history.tsv` file in the history directory:
+- all the parameters specified in the config file (if there are nested fields they are represented as `a.b`)
+- `date` - when the experiment was ran
+- `history_path` - corresponding history directory
+- `bleu_score` - overall BLEU score
+- `bleu_score_n` - ngram BLEU score
+- `git_hash` - hash of the git commit that was used
+
+If there is a new parameter added to the config the previous runs will have `None` as a value for that parameter.
