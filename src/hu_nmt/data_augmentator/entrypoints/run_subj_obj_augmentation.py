@@ -12,7 +12,7 @@ log = get_logger(__name__)
 @click.argument('hun_data_folder')
 @click.argument('augmentation_output_path')
 @click.argument('augmented_data_ratio')
-@click.argument('output_format', default='tsv', help='Supported output formats: tsv (default), basic')
+@click.option('--output_format', default='tsv', help='Supported output formats: tsv (default), basic')
 def main(eng_data_folder, hun_data_folder, augmentation_output_path, augmented_data_ratio, output_format):
     eng_dep_parser = EnglishDependencyParser()
     eng_wrappers = eng_dep_parser.get_graph_wrappers_from_files(eng_data_folder)
