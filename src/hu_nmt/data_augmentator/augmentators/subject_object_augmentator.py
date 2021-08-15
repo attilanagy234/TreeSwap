@@ -1,6 +1,6 @@
 from itertools import combinations
 from operator import itemgetter
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import numpy as np
 from tqdm import tqdm
@@ -16,7 +16,7 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, eng_graphs: list[DependencyGraphWrapper], hun_graphs: list[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str, output_format: str):
+    def __init__(self, eng_graphs: List[DependencyGraphWrapper], hun_graphs: List[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str, output_format: str):
         super().__init__()
         if len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
@@ -26,9 +26,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self._output_path = output_path
         self.output_format = output_format
         self.error_cnt = 0
-        self._eng_graphs: list[DependencyGraphWrapper] = eng_graphs
-        self._hun_graphs: list[DependencyGraphWrapper] = hun_graphs
-        self._augmentation_candidate_translations: list[TranslationGraph] = []
+        self._eng_graphs: List[DependencyGraphWrapper] = eng_graphs
+        self._hun_graphs: List[DependencyGraphWrapper] = hun_graphs
+        self._augmentation_candidate_translations: List[TranslationGraph] = []
         self._augmented_sentence_pairs = {
             'obj_swapping_same_predicate_lemma': {
                 'hun': [],
@@ -52,7 +52,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
             }
         }
 
-    def group_candidates_by_predicate_lemmas(self) -> dict[tuple[str, str], list[TranslationGraph]]:
+    def group_candidates_by_predicate_lemmas(self) -> Dict[Tuple[str, str], List[TranslationGraph]]:
         lemmas_to_graphs = {}  # tuple(hun_lemma, eng_lemma) --> tuple(hun_graph, eng graph)
 
         for translation in self._augmentation_candidate_translations:
@@ -84,8 +84,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self.dump_augmented_sentences_to_files()
 
     @staticmethod
-    def sample_item_pairs(items: list, sample_count: int):
-        sampled_index_pairs: set[tuple[int, int]] = set()
+    def sample_item_pairs(items: List, sample_count: int):
+        sampled_index_pairs: set[Tuple[int, int]] = set()
         while len(sampled_index_pairs) < sample_count:
             random_index_pair = np.random.choice(len(items), 2, replace=False)
             sampled_index_pairs.add(random_index_pair)
@@ -130,7 +130,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self.swap_subtrees_among_combinations(sampled_translation_pairs, same_predicate_lemma=False)
         log.info('Finished subtree swapping on all permutations')
 
-    def swap_subtrees_among_combinations(self, translation_pairs: list[tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
+    def swap_subtrees_among_combinations(self, translation_pairs: List[Tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
         for translation_pair in tqdm(translation_pairs):
             try:
                 hun_sents, eng_sents = self.augment_pair(translation_pair, 'obj')
@@ -152,7 +152,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
                 log.debug(f'Cannot process sentence: {e}')
         log.info(f'Could not perform {self.error_cnt} augmentations so far')
 
-    def augment_subtree_swapping_with_same_predicate_lemmas(self, lemmas_to_graphs: dict[tuple[str, str], list[TranslationGraph]]):
+    def augment_subtree_swapping_with_same_predicate_lemmas(self, lemmas_to_graphs: Dict[Tuple[str, str], List[TranslationGraph]]):
         """
         Swaps Obj and Nsubj subtrees within the combinations of sentences
         that have the same same predicate lemma
@@ -177,7 +177,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self.swap_subtrees_among_combinations(translation_combinations, same_predicate_lemma=True)
         log.info('Finished subtree swapping with same predicate lemmas')
 
-    def augment_pair(self, translation_pair: tuple[TranslationGraph, TranslationGraph], augmentation_type) -> tuple[list[str], list[str]]:
+    def augment_pair(self, translation_pair: Tuple[TranslationGraph, TranslationGraph], augmentation_type) -> Tuple[List[str], List[str]]:
         """
         Swaps the subtrees of the sentences
         Params:
