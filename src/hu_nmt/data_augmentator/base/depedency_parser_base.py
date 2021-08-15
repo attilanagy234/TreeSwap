@@ -118,7 +118,7 @@ class DependencyParserBase(ABC):
             while have_more_sentences_to_process:
 
                 # read one batch
-                log.info('Reading one batch')
+                log.info(f'Reading batch {file_idx}')
                 try:
                     for _ in range(file_batch_size):
                         batch_of_sentences.append((self.nlp_pipeline, next(sentences_iter)))

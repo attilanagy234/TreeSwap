@@ -1,6 +1,6 @@
 from itertools import combinations
 from operator import itemgetter
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 from tqdm import tqdm
@@ -16,7 +16,7 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, eng_graphs: list[DependencyGraphWrapper], hun_graphs: list[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str, output_format: bool):
+    def __init__(self, eng_graphs: list[DependencyGraphWrapper], hun_graphs: list[DependencyGraphWrapper], augmented_data_ratio: float, random_seed: int, output_path: str, output_format: str):
         super().__init__()
         if len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
@@ -213,7 +213,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return hun_augmented_sentences, eng_augmented_sentences
 
-    def swap_predicates(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper) -> List[str, str]:
+    def swap_predicates(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper) -> List[str]:
         original_sentence_1 = self.reconstruct_sentence_from_node_ids(sentence_graph_1.graph.nodes)
         original_sentence_2 = self.reconstruct_sentence_from_node_ids(sentence_graph_2.graph.nodes)
         # Will have one edge only due to filtering. source node of nsubj edge --> predicate of sentence
@@ -229,7 +229,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return [' '.join(original_sentence_1[1:]), ' '.join(original_sentence_2[1:])]
 
-    def build_original_sentence_with_subgraph(self, sentence_graph: DependencyGraphWrapper, subtree_type: str) -> tuple[list[str], tuple[int, int], list[str]]:
+    def build_original_sentence_with_subgraph(self, sentence_graph: DependencyGraphWrapper, subtree_type: str) -> Tuple[List[str], Tuple[int, int], List[str]]:
         original_sentence_words = self.reconstruct_sentence_from_node_ids(sentence_graph.graph.nodes)
         subgraph_words_with_ids = self.get_subgraph_from_edge_type(sentence_graph, subtree_type)
         subgraph_offsets = self.get_offsets_from_node_ids(subgraph_words_with_ids)
@@ -238,7 +238,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return original_sentence_words, subgraph_offsets, subgraph_words
 
     @staticmethod
-    def swap_subtree(original_sentence: list[str], subgraph_offsets: tuple[int, int], subgraph_to_insert: list[str]) -> List[str]:
+    def swap_subtree(original_sentence: List[str], subgraph_offsets: Tuple[int, int], subgraph_to_insert: List[str]) -> List[str]:
         subtree_indices = range(subgraph_offsets[0], subgraph_offsets[1] + 1)
         # remove subtree from sent1
         original_sentence = [i for j, i in enumerate(original_sentence) if j not in subtree_indices]
@@ -248,7 +248,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         return original_sentence
 
-    def swap_subtrees(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper, subtree_type: str) -> List[str, str]:
+    def swap_subtrees(self, sentence_graph_1: DependencyGraphWrapper, sentence_graph_2: DependencyGraphWrapper, subtree_type: str) -> List[str]:
         original_sentence_1, subgraph_offsets_1, subgraph_1 = self.build_original_sentence_with_subgraph(sentence_graph_1, subtree_type)
         original_sentence_2, subgraph_offsets_2, subgraph_2 = self.build_original_sentence_with_subgraph(sentence_graph_2, subtree_type)
 
@@ -269,7 +269,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return [f'{y[0]}_{y[1]}' for y in sorted(splitted_node_ids, key=itemgetter(1))]
 
     @staticmethod
-    def get_offsets_from_node_ids(node_ids: list[str]) -> tuple[int, int]:
+    def get_offsets_from_node_ids(node_ids: List[str]) -> Tuple[int, int]:
         """
         Returns the smallest and largest index from the list of node ids
         """
@@ -317,7 +317,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return True
 
     @staticmethod
-    def is_consecutive_subsequence(node_ids: list[str]) -> bool:
+    def is_consecutive_subsequence(node_ids: List[str]) -> bool:
         def check(lst):
             lst = sorted(lst)
             if lst:
