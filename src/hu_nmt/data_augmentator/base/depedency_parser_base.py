@@ -3,7 +3,7 @@ import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import floor
-from typing import List, Iterator
+from typing import List, Iterator, Generator
 import multiprocessing as mp
 
 import networkx as nx
@@ -57,7 +57,7 @@ class DependencyParserBase(ABC):
         # return DependencyParserBase.sentence_to_node_relationship_list(pair[0], pair[1])
 
     @staticmethod
-    def read_parsed_dep_trees_from_files(data_dir: str) -> List[nx.DiGraph]:
+    def read_parsed_dep_trees_from_files(data_dir: str, per_file: bool = False) -> Generator[nx.DiGraph, None, None]:
         def atoi(text):
             return int(text) if text.isdigit() else text
 
@@ -71,13 +71,16 @@ class DependencyParserBase(ABC):
 
         files_to_read = get_files_in_folder(data_dir)
         files_to_read.sort(key=natural_keys)
-        dep_graphs = []
-        for file in tqdm(files_to_read):
+        for file in files_to_read:
+            dep_graphs = []
             with open(f'{data_dir}/{file}') as f:
                 graph = nx.DiGraph()
                 for line in f:
                     if line == '\n':
-                        dep_graphs.append(graph)
+                        if per_file:
+                            dep_graphs.append(graph)
+                        else:
+                            yield graph
                         graph = nx.DiGraph()
                     else:
                         target_key, target_postag, target_lemma, target_deprel, \
@@ -86,7 +89,8 @@ class DependencyParserBase(ABC):
                         graph.add_node(source_key, postag=source_postag, lemma=source_lemma)
                         graph.add_node(target_key, postag=target_postag, lemma=target_lemma)
                         graph.add_edge(source_key, target_key, dep=target_deprel)
-        return dep_graphs
+                if per_file:
+                    yield dep_graphs
 
     def get_graph_wrappers_from_files(self, data_folder) -> List[DependencyGraphWrapper]:
         dep_graphs = self.read_parsed_dep_trees_from_files(data_folder)
