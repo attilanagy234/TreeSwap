@@ -143,3 +143,4 @@ marian/
 mariannmt/
 data/
 src/poetry.lock
+opennmt/experiments/history/*/

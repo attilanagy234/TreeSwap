@@ -1,6 +1,7 @@
 seed: 1234
 
-# PREPROCESS
+#------------------------------------------------------------------------------
+# Metadata
 
 _augmentation_description: "Fixed the sampling"
 
@@ -22,40 +23,45 @@ sp_models_path: ../../../../../data/Hunglish2/combined-32-simple/sp_models
 # Where the utility scripts are located
 utils_path: ../../../utils
 
+# Model used for translation
 translate_model: run/model.pt
 
-# pair options
+# Pair options
 pair_n_lines: 50
 pair_output_path: run/pair_out.txt
 
+#------------------------------------------------------------------------------
+# Data and vocab config
+
 # Vocab
-save_data: ../../experiments/vocabs
-src_vocab: ../../experiments/vocabs/vocab.huen
+save_data: ../../../../../data/Hunglish2/combined-32-simple/vocabs
+src_vocab: ../../../../../data/Hunglish2/combined-32-simple/vocabs/vocab.huen
 share_vocab: true
 vocab_size_multiple: 1
 src_words_min_frequency: 0
 tgt_words_min_frequency: 0
 
-# Corpus opts:
+# Corpus opts
 data:
     hunglish:
-        path_src: ../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
-        path_tgt: ../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
         transforms: [sentencepiece]
         weight: 1
     valid:
-        path_src: ../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.hu
-        path_tgt: ../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.en
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.en
         transforms: [sentencepiece]
 
-#### Subword
-src_subword_model: ../../../../data/Hunglish2/combined-32-simple/spm_huen.model
+# Sentencepiece opts
+src_subword_model: ../../../../../data/Hunglish2/combined-32-simple/sp_models/spm_huen.model
 src_subword_nbest: 1
 src_subword_alpha: 0.0
 tgt_subword_nbest: 1
 tgt_subword_alpha: 0.0
 
-# TRAIN
+#------------------------------------------------------------------------------
+# Train config
 
 # Train on a single GPU
 world_size: 1
@@ -115,3 +121,5 @@ position_encoding: true  # diff
 log_file: run/output.logs
 tensorboard: true
 tensorboard_log_dir: run/tensorboard
+
+#------------------------------------------------------------------------------

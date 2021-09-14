@@ -1,4 +1,4 @@
-HISTORY_DIR=../../history
+HISTORY_DIR=$(grep 'history_path:' config.yaml | awk '{ print $2 }')
 TSV_PATH=$HISTORY_DIR/history.tsv
 
 save_dir=$HISTORY_DIR/$(date '+%Y-%m-%d_%H:%M:%S')
