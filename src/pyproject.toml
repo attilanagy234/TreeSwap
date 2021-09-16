@@ -15,6 +15,7 @@ ipython = "7.19.0"
 pygraphviz = "1.7"
 stanza = "1.2"
 click = "7.1.2"
+psutil = "^5.8.0"
 
 
 [tool.poetry.dev-dependencies]

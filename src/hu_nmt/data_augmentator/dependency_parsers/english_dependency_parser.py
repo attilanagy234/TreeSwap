@@ -1,137 +1,71 @@
-import stanza
-import pandas as pd
-import re
+from typing import List
+
 import networkx as nx
-from tqdm import tqdm
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
-from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
+import stanza
+
+from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
 
-ROOT_KEY = 'root-0'
+ROOT_KEY = 'root_0'
 
 
 class EnglishDependencyParser(DependencyParserBase):
-
     def __init__(self):
-        super().__init__()
         self.nlp_pipeline = stanza.Pipeline(lang='en', processors='tokenize,mwt,pos,lemma,depparse')
+        super().__init__(self.nlp_pipeline, use_multiprocessing=True)
 
     @staticmethod
-    def extract_info_from_row(row, df):
-        target_key = f'{row.text.lower()}-{row.id}'
-        target_postag = row.upos
-        target_lemma = row.lemma
-        target_deprel = row.deprel
-        if row.head != 0:
-            head = df.iloc[int(row.head) - 1]
-            source_key = f'{head.text.lower()}-{head.id}'
-            source_postag = head.upos
-            source_lemma = head.lemma
-        else:
-            source_key = ROOT_KEY
-            source_postag = None
-            source_lemma = None
-        return target_key, target_postag, target_lemma, target_deprel, source_key, source_postag, source_lemma
+    def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
+        doc = nlp_pipeline(sent)
+        # We most likely will only pass single sentences.
+        if len(doc.sentences) != 1:
+            log.info(f'Sample has multiple sentences: {[s.text for s in doc.sentences]}')
+        sent = doc.sentences[0]
 
-    def sentence_to_dep_parse_tree(self, sent):
+        node_relationship_list = []
+        word_dicts = [word.to_dict() for word in sent.words]
+        for word in sent.words:
+            token = word.to_dict()
+            target_key = f'{token["text"].lower()}_{token["id"]}'
+            target_postag = token['upos']
+            target_lemma = token['lemma']
+            target_deprel = token['deprel']
+            if token['head'] == 0:
+                source_key = ROOT_KEY
+                source_postag = None
+                source_lemma = None
+            else:
+                head = word_dicts[int(token['head']) - 1]
+                source_key = f'{head["text"].lower()}_{head["id"]}'
+                source_postag = head['upos']
+                source_lemma = head['lemma']
+
+            node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_deprel, source_key, source_postag, source_lemma))
+
+        return node_relationship_list
+
+    def sentence_to_dep_parse_tree(self, sent) -> nx.DiGraph:
         """
         Args:
             sent: space separated string of the input sentence
         Returns:
             A directed (networkx) graph representation of the dependency tree
         """
-        doc = self.nlp_pipeline(sent)
-        # We most likely will only pass single sentences.
-        if len(doc.sentences) != 1:
-            log.info(f'Sample has multiple sentences: {doc.sentences}')
-        for sentence in doc.sentences:
-            words_dict = [word.to_dict() for word in sentence.words]
-            df = pd.DataFrame.from_records(words_dict)
         dep_graph = nx.DiGraph()
         # Add ROOT node
         dep_graph.add_node(ROOT_KEY)
-        for row in df.itertuples(index=True, name='Pandas'):
-            target_key, target_postag, target_lemma, target_deprel, \
-            source_key, source_postag, source_lemma = self.extract_info_from_row(row, df)
-            dep_graph.add_node(source_key, postag=source_postag, lemma=source_lemma)
-            dep_graph.add_node(target_key, postag=target_postag, lemma=target_lemma)
-            dep_graph.add_edge(source_key, target_key, dep=target_deprel)
+        for node_rel in self.sentence_to_node_relationship_list(self.nlp_pipeline, sent):
+            dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
+            dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
+            dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
 
-    def sentences_to_serialized_dep_graph_files(self, sentences, output_dir, file_batch_size):
+    @staticmethod
+    def _sentence_pipeline_pair_to_node_relationship_list(pair) -> List[NodeRelationship]:
         """
         Args:
-            sentences: list of sentences to process
-            output_dir: location of tsv files containing the dep parsed sentences
-            file_batch_size: amount of sentences to be parsed into a single file
+            pair: tuple[pipeline, sentence]
         """
-        file_idx = 1
-        open_new_file = True
-        file_batch_size = int(file_batch_size)
-
-        for progress_idx, record in tqdm(enumerate(sentences)):
-            if open_new_file:
-                file = open(f'{output_dir}/{file_idx}.tsv', 'w+')
-                open_new_file = False
-
-            doc = self.nlp_pipeline(record)
-            for sent in doc.sentences:
-                words_dict = [word.to_dict() for word in sent.words]
-                df = pd.DataFrame.from_records(words_dict)
-            for row in df.itertuples(index=True, name='Pandas'):
-                target_key, target_postag, target_lemma, target_deprel, \
-                source_key, source_postag, source_lemma = self.extract_info_from_row(row, df)
-
-                graph_record = f'{target_key}\t{target_postag}\t{target_lemma}' \
-                               f'\t{target_deprel}\t{source_key}\t{source_postag}\t{source_lemma}\n'
-                file.write(graph_record)
-
-            file.write('\n')  # Separate sentences with a new line
-
-            if (progress_idx + 1) % file_batch_size == 0:
-                file.close()
-                file_idx += 1
-                open_new_file = True
-
-
-
-
-
-    @staticmethod
-    def read_parsed_dep_trees_from_files(data_dir):
-        def atoi(text):
-            return int(text) if text.isdigit() else text
-
-        def natural_keys(text):
-            '''
-            alist.sort(key=natural_keys) sorts in human order
-            http://nedbatchelder.com/blog/200712/human_sorting.html
-            (See Toothy's implementation in the comments)
-            '''
-            return [atoi(c) for c in re.split(r'(\d+)', text)]
-
-        files_to_read = get_files_in_folder(data_dir)
-        files_to_read.sort(key=natural_keys)
-        dep_graphs = []
-        for file in files_to_read:
-            with open(f'{data_dir}/{file}') as f:
-                graph = nx.DiGraph()
-                for line in f:
-                    if line == '\n':
-                        dep_graphs.append(graph)
-                        graph = nx.DiGraph()
-                    else:
-                        target_key, target_postag, target_lemma, target_deprel, \
-                        source_key, source_postag, source_lemma = line.split('\t')
-
-                        graph.add_node(source_key, postag=source_postag, lemma=source_lemma)
-                        graph.add_node(target_key, postag=target_postag, lemma=target_lemma)
-                        graph.add_edge(source_key, target_key, dep=target_deprel)
-        return dep_graphs
-
-    def get_graph_wrappers_from_files(self, data_folder):
-        dep_graphs = self.read_parsed_dep_trees_from_files(data_folder)
-        return [DependencyGraphWrapper(x) for x in dep_graphs]
+        return EnglishDependencyParser.sentence_to_node_relationship_list(pair[0], pair[1])

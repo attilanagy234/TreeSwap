@@ -19,7 +19,7 @@ class DepthBasedAugmentator(AugmentatorBase):
     def __init__(self):
         super().__init__()
 
-    def augment_sentence_from_dep_graph(self, dep_graph: DependencyGraphWrapper):
+    def augment(self, dep_graph: DependencyGraphWrapper):
         raise NotImplementedError()
 
     def get_probabilities_from_tree_depth(self, dep_graph: DependencyGraphWrapper):
@@ -54,5 +54,5 @@ class DepthBasedAugmentator(AugmentatorBase):
         # Subtract 1 from index,
         # because we removed the artifical ROOT node
         # from the first position in the sentence
-        indices_to_blank = [int(x.split('-')[1])-1 for x in words_to_augment]
+        indices_to_blank = [int(x.rpartition('_')[-1])-1 for x in words_to_augment]
         return node_ids, indices_to_blank

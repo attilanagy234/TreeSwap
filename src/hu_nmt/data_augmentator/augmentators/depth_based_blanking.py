@@ -11,9 +11,9 @@ class DepthBasedBlanking(DepthBasedAugmentator):
 
     def __init__(self):
         super().__init__()
-        self.BLANK = 'BLANK'
+        self.BLANK = '[BLANK]'
 
-    def augment_sentence_from_dep_graph(self, dep_graph: DependencyGraphWrapper):
+    def augment(self, dep_graph: DependencyGraphWrapper):
         node_ids, indices_to_blank = self.get_word_indicies_to_blank(dep_graph)
         sentence = self.reconstruct_sentence_from_node_ids(node_ids)
         log.debug(f'Original list of tokens: {sentence}')

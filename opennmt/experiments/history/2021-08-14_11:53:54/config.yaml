@@ -1,0 +1,101 @@
+seed: 1234
+
+# PREPROCESS
+
+# Additional paths
+sp_models_path: ../../sp_models
+utils_path: ../../../utils
+
+translate_model: run/model.pt
+
+# pair options
+pair_n_lines: 50
+pair_output_path: run/pair_out.txt
+
+# Vocab
+save_data: ../../experiments/vocabs
+src_vocab: ../../experiments/vocabs/vocab.huen
+share_vocab: true
+vocab_size_multiple: 1
+src_words_min_frequency: 0
+tgt_words_min_frequency: 0
+
+# Corpus opts:
+data:
+    hunglish:
+        path_src: ../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
+        path_tgt: ../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
+        transforms: [sentencepiece]
+        weight: 1
+    valid:
+        path_src: ../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.hu
+        path_tgt: ../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.en
+        transforms: [sentencepiece]
+
+#### Subword
+src_subword_model: ../../../../data/Hunglish2/combined-32-simple/spm_huen.model
+src_subword_nbest: 1
+src_subword_alpha: 0.0
+tgt_subword_nbest: 1
+tgt_subword_alpha: 0.0
+
+# TRAIN
+
+# Train on a single GPU
+world_size: 1
+gpu_ranks: [0]
+
+# Batching
+batch_type: tokens  # diff
+batch_size: 4096  # diff
+# batch_size: 64
+# valid_batch_size: 64
+# queue_size: 40
+accum_count: [4]
+
+# General opts
+save_model: run/model
+keep_checkpoint: -1
+save_checkpoint_steps: 5000
+average_decay: 0.0005
+report_every: 100
+train_steps: 90000
+valid_steps: 5000
+single_pass: False
+early_stopping: 4
+early_stopping_criteria: ppl
+
+# Optimization
+model_dtype: "fp32"
+optim: "adam"  # used sparseadam in the legacy
+learning_rate: 2
+warmup_steps: 8000
+decay_method: "noam"
+adam_beta2: 0.998
+max_grad_norm: 2
+label_smoothing: 0.1
+param_init: 0
+param_init_glorot: true
+normalization: "tokens"
+max_generator_batches: 32  # diff
+
+# Model
+encoder_type: transformer
+decoder_type: transformer
+enc_layers: 6
+dec_layers: 6
+heads: 8
+rnn_size: 512
+word_vec_size: 512
+transformer_ff: 2048
+dropout_steps: [0]
+dropout: [0.1]
+attention_dropout: [0.1]
+share_decoder_embeddings: true  # plus
+share_embeddings: true  # plus
+position_encoding: true  # diff
+
+# Logging
+log_file: run/output.logs
+tensorboard: true
+tensorboard_log_dir: run/tensorboard

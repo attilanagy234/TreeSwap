@@ -9,7 +9,7 @@ class DepthBasedDropout(DepthBasedAugmentator):
     def __init__(self):
         super().__init__()
 
-    def augment_sentence_from_dep_graph(self, dep_graph):
+    def augment(self, dep_graph):
         node_ids, indices_to_blank = self.get_word_indicies_to_blank(dep_graph)
         sentence = self.reconstruct_sentence_from_node_ids(node_ids)
         log.debug(f'Original list of tokens: {sentence}')

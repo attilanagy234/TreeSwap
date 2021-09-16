@@ -140,3 +140,7 @@ marian/
 
 .idea/
 .DS_Store
+mariannmt/
+data/
+src/poetry.lock
+opennmt/experiments/history/*/
