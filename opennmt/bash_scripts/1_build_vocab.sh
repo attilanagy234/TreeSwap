@@ -8,6 +8,8 @@ share_vocab=$(grep 'share_vocab:' config.yaml | awk '{ print $2 }')
 src_vocab_size=$(grep 'src_vocab_size:' config.yaml | awk '{ print $2 }')
 src_model_name=$(grep 'src_subword_model:' config.yaml | awk '{ print $2}' | sed 's_\(.*\)\.model_\1_')
 
+subword_model_type=$(grep 'subword_model_type:' config.yaml | awk '{ print $2 }')
+
 if [ "$share_vocab" != "true" ];
 then
     echo "Creating source and target sentencepiece model"
@@ -15,19 +17,23 @@ then
     tgt_model_name=$(grep 'tgt_subword_model:' config.yaml | awk '{ print $2}' | sed 's_\(.*\)\.model_\1_')
 
     # Run sentencepiece training on the source training data
+    srun -p gpu --gres=mps \
     spm_train \
     --input=$hunglish_src \
     --model_prefix=$src_model_name \
     --vocab_size=$src_vocab_size \
     --character_coverage=1 \
+    --model_type=$subword_model_type \
     --input_sentence_size=500000
 
     # Run sentencepiece training on the target training data
+    srun -p gpu --gres=mps \
     spm_train \
     --input=$hunglish_tgt \
     --model_prefix=$tgt_model_name \
     --vocab_size=$tgt_vocab_size \
     --character_coverage=1 \
+    --model_type=$subword_model_type \
     --input_sentence_size=500000
 else
     echo "Creating shared sentencepiece model"
@@ -41,11 +47,13 @@ else
     done
 
     # Run sentencepiece training on the concatenated training data
+    srun -p gpu --gres=mps \
     spm_train \
     --input=$tmp_train_file \
     --model_prefix=$src_model_name \
     --vocab_size=$src_vocab_size \
     --character_coverage=1 \
+    --model_type=$subword_model_type \
     --input_sentence_size=500000
 
     rm -rf $tmp_train_file
@@ -53,4 +61,4 @@ else
 fi
 
 
-onmt_build_vocab -config config.yaml -n_sample -1
+srun -p gpu --gres=mps onmt_build_vocab -config config.yaml -n_sample -1
