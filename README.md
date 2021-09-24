@@ -70,7 +70,35 @@ cd hu_nmt/src
 ./precompute_english_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
 ```
 
-## Training models
+# Training models
+
+## Setup
+Create a new conda environment:
+```shell
+conda create --name my-env python=3.8.5
+conda activate my-env
+```
+
+Install the required packages:
+```shell
+pip install -r requirements.txt
+conda install -c conda-forge sentencepiece=0.1.95
+conda install -c conda-forge sacrebleu=1.5.1
+```
+
+If you get the following error during vocabulary building:
+```
+ImportError: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (...)
+```
+
+run the following lines one by one in the given order:
+```shell
+conda install libgcc #1
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/miniconda3/lib/ #2
+```
+
+
+## Run
 To train a model you need to specify a config file like [this one](hhttps://github.com/attilanagy234/hu-nmt/blob/main/opennmt/experiments/runs/huen/config.yaml) where you specify all the model parameters and data paths based on the OpenNMT documentation ([build vocab](https://opennmt.net/OpenNMT-py/options/build_vocab.html), [train](https://opennmt.net/OpenNMT-py/options/train.html), [translate](https://opennmt.net/OpenNMT-py/options/translate.html)), and also specify additional parameters for our [scripts](https://github.com/attilanagy234/hu-nmt/tree/main/opennmt/bash_scripts).
 
 After you have set up your config.yaml file you should build your vocabularies (you only have to do this once). After the vocabs have been created you can call the [full_train.sh](https://github.com/attilanagy234/hu-nmt/blob/main/opennmt/bash_scripts/full_train.sh) script which will train your model based on your config, translate your validation set and evaluate BLEU. It will also track your execution based on the next section.
