@@ -6,7 +6,7 @@ from onmt.utils.logging import init_logger
 from onmt.translate.translator import build_translator
 from argparse import Namespace
 import sentencepiece as spm
-
+from unittest.mock import MagicMock
 
 def _get_parser():
     parser = ArgumentParser(description='translate.py')
@@ -15,7 +15,7 @@ def _get_parser():
     return parser
 
 
-class TranslatorWrapper():
+class TranslatorWrapper:
     def __init__(self, opt: Namespace, sp_model_path: str):
         ArgumentParser.validate_translate_opts(opt)
         self.opt = opt
@@ -25,7 +25,7 @@ class TranslatorWrapper():
         self.logger.info(f'Using sentencepiece model: {sp_model_path}')
 
         self.spp = spm.SentencePieceProcessor(model_file=sp_model_path)
-        self.translator = build_translator(opt, logger=self.logger, report_score=True)
+        self.translator = build_translator(opt, logger=self.logger, report_score=True, out_file=MagicMock())
 
     @staticmethod
     def _batch(iterable, n=1):
