@@ -6,6 +6,8 @@ utils_path=$(grep 'utils_path:' config.yaml | awk '{ print $2 }')
 pair_output_path=$(grep 'pair_output_path:' config.yaml | awk '{ print $2 }')
 translate_model=$(grep 'translate_model:' config.yaml | awk '{ print $2 }')
 
+echo "--Saving history--"
+
 CONFIG_PATH="config.yaml"
 FINAL_RESULT_PATH="run/final_result.txt"
 TO_SAVE="$CONFIG_PATH $FINAL_RESULT_PATH run/pred.txt run/tensorboard $pair_output_path $translate_model"
