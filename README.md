@@ -13,6 +13,23 @@ The data augmentator uses [Poetry](https://python-poetry.org/) for packaging and
 > sudo chown -R root /usr/local/bin
 > ```
 
+## Current server setup
+
+To use all the features in the repo
+```bash
+conda create --name my-env python=3.8.5
+conda activate my-env
+
+pip install -r requirements.txt
+conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2
+conda install libgcc
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/miniconda3/lib/
+
+cd src
+poetry install
+```
+
+## Setup
 To install all the necessary dependencies, just run:
 ```bash
 cd src/hu_nmt
@@ -82,8 +99,7 @@ conda activate my-env
 Install the required packages:
 ```shell
 pip install -r requirements.txt
-conda install -c conda-forge sentencepiece=0.1.95
-conda install -c conda-forge sacrebleu=1.5.1
+conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2
 ```
 
 If you get the following error during vocabulary building:
