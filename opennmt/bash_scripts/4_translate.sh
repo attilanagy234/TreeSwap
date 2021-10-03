@@ -10,7 +10,7 @@ echo "--Starting translation--"
 if [ -z "$translate_encoding_tgt" ]; then
     echo "Encoding the validation set for translation"
     if [ ! -f $"valid_src".sp ]; then
-        srun --exclusive -p gpu --gres=mps spm_encode --model=$src_subword_model < "" > $valid_src.sp
+        srun --exclusive -p gpu --gres=mps spm_encode --model=$src_subword_model < $valid_src > $valid_src.sp
     fi
 
     translation_src=$valid_src.sp
