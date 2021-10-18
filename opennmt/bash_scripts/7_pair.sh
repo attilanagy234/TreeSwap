@@ -3,6 +3,8 @@ pair_n_lines=$(grep 'pair_n_lines:' config.yaml | awk '{ print $2 }')
 pair_output_path=$(grep 'pair_output_path:' config.yaml | awk '{ print $2 }')
 valid_src=$(grep -A2 'valid:' config.yaml | grep 'path_src:' | awk '{ print $2 }')
 
+echo "--Pairing sentences--"
+
 output_folder=run
 
 python $utils_path/pair.py \
