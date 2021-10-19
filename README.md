@@ -20,7 +20,7 @@ To use all the features in the repo
 conda create --name my-env python=3.8.5
 conda activate my-env
 
-pip install -r requirements.txt
+pip install -r requirements.txt --use-feature=2020-resolver
 conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2
 conda install libgcc
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/miniconda3/lib/

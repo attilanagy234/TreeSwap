@@ -145,3 +145,5 @@ data/
 src/poetry.lock
 opennmt/experiments/history/*/
 opennmt/experiments/runs/*
+.vscode
+tensorboard/

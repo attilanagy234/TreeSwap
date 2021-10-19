@@ -8,15 +8,17 @@ tgt_vocab: vocabs/vocab.hu
 
 # Corpus opts:
 data:
-    hunglish:
-        path_src: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.en
-        path_tgt: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.hu
-        transforms: [sentencepiece]
+    corpus:
+        path_src: /home/bana/Data/combined-tiny/hunglish2-tiny-train.en #/home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.en
+        path_tgt: /home/bana/Data/combined-tiny/hunglish2-tiny-train.hu #/home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-train.hu
         weight: 1
+        transforms: [berttokenizer]  # Comment this during vocab generation...
     valid:
-        path_src: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.en
-        path_tgt: /home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.hu
-        transforms: [sentencepiece]
+        path_src: /home/bana/Data/combined-tiny/hunglish2-tiny-valid.en #/home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.en
+        path_tgt: /home/bana/Data/combined-tiny/hunglish2-tiny-valid.hu #/home1/hu-nmt/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined-en-hu/hunglish2-short-no-qoutes-valid.hu
+        weight: 1
+        transforms: [berttokenizer]  # Comment this during vocab generation...
+
 
 #### Subword
 src_subword_model: /home1/hu-nmt/hu-nmt/opennmt/experiments-en-hu/sp_models/bpe_en.model
