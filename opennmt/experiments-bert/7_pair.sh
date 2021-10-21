@@ -1,5 +1,5 @@
 utils_path=../../../utils
-output_folder=../../runs/en-hu/run
+output_folder=../../runs/bert/run
 
 python $utils_path/pair.py \
 --original_path $output_folder/valid.txt \
