@@ -8,8 +8,8 @@ echo "--Starting translation--"
 
 # encode
 if [ -z "$translate_encoding_tgt" ]; then
-    echo "Encoding the validation set for translation"
-    if [ ! -f $"valid_src".sp ]; then
+    if [ ! -f "$valid_src".sp ]; then
+        echo "Encoding the validation set for translation"
         srun --exclusive -p gpu --gres=mps spm_encode --model=$src_subword_model < $valid_src > $valid_src.sp
     fi
 
@@ -29,4 +29,5 @@ else
 fi
 
 # translate
+echo "Translating..."
 srun --exclusive -p gpu --gres=mps onmt_translate -model $translate_model -src $translation_src -output run/pred.txt.sp -gpu 0
