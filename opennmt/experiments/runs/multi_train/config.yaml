@@ -3,7 +3,7 @@ seed: 1234
 #------------------------------------------------------------------------------
 # Metadata
 
-_augmentation_description: "Fixed the sampling and with proper language added to the augmentator (not mixing it up) aug_ratio: 0.25"
+_augmentation_description: "Fixed the sampling POC aug_ratio: 0.25"
 
 #------------------------------------------------------------------------------
 # Multi train config
@@ -40,6 +40,13 @@ pair_output_path: run/pair_out.txt
 
 # Path to where all the history files are
 history_path: ../../../history
+
+# Vocabulary size of the source language
+# (when using shared vocab this is also the size that is used)
+src_vocab_size: 32000
+
+# Type of the subword model (used by sentencepiece)
+subword_model_type: unigram
 
 #------------------------------------------------------------------------------
 # Data and vocab config
