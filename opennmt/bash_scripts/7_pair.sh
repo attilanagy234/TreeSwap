@@ -1,7 +1,7 @@
-utils_path=$(grep 'utils_path:' config.yaml | awk '{ print $2 }')
-pair_n_lines=$(grep 'pair_n_lines:' config.yaml | awk '{ print $2 }')
-pair_output_path=$(grep 'pair_output_path:' config.yaml | awk '{ print $2 }')
-valid_src=$(grep -A2 'valid:' config.yaml | grep 'path_src:' | awk '{ print $2 }')
+utils_path=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep 'utils_path:' | awk '{ print $2 }')
+pair_n_lines=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep 'pair_n_lines:' | awk '{ print $2 }')
+pair_output_path=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep 'pair_output_path:' | awk '{ print $2 }')
+valid_src=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep -A2 'valid:' | grep 'path_src:' | awk '{ print $2 }')
 
 echo "--Pairing sentences--"
 

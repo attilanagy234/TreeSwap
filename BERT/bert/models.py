@@ -44,7 +44,7 @@ class BertEncoder(onmt.encoders.EncoderBase):
         attention_mask = self.lengths_to_mask(lengths)
 
         with torch.no_grad():
-            encoded = self.base(src.squeeze(), attention_mask=attention_mask)[0]
+            encoded = self.base(src.squeeze(-1), attention_mask=attention_mask)[0]
 
         # Dummy final_state to remain compatible to original interface
         final_state = (torch.zeros((1, encoded.shape[1], encoded.shape[2])).to(encoded.device),

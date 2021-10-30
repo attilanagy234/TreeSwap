@@ -8,9 +8,10 @@
 sp_models_path: ../../sp_models
 utils_path: ../../../utils
 pair_n_lines: 100
-pair_output_path: paired.text
+pair_output_path: run/paired.text
 
-translate_model: model_no_qoutes_step_340000.pt
+translate_model: run/model/model.pt
+#model_no_qoutes_step_340000.pt
 
 src_vocab_size: 20000
 tgt_vocab_size: 20000
@@ -112,4 +113,5 @@ attention_dropout: [0.1]
 # Logging
 log_file: logs
 tensorboard: true
-tensorboard_log_dir: tensorboard
+tensorboard_log_dir: run/tensorboard
+history_path: history

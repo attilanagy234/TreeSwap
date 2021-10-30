@@ -1,10 +1,10 @@
-HISTORY_DIR=$(grep 'history_path:' config.yaml | awk '{ print $2 }')
+HISTORY_DIR=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep 'history_path:' | awk '{ print $2 }')
 TSV_PATH=$HISTORY_DIR/history.tsv
 
 save_dir=$HISTORY_DIR/$(date '+%Y-%m-%d_%H:%M:%S')
-utils_path=$(grep 'utils_path:' config.yaml | awk '{ print $2 }')
-pair_output_path=$(grep 'pair_output_path:' config.yaml | awk '{ print $2 }')
-translate_model=$(grep 'translate_model:' config.yaml | awk '{ print $2 }')
+utils_path=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep 'utils_path:' | awk '{ print $2 }')
+pair_output_path=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep 'pair_output_path:' | awk '{ print $2 }')
+translate_model=$(grep '^[[:blank:]]*[^[:blank:]#;]' config.yaml | grep 'translate_model:' | awk '{ print $2 }')
 
 echo "--Saving history--"
 
