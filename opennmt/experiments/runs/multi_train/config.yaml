@@ -3,7 +3,7 @@ seed: 1234
 #------------------------------------------------------------------------------
 # Metadata
 
-_augmentation_description: "Fixed the sampling POC aug_ratio: 0.25"
+_augmentation_description: "Low resource POC"
 
 #------------------------------------------------------------------------------
 # Multi train config
@@ -12,15 +12,25 @@ _augmentation_description: "Fixed the sampling POC aug_ratio: 0.25"
 multi_train: true
 
 # prefix to use for the generated folders
-multi_train_prefix: m_huen
+multi_train_prefix: base
 
 # For each folder in this directory it launches a training adding all the files
 # to the corpus
-multi_train_dir: ../../../../../data/Hunglish2/augmented/generated-0.25
+multi_train_dir: ../../../../../data/Hunglish2/low-resource/training
 
 # Where the utility scripts are located from the multi train script start
 # location
 utils_path_from_multi_train: ../../../utils
+
+# The post fix of the source files (eg. en -> file_name.en)
+src_postfix: hu
+
+# The post fix of the target files (eg. en -> file_name.en)
+tgt_postfix: en
+
+# All the data files come from the folders in 'multi_train_dir'.
+# If a file contains the word 'valid' it is used in the validation set.
+bare_multi_train: true
 
 #------------------------------------------------------------------------------
 # Script configs
@@ -60,6 +70,7 @@ src_words_min_frequency: 0
 tgt_words_min_frequency: 0
 
 # Corpus opts
+transforms: [sentencepiece]
 data:
     hunglish:
         path_src: ../../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
