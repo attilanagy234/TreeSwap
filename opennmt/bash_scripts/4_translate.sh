@@ -32,4 +32,3 @@ echo "--Starting translation--"
 # translate
 #srun --exclusive -p gpu --gres=mps onmt_translate -model $translate_model -src $translation_src -output run/pred.txt.sp -gpu 0
 srun --exclusive -p gpu --gres=mps onmt_translate --model $translate_model --src $valid_src --output run/pred.txt.sp --gpu 0 --n_best 1 --batch_size 64
-#srun spm_decode --model=$tgt_subword_model < run/pred.txt.sp > run/pred.txt

@@ -6,6 +6,7 @@ function succeded() {
     grep "0" <<< "${PIPESTATUS[0]}" &> /dev/null
 }
 
+$base_dir/1_build_vocab.sh |& tee -a $log_file; succeded && \
 $base_dir/2_train_exclusive.sh |& tee -a $log_file; succeded && \
 $base_dir/3_remove_unused_models.sh |& tee -a $log_file; succeded && \
 $base_dir/4_translate.sh |& tee -a $log_file; succeded && \

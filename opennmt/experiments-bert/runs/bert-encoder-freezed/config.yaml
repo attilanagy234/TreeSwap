@@ -65,7 +65,7 @@ batch_size: 96
 #accum_count: [3]
 
 # General opts
-save_model: model
+save_model: run/model
 keep_checkpoint: 10
 save_checkpoint_steps: 10000
 average_decay: 0.0005
@@ -109,7 +109,7 @@ dropout_steps: [0]
 dropout: [0.1]
 attention_dropout: [0.1]
 #share_decoder_embeddings: true
-encoder_freezed: false
+encoder_freezed: true
 
 # Logging
 log_file: logs
