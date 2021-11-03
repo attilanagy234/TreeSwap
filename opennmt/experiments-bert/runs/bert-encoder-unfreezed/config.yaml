@@ -10,7 +10,7 @@ utils_path: ../../../utils
 pair_n_lines: 100
 pair_output_path: run/paired.text
 
-translate_model: run/model/model.pt
+translate_model: run/model.pt
 
 src_vocab_size: 30000
 tgt_vocab_size: 30000
