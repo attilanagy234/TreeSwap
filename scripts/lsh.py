@@ -1,8 +1,9 @@
-import numpy as np
-import pandas as pd
 import re
 import time
-from datasketch import MinHash, MinHashLSHForest, MinHashLSH
+
+import numpy as np
+import pandas as pd
+from datasketch import MinHash, MinHashLSH, MinHashLSHForest
 
 lines = []
 with open("../data/ftp.mokk.bme.hu/Hunglish2/modern.lit/bi/hunglish1.lit.bi", 'r', encoding='utf_8') as file:

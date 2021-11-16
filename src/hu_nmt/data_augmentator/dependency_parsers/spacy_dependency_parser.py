@@ -4,7 +4,8 @@ import hu_core_ud_lg
 import networkx as nx
 import spacy
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship
+from hu_nmt.data_augmentator.base.depedency_parser_base import (
+    DependencyParserBase, NodeRelationship)
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)

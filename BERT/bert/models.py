@@ -1,8 +1,8 @@
 from typing import Any
 
 import onmt
-from transformers import AutoModel
 import torch
+from transformers import AutoModel
 
 
 class BertEncoder(onmt.encoders.EncoderBase):

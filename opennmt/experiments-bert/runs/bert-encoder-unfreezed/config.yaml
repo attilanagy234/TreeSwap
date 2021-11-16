@@ -60,7 +60,7 @@ world_size: 1
 gpu_ranks: [0]
 
 # Batching
-batch_size: 96
+batch_size: 32
 #queue_size: 16
 #accum_count: [3]
 

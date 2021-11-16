@@ -1,35 +1,46 @@
-import yaml
-import torch.nn as nn
-from collections import defaultdict, Counter
+import argparse
+from collections import Counter, defaultdict
+
 import onmt
-from onmt.inputters.inputter import (
-    _load_vocab,
-    _build_fields_vocab,
-    get_fields,
-    IterOnDevice,
-)
+import sentencepiece
+import torch
+import torch.nn as nn
+import yaml
+from bert.models import BertEncoder
+from bert.transforms import EncoderBertTransform, DummyTransform
+from configargparse import ArgumentError
+from onmt.encoders.transformer import TransformerEncoder
 from onmt.inputters.corpus import ParallelCorpus
 from onmt.inputters.dynamic_iterator import DynamicDatasetIter
+from onmt.inputters.inputter import (IterOnDevice, _build_fields_vocab,
+                                     _load_vocab, get_fields)
+from onmt.opts import dynamic_prepare_opts
+from onmt.transforms.tokenize import SentencePieceTransform
+from onmt.utils.logging import init_logger, logger
 from onmt.utils.misc import set_random_seed
 from onmt.utils.parse import ArgumentParser
-from onmt.opts import dynamic_prepare_opts
 from transformers import AutoTokenizer
-import torch
-
-from onmt.utils.logging import init_logger, logger
-
-from bert.models import BertEncoder
-from bert.transforms import BertTransform
-import argparse
-
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     onmt.opts.train_opts(parser)
 
-    opts, unknown = parser.parse_known_args()
+    group = parser.add_argument_group('Custom')
+    group.add('--encoder_freezed', type=bool, default=False)
+    group.add('--custom_encoder_type', type=str)
+    group.add('--custom_decoder_type', type=str)
 
     base_args = ["-config", "config.yaml"]  # "../opennmt/experiments-bert/runs/bert/config.yaml"
+    opts, unknown = parser.parse_known_args(base_args)
+
+    init_logger(log_file=opts.log_file)
+
+    logger.info("opts:", opts)
+
+    base_args = [
+        "-config",
+        "config.yaml",
+    ]  # "../opennmt/experiments-bert/runs/bert/config.yaml"
     opts, unknown = parser.parse_known_args(base_args)
 
     init_logger(log_file=opts.log_file)
@@ -43,26 +54,42 @@ if __name__ == "__main__":
     tgt_vocab_path = opts.tgt_vocab
 
     counters = defaultdict(Counter)
-    eng_tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 
-    _src_vocab = [[k, v] for k, v in eng_tokenizer.get_vocab().items()]
-    _src_vocab_size = len(_src_vocab)
-    for k, _ in _src_vocab:
-        counters["src"][k] = 1000  # Set dummy count
+    if opts.custom_encoder_type == "transformer":
+        # load source vocab
+        _src_vocab, src_vocab_size = _load_vocab(src_vocab_path, "src", counters)
 
-    # load target vocab
-    _tgt_vocab, _tgt_vocab_size = _load_vocab(tgt_vocab_path, "tgt", counters)
+        src_words_min_frequency = opts.src_words_min_frequency
+    elif opts.custom_encoder_type == "custom_bert":
+        eng_tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+
+        _src_vocab = [[k, v] for k, v in eng_tokenizer.get_vocab().items()]
+        _src_vocab_size = len(_src_vocab)
+        for k, _ in _src_vocab:
+            counters["src"][k] = 1000  # Set dummy count
+
+        src_vocab_size = _src_vocab_size
+        src_words_min_frequency = 0
+    else:
+        raise ArgumentError(f"Unknown encoder type: {opts.custom_encoder_type}")
+
+    if opts.custom_decoder_type == "transformer":
+        # load target vocab
+        _tgt_vocab, _tgt_vocab_size = _load_vocab(tgt_vocab_path, "tgt", counters)
+
+        tgt_vocab_size = _tgt_vocab_size
+        tgt_words_min_frequency = opts.tgt_words_min_frequency
+    elif opts.custom_decoder_type == "custom_bert":
+        raise NotImplementedError("Tokenizer for BERT decoder not implemented yet.")
+    else:
+        raise ArgumentError(f"Unknown encoder type: {opts.custom_decoder_type}")
 
     # initialize fields
     src_nfeats, tgt_nfeats = 0, 0  # do not support word features for now
     fields = get_fields("text", src_nfeats, tgt_nfeats)
 
-    share_vocab = False
+    share_vocab = opts.share_vocab
     vocab_size_multiple = 1
-    src_vocab_size = _src_vocab_size
-    tgt_vocab_size = opts.tgt_vocab_size
-    src_words_min_frequency = 0
-    tgt_words_min_frequency = opts.tgt_words_min_frequency
 
     vocab_fields = _build_fields_vocab(
         fields,
@@ -76,21 +103,37 @@ if __name__ == "__main__":
         tgt_words_min_frequency,
     )
 
-    # src_text_field = vocab_fields["src"].base_field
-    # src_vocab = src_text_field.vocab
-    # src_padding = src_vocab.stoi[src_text_field.pad_token]
+    src_text_field = vocab_fields["src"].base_field
+    src_vocab = src_text_field.vocab
+    src_padding = src_vocab.stoi[src_text_field.pad_token]
 
     tgt_text_field = vocab_fields["tgt"].base_field
     tgt_vocab = tgt_text_field.vocab
     tgt_padding = tgt_vocab.stoi[tgt_text_field.pad_token]
 
-    encoder = BertEncoder()
-    decoder_embeddings = onmt.modules.Embeddings(
-        opts.tgt_word_vec_size, len(tgt_vocab), word_padding_idx=tgt_padding
-    )
-    decoder = onmt.decoders.transformer.TransformerDecoder.from_opt(
-        opts, decoder_embeddings
-    )
+    if opts.custom_encoder_type == "transformer":
+        encoder_embeddings = onmt.modules.Embeddings(
+            opts.src_word_vec_size, len(src_vocab), word_padding_idx=src_padding
+        )
+        encoder = TransformerEncoder.from_opt(
+            opts, encoder_embeddings
+        )
+    elif opts.custom_encoder_type == "custom_bert":
+        encoder = BertEncoder()
+    else:
+        raise ArgumentError(f"Unknown encoder type: {opts.custom_encoder_type}")
+
+    if opts.decoder_type == "transformer":
+        decoder_embeddings = onmt.modules.Embeddings(
+            opts.tgt_word_vec_size, len(tgt_vocab), word_padding_idx=tgt_padding
+        )
+        decoder = onmt.decoders.transformer.TransformerDecoder.from_opt(
+            opts, decoder_embeddings
+        )
+    elif opts.decoder_type == "custom_bert":
+        raise NotImplementedError(f"Not implemented decoder type: {opts.decoder_type}")
+    else:
+        raise ArgumentError(f"Unknown decoder type: {opts.decoder_type}")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = onmt.models.model.NMTModel(encoder, decoder)
@@ -121,14 +164,30 @@ if __name__ == "__main__":
     corpus = ParallelCorpus("corpus", src_train, tgt_train)
     valid = ParallelCorpus("valid", src_val, tgt_val)
 
-    bertTransform = BertTransform(opts, src_tokenizer=eng_tokenizer)
+    bertTransform = EncoderBertTransform(opts)
     bertTransform.warm_up()
+
+    dummyTransform = DummyTransform(opts)
+    dummyTransform.warm_up()
 
     gpu_rank = 0 if is_cuda else -1  # TODO: read from config
 
+    # if opts.custom_encoder_type == "transformer":
+    #     import sentencepiece
+    #     dataset_transforms = {"sentencepiece": sentencepiece}
+    # elif opts.custom_encoder_type == "custom_bert":
+    #     dataset_transforms = {"sentencepiece": bertTransform}
+    # else:
+    #     raise ArgumentError(f"Unknown encoder type: {opts.custom_encoder_type}")
+    dataset_transforms = {
+        "sentencepiece": sentencepiece,
+        "berttransform": bertTransform,
+        "dummy": dummyTransform
+    }
+
     train_iter = DynamicDatasetIter.from_opts(
         corpora={"corpus": corpus},
-        transforms={"berttokenizer": bertTransform},
+        transforms=dataset_transforms,
         fields=vocab_fields,
         opts=opts,
         is_train=True,
@@ -136,7 +195,7 @@ if __name__ == "__main__":
     train_iter = iter(IterOnDevice(train_iter, gpu_rank))
     valid_iter = DynamicDatasetIter.from_opts(
         corpora={"valid": valid},
-        transforms={"berttokenizer": bertTransform},
+        transforms=dataset_transforms,
         fields=vocab_fields,
         opts=opts,
         is_train=False,

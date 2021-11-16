@@ -1,5 +1,5 @@
-import numpy as np
 import datasets
+import numpy as np
 
 dataset_names = [
                 "bible_para",

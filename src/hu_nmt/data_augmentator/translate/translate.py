@@ -1,12 +1,14 @@
-from typing import List
-import torch
-import onmt.opts as opts
-from onmt.utils.parse import ArgumentParser
-from onmt.utils.logging import init_logger
-from onmt.translate.translator import build_translator
 from argparse import Namespace
-import sentencepiece as spm
+from typing import List
 from unittest.mock import MagicMock
+
+import onmt.opts as opts
+import sentencepiece as spm
+import torch
+from onmt.translate.translator import build_translator
+from onmt.utils.logging import init_logger
+from onmt.utils.parse import ArgumentParser
+
 
 def _get_parser():
     parser = ArgumentParser(description='translate.py')

@@ -3,7 +3,8 @@ from typing import List
 import networkx as nx
 import stanza
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship
+from hu_nmt.data_augmentator.base.depedency_parser_base import (
+    DependencyParserBase, NodeRelationship)
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)

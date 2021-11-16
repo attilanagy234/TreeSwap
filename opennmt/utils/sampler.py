@@ -1,8 +1,10 @@
-import pandas as pd
 from os import listdir, mkdir
-from os.path import isfile, join, exists
-from sklearn.model_selection import train_test_split
+from os.path import exists, isfile, join
+
 import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
 from opennmt.utils.logger import get_logger
 
 log = get_logger(__name__)

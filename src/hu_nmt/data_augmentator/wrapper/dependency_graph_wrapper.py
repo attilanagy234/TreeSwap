@@ -1,7 +1,8 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
 from collections import namedtuple
+
+import matplotlib.pyplot as plt
+import networkx as nx
+from networkx.drawing.nx_agraph import graphviz_layout
 
 EdgeObject = namedtuple('Edge', 'source_node target_node edge')
 

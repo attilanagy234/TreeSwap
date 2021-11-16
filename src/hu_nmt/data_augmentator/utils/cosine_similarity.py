@@ -1,10 +1,12 @@
 import pathlib
-import shutil
 import re
-import numpy as np
+import shutil
+
 import fasttext
 import fasttext.util
+import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+
 
 def get_model(lang: str):
     # make sure there is a resource folder

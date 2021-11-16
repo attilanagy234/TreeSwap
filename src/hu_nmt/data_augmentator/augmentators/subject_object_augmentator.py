@@ -1,8 +1,8 @@
 import copy
+import os
 from itertools import combinations
 from operator import itemgetter
-import os
-from typing import List, Tuple, Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from tqdm import tqdm
@@ -10,7 +10,8 @@ from tqdm import tqdm
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
-from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import \
+    DependencyGraphWrapper
 
 log = get_logger(__name__)
 log.setLevel('DEBUG')

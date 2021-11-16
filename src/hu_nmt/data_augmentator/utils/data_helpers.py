@@ -1,10 +1,11 @@
-import yaml
-from dotmap import DotMap
-import numpy as np
-import pandas as pd
 from multiprocessing import Pool
 from os import listdir
 from os.path import isfile, join
+
+import numpy as np
+import pandas as pd
+import yaml
+from dotmap import DotMap
 
 
 def get_config_from_yaml(yaml_file):

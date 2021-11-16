@@ -13,13 +13,13 @@ pair_output_path: run/paired.text
 translate_model: run/model.pt
 
 src_vocab_size: 30000
-tgt_vocab_size: 30000
+tgt_vocab_size: 30000  # Shared vocab, has to be the same
 
 # Where the samples will be written
 save_data: samples
 # Where the vocab(s) will be written
 src_vocab: sp_models/vocab.en
-tgt_vocab: sp_models/vocab.hu
+tgt_vocab: sp_models/vocab.en  # Shared vocab, has to be the same
 share_vocab: true
 vocab_size_multiple: 1
 src_words_min_frequency: 0
@@ -28,19 +28,15 @@ tgt_words_min_frequency: 0
 # Corpus opts:
 data:
     corpus:
-        #path_src: /home/bana/Data/combined-tiny/hunglish2-tiny-train.en
-        #path_tgt: /home/bana/Data/combined-tiny/hunglish2-tiny-train.hu 
-        path_src: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-train.en
-        path_tgt: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-train.hu
+        path_src: ../../../data/hunglish2-train.en
+        path_tgt: ../../../data/hunglish2-train.hu 
         weight: 1
-        transforms: [sentencepiece]  # Keep this line while building vocab
+        transforms: [berttransform] # [sentencepiece]
     valid:
-        #path_src: /home/bana/Data/combined-tiny/hunglish2-tiny-valid.en
-        #path_tgt: /home/bana/Data/combined-tiny/hunglish2-tiny-valid.hu
-        path_src: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-valid.en
-        path_tgt: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-valid.hu
+        path_src: ../../../data/hunglish2-valid.en
+        path_tgt: ../../../data/hunglish2-valid.hu
         weight: 1
-        transforms: [sentencepiece]  # Keep this line while building vocab
+        transforms: [berttransform] # [sentencepiece]
 
 #### Subword
 src_subword_model: sp_models/en.model
@@ -62,7 +58,7 @@ gpu_ranks: [0]
 
 # Batching
 batch_type: tokens  # diff
-batch_size: 4096  # diff
+batch_size: 32 #4096  # diff
 accum_count: [4]
 
 #batch_size: 32
@@ -117,13 +113,20 @@ max_generator_batches: 32  # diff
 # share_decoder_embeddings: true
 # encoder_freezed: true
 
-encoder_type: transformer
-decoder_type: transformer
+encoder_type: transformer  # Has to be a valid name, not used
+decoder_type: transformer  # Has to be a valid name, not used
+
+custom_encoder_type: transformer
+custom_decoder_type: transformer
 enc_layers: 8
 dec_layers: 8
 heads: 16
 rnn_size: 1024
+enc_rnn_size: 1024
+dec_rnn_size: 1024
 word_vec_size: 1024
+src_word_vec_size: 1024
+tgt_word_vec_size: 1024
 transformer_ff: 2096
 dropout_steps: [0]
 dropout: [0.1]

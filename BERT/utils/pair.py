@@ -1,10 +1,10 @@
+import argparse
+import logging
 import os
 import re
-import argparse
 import sys
-import logging
-import sentencepiece as spm
 
+import sentencepiece as spm
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-9s %(message)s'))

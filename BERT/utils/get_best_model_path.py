@@ -1,6 +1,6 @@
+import argparse
 import os
 import re
-import argparse
 
 
 def get_best_model_path(run_dir: str):

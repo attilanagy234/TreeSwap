@@ -1,10 +1,10 @@
+import multiprocessing as mp
 import os
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import floor
-from typing import List, Iterator, Generator
-import multiprocessing as mp
+from typing import Generator, Iterator, List
 
 import networkx as nx
 import psutil
@@ -12,7 +12,8 @@ from tqdm import tqdm
 
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 from hu_nmt.data_augmentator.utils.logger import get_logger
-from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import \
+    DependencyGraphWrapper
 
 log = get_logger(__name__)
 

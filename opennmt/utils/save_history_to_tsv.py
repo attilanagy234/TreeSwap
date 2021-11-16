@@ -1,12 +1,13 @@
-import collections
-from datetime import datetime
-import os
-from typing import Dict
-import yaml
 import argparse
-import pandas as pd
+import collections
+import os
 import re
+from datetime import datetime
+from typing import Dict
+
 import git
+import pandas as pd
+import yaml
 
 
 def flatten_dict(d, parent_key='', sep='.'):

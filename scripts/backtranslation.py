@@ -1,5 +1,6 @@
 from transformers import MarianMTModel, MarianTokenizer
 
+
 def download(model_name):
     tokenizer = MarianTokenizer.from_pretrained(model_name)
     model = MarianMTModel.from_pretrained(model_name).to('cuda:0')

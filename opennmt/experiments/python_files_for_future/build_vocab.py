@@ -1,14 +1,15 @@
-import torch
+import os
+
+import hydra
 import onmt
+import sentencepiece as spm
+import torch
+from omegaconf import DictConfig
+from onmt.bin.build_vocab import build_vocab_main
+from onmt.opts import dynamic_prepare_opts
 from onmt.utils.logging import init_logger
 from onmt.utils.misc import set_random_seed
 from onmt.utils.parse import ArgumentParser
-from onmt.opts import dynamic_prepare_opts
-from onmt.bin.build_vocab import build_vocab_main
-import sentencepiece as spm
-import hydra
-from omegaconf import DictConfig
-import os
 
 
 def create_sentencepiece_models(cfg: DictConfig):

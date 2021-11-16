@@ -1,6 +1,8 @@
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
-import pandas as pd
 import networkx as nx
+import pandas as pd
+
+from hu_nmt.data_augmentator.base.depedency_parser_base import \
+    DependencyParserBase
 
 ROOT_KEY = 'root-0'
 

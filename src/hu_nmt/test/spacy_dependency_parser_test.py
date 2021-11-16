@@ -1,8 +1,11 @@
+import filecmp
 import os
 import unittest
-import filecmp
+
 import networkx as nx
-from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
+
+from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import \
+    SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 
 dirname = os.path.dirname(__file__)

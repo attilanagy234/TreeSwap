@@ -1,10 +1,15 @@
 import click
 from tqdm import tqdm
-from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
-from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
+
+from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import \
+    SubjectObjectAugmentator
+from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import \
+    EnglishDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import \
+    SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.logger import get_logger
-from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import \
+    DependencyGraphWrapper
 
 log = get_logger(__name__)
 

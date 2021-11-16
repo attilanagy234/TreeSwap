@@ -1,5 +1,6 @@
-import sentencepiece as spm
 import argparse
+
+import sentencepiece as spm
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

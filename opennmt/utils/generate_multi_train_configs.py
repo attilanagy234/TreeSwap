@@ -1,9 +1,10 @@
 import argparse
-import os
-from typing import List
-import yaml
 import copy
+import os
 import subprocess
+from typing import List
+
+import yaml
 
 
 def get_dirs_at_path(path: str) -> List[str]:

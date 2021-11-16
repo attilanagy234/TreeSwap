@@ -1,19 +1,20 @@
-import yaml
+import os
+from argparse import Namespace
+from collections import Counter, defaultdict
+
+import hydra
+import onmt
 import torch
 import torch.nn as nn
-from argparse import Namespace
-from collections import defaultdict, Counter
-import onmt
-from onmt.inputters.inputter import _load_vocab, _build_fields_vocab, get_fields, IterOnDevice
+import yaml
+from omegaconf import DictConfig
 from onmt.inputters.corpus import ParallelCorpus
 from onmt.inputters.dynamic_iterator import DynamicDatasetIter
-from onmt.translate import GNMTGlobalScorer, Translator, TranslationBuilder
-from onmt.utils.misc import set_random_seed
+from onmt.inputters.inputter import (IterOnDevice, _build_fields_vocab,
+                                     _load_vocab, get_fields)
+from onmt.translate import GNMTGlobalScorer, TranslationBuilder, Translator
 from onmt.utils.logging import init_logger, logger
-import hydra
-from omegaconf import DictConfig
-import os
-
+from onmt.utils.misc import set_random_seed
 
 init_logger()
 is_cuda = torch.cuda.is_available()

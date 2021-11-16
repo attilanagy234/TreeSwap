@@ -1,6 +1,7 @@
 import click
 
-from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import \
+    SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
