@@ -170,6 +170,9 @@ if __name__ == "__main__":
     dummyTransform = DummyTransform(opts)
     dummyTransform.warm_up()
 
+    spt = SentencePieceTransform(opts)
+    spt.warm_up()
+
     gpu_rank = 0 if is_cuda else -1  # TODO: read from config
 
     # if opts.custom_encoder_type == "transformer":
@@ -180,7 +183,7 @@ if __name__ == "__main__":
     # else:
     #     raise ArgumentError(f"Unknown encoder type: {opts.custom_encoder_type}")
     dataset_transforms = {
-        "sentencepiece": sentencepiece,
+        "sentencepiece": spt,
         "berttransform": bertTransform,
         "dummy": dummyTransform
     }

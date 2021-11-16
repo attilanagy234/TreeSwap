@@ -31,16 +31,16 @@ data:
         path_src: ../../../data/hunglish2-train.en
         path_tgt: ../../../data/hunglish2-train.hu 
         weight: 1
-        transforms: [berttransform] # [sentencepiece]
+        transforms: [sentencepiece]
     valid:
         path_src: ../../../data/hunglish2-valid.en
         path_tgt: ../../../data/hunglish2-valid.hu
         weight: 1
-        transforms: [berttransform] # [sentencepiece]
+        transforms: [sentencepiece]
 
 #### Subword
 src_subword_model: sp_models/en.model
-tgt_subword_model: sp_models/hu.model
+tgt_subword_model: sp_models/en.model # Shared vocab, has to be the same
 src_subword_nbest: 1
 src_subword_alpha: 0.0
 tgt_subword_nbest: 1
@@ -71,7 +71,7 @@ keep_checkpoint: -1
 save_checkpoint_steps: 5000
 average_decay: 0.0005
 seed: 1234
-report_every: 100
+report_every: 10
 train_steps: 150000
 valid_steps: 5000 
 single_pass: False
