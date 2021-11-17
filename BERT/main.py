@@ -1,5 +1,6 @@
 import argparse
 from collections import Counter, defaultdict
+from typing import DefaultDict
 
 import onmt
 import sentencepiece
@@ -63,13 +64,18 @@ if __name__ == "__main__":
     elif opts.custom_encoder_type == "custom_bert":
         eng_tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 
-        _src_vocab = [[k, v] for k, v in eng_tokenizer.get_vocab().items()]
-        _src_vocab_size = len(_src_vocab)
-        for k, _ in _src_vocab:
-            counters["src"][k] = 1000  # Set dummy count
+        _src_vocab = [[k, v] for k, v in sorted(eng_tokenizer.get_vocab().items(), key=lambda x: x[1])]
+        src_vocab_size = len(_src_vocab)
+        for k, v in _src_vocab:
+            counters["src"][k] = src_vocab_size - v
 
-        src_vocab_size = _src_vocab_size
         src_words_min_frequency = 0
+
+        # sorted_by_freq_tuples = sorted(eng_tokenizer.get_vocab().items(), key=lambda x: x[1], reverse=True)
+        # from collections import OrderedDict
+        # ordered_dict = OrderedDict(sorted_by_freq_tuples)
+        # from torchtext.vocab import vocab
+        # src_vocab = vocab(ordered_dict)
     else:
         raise ArgumentError(f"Unknown encoder type: {opts.custom_encoder_type}")
 
@@ -105,6 +111,20 @@ if __name__ == "__main__":
 
     src_text_field = vocab_fields["src"].base_field
     src_vocab = src_text_field.vocab
+
+    if opts.custom_encoder_type == "custom_bert":
+        src_text_field.pad_token = "[PAD]"
+        src_text_field.unk_token = "[UNK]"
+        src_vocab.UNK = "[UNK]"
+
+        from collections import defaultdict
+        src_vocab.stoi = defaultdict(lambda: 100)
+        for k, v in _src_vocab:
+            src_vocab.stoi[k] = v
+        src_vocab.itos = [k for k, _ in _src_vocab]
+
+        src_vocab.unk_index = src_vocab.stoi["[UNK]"]
+
     src_padding = src_vocab.stoi[src_text_field.pad_token]
 
     tgt_text_field = vocab_fields["tgt"].base_field
@@ -119,7 +139,7 @@ if __name__ == "__main__":
             opts, encoder_embeddings
         )
     elif opts.custom_encoder_type == "custom_bert":
-        encoder = BertEncoder()
+        encoder = BertEncoder.from_opt(opts)
     else:
         raise ArgumentError(f"Unknown encoder type: {opts.custom_encoder_type}")
 
@@ -164,8 +184,8 @@ if __name__ == "__main__":
     corpus = ParallelCorpus("corpus", src_train, tgt_train)
     valid = ParallelCorpus("valid", src_val, tgt_val)
 
-    bertTransform = EncoderBertTransform(opts)
-    bertTransform.warm_up()
+    encoder_bert_transform = EncoderBertTransform(opts)
+    encoder_bert_transform.warm_up()
 
     dummyTransform = DummyTransform(opts)
     dummyTransform.warm_up()
@@ -182,9 +202,12 @@ if __name__ == "__main__":
     #     dataset_transforms = {"sentencepiece": bertTransform}
     # else:
     #     raise ArgumentError(f"Unknown encoder type: {opts.custom_encoder_type}")
+
+    onmt.transforms.register_transform(EncoderBertTransform)
+
     dataset_transforms = {
         "sentencepiece": spt,
-        "berttransform": bertTransform,
+        "encoderberttransform": encoder_bert_transform,
         "dummy": dummyTransform
     }
 

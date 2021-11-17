@@ -18,9 +18,9 @@ tgt_vocab_size: 30000
 # Where the samples will be written
 save_data: samples
 # Where the vocab(s) will be written
-src_vocab: sp_models/en_bert.vocab
-tgt_vocab: sp_models/vocab.hu 
-share_vocab: false
+src_vocab: sp_models/vocab.en
+tgt_vocab: sp_models/vocab.hu
+share_vocab: true
 vocab_size_multiple: 1
 src_words_min_frequency: 0
 tgt_words_min_frequency: 0
@@ -28,15 +28,19 @@ tgt_words_min_frequency: 0
 # Corpus opts:
 data:
     corpus:
-        path_src: ../../../data/hunglish2-train.en
-        path_tgt: ../../../data/hunglish2-train.hu 
+        #path_src: /home/bana/Data/combined-tiny/hunglish2-tiny-train.en
+        #path_tgt: /home/bana/Data/combined-tiny/hunglish2-tiny-train.hu 
+        path_src: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-train.en
+        path_tgt: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-train.hu
         weight: 1
-        transforms: [encoderberttransform]  # [sentencepiece]
+        transforms: [sentencepiece]  # Keep this line while building vocab
     valid:
-        path_src: ../../../data/hunglish2-valid.en
-        path_tgt: ../../../data/hunglish2-valid.hu
+        #path_src: /home/bana/Data/combined-tiny/hunglish2-tiny-valid.en
+        #path_tgt: /home/bana/Data/combined-tiny/hunglish2-tiny-valid.hu
+        path_src: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-valid.en
+        path_tgt: /home1/hu-nmt/data/Hunglish2/combined-32-simple/hunglish2-valid.hu
         weight: 1
-        transforms: [encoderberttransform]  # [sentencepiece]
+        transforms: [sentencepiece]  # Keep this line while building vocab
 
 #### Subword
 src_subword_model: sp_models/en.model
@@ -45,7 +49,7 @@ src_subword_nbest: 1
 src_subword_alpha: 0.0
 tgt_subword_nbest: 1
 tgt_subword_alpha: 0.0
-subword_model_type: unigram  # TODO: bpe???
+subword_model_type: unigram
 
 #src_seq_length: 16  # maximum source sequence length
 #tgt_seq_length: 16  # maximum target sequence length
@@ -58,8 +62,8 @@ gpu_ranks: [0]
 
 # Batching
 batch_type: tokens  # diff
-batch_size: 7 #4096  # diff
-accum_count: [1]  # [4]
+batch_size: 4096  # diff
+accum_count: [4]
 
 #batch_size: 32
 #queue_size: 16
@@ -95,27 +99,38 @@ max_generator_batches: 32  # diff
 # Model
 #train_from: /home/bana/Code/hu-nmt/opennmt/experiments-bert/runs/bert/model_no_qoutes_step_200000.pt
 #reset_optim: keep_states
+#encoder_type: transformer  # Dummy, will replaced with pretrained BERT
+#decoder_type: transformer
+# enc_layers: 4  # Dummy, will replaced with pretrained BERT
+# dec_layers: 4
+# heads: 8
+# rnn_size: 768
+# enc_rnn_size: 768
+# dec_rnn_size: 768
+# word_vec_size: 768
+# src_word_vec_size: 768
+# tgt_word_vec_size: 768
+# transformer_ff: 2048
+# dropout_steps: [0]
+# dropout: [0.1]
+# attention_dropout: [0.1]
+# share_decoder_embeddings: true
+# encoder_freezed: true
 
-encoder_type: transformer  # Has to be a valid name, not used
-decoder_type: transformer  # Has to be a valid name, not used
-custom_encoder_type: custom_bert
-custom_decoder_type: transformer
-encoder_freezed: true
-enc_layers: 1  # BERT will be used 
+encoder_type: transformer
+decoder_type: transformer
+enc_layers: 8
 dec_layers: 8
 heads: 16
-rnn_size: 768
-enc_rnn_size: 768
-dec_rnn_size: 768
-word_vec_size: 768
-src_word_vec_size: 768
-tgt_word_vec_size: 768
+rnn_size: 1024
+word_vec_size: 1024
 transformer_ff: 2096
 dropout_steps: [0]
 dropout: [0.1]
 attention_dropout: [0.1]
+share_decoder_embeddings: true  # plus
+share_embeddings: true  # plus
 position_encoding: true  # diff
-
 
 # Logging
 log_file: logs
