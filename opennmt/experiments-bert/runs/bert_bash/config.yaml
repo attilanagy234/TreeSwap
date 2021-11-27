@@ -13,7 +13,7 @@ pair_output_path: run/paired.text
 translate_model: run/model.pt
 
 src_vocab_size: 30000
-tgt_vocab_size: 30000
+tgt_vocab_size: 30000  # Shared vocab, has to be the same
 
 # Where the samples will be written
 save_data: samples
@@ -29,18 +29,23 @@ tgt_words_min_frequency: 0
 data:
     corpus:
         path_src: ../../../data/hunglish2-train.en
-        path_tgt: ../../../data/hunglish2-train.hu
+        path_tgt: ../../../data/hunglish2-train.hu 
         weight: 1
-        transforms: [encoderberttransform]  # [sentencepiece]
+        transforms: [encoder_bert_transform]
+    valid:
+        path_src: ../../../data/hunglish2-valid.en
+        path_tgt: ../../../data/hunglish2-valid.hu
+        weight: 1
+        transforms: [encoder_bert_transform]
 
 #### Subword
-src_subword_model: sp_models/en.model
-tgt_subword_model: sp_models/hu.model
+#src_subword_model: sp_models/en.model
+tgt_subword_model: sp_models/hu.model # Shared vocab, has to be the same
 src_subword_nbest: 1
 src_subword_alpha: 0.0
 tgt_subword_nbest: 1
 tgt_subword_alpha: 0.0
-subword_model_type: unigram  # TODO: bpe???
+subword_model_type: unigram
 
 #src_seq_length: 16  # maximum source sequence length
 #tgt_seq_length: 16  # maximum target sequence length
@@ -63,12 +68,12 @@ accum_count: [4]
 # General opts
 save_model: run/model
 keep_checkpoint: -1
-save_checkpoint_steps: 5000
+save_checkpoint_steps: 10000
 average_decay: 0.0005
 seed: 1234
 report_every: 100
 train_steps: 150000
-valid_steps: 5000 
+valid_steps: 10000
 single_pass: False
 early_stopping: 4 
 early_stopping_criteria: ppl
@@ -91,26 +96,23 @@ max_generator_batches: 32  # diff
 #train_from: /home/bana/Code/hu-nmt/opennmt/experiments-bert/runs/bert/model_no_qoutes_step_200000.pt
 #reset_optim: keep_states
 
-encoder_type: transformer  # Has to be a valid name, not used
-decoder_type: transformer  # Has to be a valid name, not used
-custom_encoder_type: custom_bert
-custom_decoder_type: transformer
+encoder_type: bert
+decoder_type: transformer
 encoder_freezed: true
-enc_layers: 1  # BERT will be used 
+enc_layers: 8  # BERT will be used
 dec_layers: 8
 heads: 16
 rnn_size: 768
 enc_rnn_size: 768
-dec_rnn_size: 768
+dec_rnn_size: 1024
 word_vec_size: 768
-src_word_vec_size: 768
-tgt_word_vec_size: 768
+src_word_vec_size: 786
+tgt_word_vec_size: 1024
 transformer_ff: 2096
 dropout_steps: [0]
 dropout: [0.1]
 attention_dropout: [0.1]
 position_encoding: true  # diff
-
 
 # Logging
 log_file: logs

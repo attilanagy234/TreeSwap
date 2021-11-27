@@ -4,7 +4,6 @@ jupyter==1.0.0
 matplotlib==3.3.4
 numpy==1.19.2
 omegaconf==2.0.6
-OpenNMT-py==2.1.2
 pandas==1.2.1
 PyYAML==5.4
 requests==2.25.1

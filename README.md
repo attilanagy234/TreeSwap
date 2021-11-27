@@ -161,3 +161,12 @@ It saves the following in the `history.tsv` file in the history directory:
 - `git_hash` - hash of the git commit that was used
 
 If there is a new parameter added to the config the previous runs will have `None` as a value for that parameter.
+
+
+# BERT
+## OpenNMT installation
+In order to use custom models OpenNMT's source code has to be installed
+
+```sh
+git clone https://github.com/OpenNMT/OpenNMT-py.git
+```
