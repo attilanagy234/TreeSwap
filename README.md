@@ -1,5 +1,5 @@
-# hu-nmt
-
+# syntax-augmentation-nmt
+Complimentary code for our paper Syntax-based data augmentation for Hungarian-English machine translation submitted to the XVIII. Conference on Hungarian Computational Linguistics.
 
 
 ## Building the data augmentation package
