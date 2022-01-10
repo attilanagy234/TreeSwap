@@ -1,6 +1,9 @@
 # syntax-augmentation-nmt
 Complimentary code for our paper Syntax-based data augmentation for Hungarian-English machine translation submitted to the XVIII. Conference on Hungarian Computational Linguistics.
 
+## Trained models
+You can download the trained models reported in our paper from [this link](https://drive.google.com/drive/folders/13t9M0-j96ylqtkH0nd422wVzHmkAjvhk).
+
 
 ## Building the data augmentation package
 
@@ -57,34 +60,6 @@ To set up PyCharm with this virtual environment, just configure it as the projec
 You can obtain the path for the virtualenv by:
 ```bash
 poetry env info --path
-```
-
-## Installing Stanza models:
-```python
-import stanza
-stanza.download('en')
-```
-
-## Installing Hungarian Spacy models
-```bash
-pip install https://github.com/oroszgy/spacy-hungarian-models/releases/download/hu_core_ud_lg-0.3.1/hu_core_ud_lg-0.3.1-py3-none-any.whl  
-```
-
-## Dependency parsing for Hungarian
-We use [Spacy](https://github.com/oroszgy/spacy-hungarian-models) for creating the dependency parse trees for Hungarian sentences.
-To precompute dependency graphs and serialize them to TSVs:
-```bash
-cd hu_nmt/src
-./precompute_hungarian_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
-
-```
-
-## Dependency parsing for English
-We use Stanza for English dependency parsing.
-To precompute dependency graphs and serialize them to TSVs:
-```bash
-cd hu_nmt/src
-./precompute_english_dependency_trees.sh <data_input_path> <output_path> <file_batch_size>
 ```
 
 # Training models
