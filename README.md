@@ -1,5 +1,5 @@
 # syntax-augmentation-nmt
-Complimentary code for our paper Syntax-based data augmentation for Hungarian-English machine translation submitted to the XVIII. Conference on Hungarian Computational Linguistics.
+Complimentary code for our paper [Syntax-based data augmentation for Hungarian-English machine translation](https://arxiv.org/abs/2201.06876) submitted to the XVIII. Conference on Hungarian Computational Linguistics.
 
 ## Trained models
 You can download the trained models reported in our paper from [this link](https://drive.google.com/drive/folders/13t9M0-j96ylqtkH0nd422wVzHmkAjvhk).
