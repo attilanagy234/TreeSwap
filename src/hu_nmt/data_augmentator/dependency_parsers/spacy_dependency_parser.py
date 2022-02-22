@@ -1,6 +1,6 @@
 from typing import List
 
-import hu_core_ud_lg
+import huspacy
 import networkx as nx
 import spacy
 
@@ -15,7 +15,15 @@ ROOT_KEY = 'root_0'
 class SpacyDependencyParser(DependencyParserBase):
     def __init__(self, lang):
         if lang == 'hu':
-            self.nlp_pipeline = hu_core_ud_lg.load()
+            try:
+                self.nlp_pipeline = huspacy.load()
+            except OSError as e:
+                log.info(f'Could not load {lang} model:',e)
+                log.info('Downloading model')
+                huspacy.download()
+                log.info('Retrying model loading')
+                self.nlp_pipeline = huspacy.load()
+
         elif lang == 'de':
             self.nlp_pipeline = spacy.load("de_core_news_sm")
         elif lang == 'fr':
