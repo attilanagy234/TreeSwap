@@ -26,10 +26,9 @@ class Preprocessor:
 
             for i, (source_line, target_line) in enumerate(zip(source_file, target_file)):
                 source_sentence, target_sentence = source_line.strip(), target_line.strip()
+                source_sentence = self.clean_sentence(source_sentence)
+                target_sentence = self.clean_sentence(target_sentence)
                 if self.is_good_length(source_sentence, target_sentence):
-                    source_sentence = self.clean_sentence(source_sentence)
-                    target_sentence = self.clean_sentence(target_sentence)
-
                     source_output_file.write(source_sentence + '\n')
                     target_output_file.write(target_sentence + '\n')
 
