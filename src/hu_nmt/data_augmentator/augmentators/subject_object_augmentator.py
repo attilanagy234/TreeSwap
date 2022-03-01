@@ -11,6 +11,7 @@ from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.filters.filter import Filter
 
 log = get_logger(__name__)
 log.setLevel('DEBUG')
@@ -19,7 +20,7 @@ log.setLevel('DEBUG')
 class SubjectObjectAugmentator(AugmentatorBase):
 
     def __init__(self, eng_graphs: Optional[List[DependencyGraphWrapper]], hun_graphs: Optional[List[DependencyGraphWrapper]],
-                 augmented_data_ratio: float, random_seed: int, output_path: str, output_format: str, save_original: bool = False):
+                 augmented_data_ratio: float, random_seed: int, filters: List[Filter], output_path: str, output_format: str, save_original: bool = False):
         super().__init__()
         if eng_graphs and hun_graphs and len(eng_graphs) != len(hun_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
@@ -37,6 +38,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
             self._num_augmented_sentences_to_generate_per_method = int(self._pre_filter_sentence_count * float(self.augmented_data_ratio))
 
         np.random.seed = random_seed
+        self.filters = filters
         self._output_path = output_path
         self.output_format = output_format
         self.save_original = save_original
@@ -44,14 +46,14 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         self._augmentation_candidate_translations: List[TranslationGraph] = []
         sentence_pairs_template = {
-            'obj_swapping_same_predicate_lemma': {
-                'hun': [],
-                'eng': []
-            },
-            'subj_swapping_same_predicate_lemma': {
-                'hun': [],
-                'eng': []
-            },
+            # 'obj_swapping_same_predicate_lemma': {
+            #     'hun': [],
+            #     'eng': []
+            # },
+            # 'subj_swapping_same_predicate_lemma': {
+            #     'hun': [],
+            #     'eng': []
+            # },
             'subj_swapping': {
                 'hun': [],
                 'eng': []
@@ -60,10 +62,10 @@ class SubjectObjectAugmentator(AugmentatorBase):
                 'hun': [],
                 'eng': []
             },
-            'predicate_swapping': {
-                'hun': [],
-                'eng': []
-            }
+            # 'predicate_swapping': {
+            #     'hun': [],
+            #     'eng': []
+            # }
         }
         self._augmented_sentence_pairs = copy.deepcopy(sentence_pairs_template)
         if self.save_original:
@@ -94,14 +96,24 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         log.info(f'Working with {len(self._augmentation_candidate_translations)} candidate sentence pairs')
         log.info(f'Going to generate {self._num_augmented_sentences_to_generate_per_method} augmented sentences per method')
-        lemmas_to_graphs = self.group_candidates_by_predicate_lemmas()
+        # lemmas_to_graphs = self.group_candidates_by_predicate_lemmas()
 
-        self.augment_subtree_swapping_with_same_predicate_lemmas(lemmas_to_graphs)
-        self.augment_predicate_swapping()
+        # self.augment_subtree_swapping_with_same_predicate_lemmas(lemmas_to_graphs)
+        # self.augment_predicate_swapping()
         self.augment_subtree_swapping()
 
-        # for i in range(10):
-        #     self.print_augmented_pairs(i)
+        # filter
+        if len(self.filters) > 0:
+            number_of_sents_per_aug_method = {aug_name: len(sents['hun']) for aug_name, sents in self._augmented_sentence_pairs.items()}
+            log.info(f'Number of sentences per method before filtering: {number_of_sents_per_aug_method}')
+            log.info('Filtering sentences...')
+            for aug_method_name, sentences in self._augmented_sentence_pairs.items():
+                for filter in self.filters:
+                    filtered_hun, filtered_eng = filter.filter(sentences['hun'], sentences['eng'])
+                    self._augmented_sentence_pairs[aug_method_name]['hun'] = filtered_hun
+                    self._augmented_sentence_pairs[aug_method_name]['eng'] = filtered_eng
+            number_of_sents_per_aug_method = {aug_name: len(sents['hun']) for aug_name, sents in self._augmented_sentence_pairs.items()}
+            log.info(f'Number of sentences per method after filtering: {number_of_sents_per_aug_method}')
 
         self.dump_augmented_sentences_to_files()
 
@@ -155,14 +167,21 @@ class SubjectObjectAugmentator(AugmentatorBase):
         """
         log.info('Starting subtree swapping on all permutations')
         sample_cnt = int(self._num_augmented_sentences_to_generate_per_method / 2)
-        sampled_translation_pairs = self.sample_item_pairs(self._augmentation_candidate_translations, sample_cnt)
+        # increase sample count to
+        pre_filter_multiplier = np.prod([filter.get_pre_filter_data_multiplier() for filter in self.filters])
+        pre_filter_sample_cnt = int(sample_cnt * pre_filter_multiplier)
+        sampled_translation_pairs = self.sample_item_pairs(self._augmentation_candidate_translations, pre_filter_sample_cnt)
         self.swap_subtrees_among_combinations(sampled_translation_pairs, same_predicate_lemma=False)
+
         log.info('Finished subtree swapping on all permutations')
 
     def swap_subtrees_among_combinations(self, translation_pairs: List[Tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
         for translation_pair in tqdm(translation_pairs):
             try:
-                original_hun_sents, original_eng_sents = self.reconstruct_translation_pair(translation_pair)
+                if self.save_original:
+                    original_hun_sents, original_eng_sents = self.reconstruct_translation_pair(translation_pair)
+
+                # object swapping
                 hun_sents, eng_sents = self.augment_pair(translation_pair, 'obj')
                 if same_predicate_lemma:
                     key = 'obj_swapping_same_predicate_lemma'
@@ -173,6 +192,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
                     self._original_augmentation_sentence_pairs[key]['eng'].extend(original_eng_sents)
                 self._augmented_sentence_pairs[key]['hun'].extend(hun_sents)
                 self._augmented_sentence_pairs[key]['eng'].extend(eng_sents)
+
+                # subject swapping
                 hun_sents, eng_sents = self.augment_pair(translation_pair, 'nsubj')
                 if same_predicate_lemma:
                     key = 'subj_swapping_same_predicate_lemma'

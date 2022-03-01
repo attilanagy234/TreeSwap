@@ -136,7 +136,7 @@ class DependencyParserBase(ABC):
                         process_used_bytes = process.memory_info().rss
                         available_bytes = psutil.virtual_memory().available
                         log.info(f'There could be {available_bytes / process_used_bytes} processes spawned to fill up the available memory')
-                        process_count = max(floor(available_bytes / process_used_bytes), 1)
+                        process_count = min(max(floor(available_bytes / process_used_bytes), 1), mp.cpu_count())
                         log.info(f'Decided to use {process_count} processes based on available memory')
                         first_run = False
 
