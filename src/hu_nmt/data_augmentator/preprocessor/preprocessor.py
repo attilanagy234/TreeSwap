@@ -21,8 +21,8 @@ class Preprocessor:
         number_of_lines_saved_to_file = 0
         with open(self._source_data_path) as source_file, \
              open(self._target_data_path) as target_file, \
-             open(self._source_output_path, 'w+') as source_output_file, \
-             open(self._target_output_path, 'w+') as target_output_file:
+             open(self._source_output_path, 'w') as source_output_file, \
+             open(self._target_output_path, 'w') as target_output_file:
 
             for i, (source_line, target_line) in enumerate(zip(source_file, target_file)):
                 source_sentence, target_sentence = source_line.strip(), target_line.strip()
