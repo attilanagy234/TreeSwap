@@ -49,14 +49,14 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self._augmentation_candidate_translations: List[TranslationGraph] = []
         self._separate_candidate_translations: Dict[str, List[TranslationGraph]] = {}
         sentence_pairs_template = {
-            # 'obj_swapping_same_predicate_lemma': {
-            #     'hun': [],
-            #     'eng': []
-            # },
-            # 'subj_swapping_same_predicate_lemma': {
-            #     'hun': [],
-            #     'eng': []
-            # },
+             'obj_swapping_same_predicate_lemma': {
+                 'hun': [],
+                 'eng': []
+             },
+             'subj_swapping_same_predicate_lemma': {
+                 'hun': [],
+                 'eng': []
+             },
             'subj_swapping': {
                 'hun': [],
                 'eng': []

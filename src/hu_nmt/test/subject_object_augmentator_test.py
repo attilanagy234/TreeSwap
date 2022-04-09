@@ -18,7 +18,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
     def test_subject_object_augmentator_setup(self):
         # action
-        augmentator = SubjectObjectAugmentator(list(range(5)), list(range(5)), 0.5, 123, '', '')
+        augmentator = SubjectObjectAugmentator(list(range(5)), list(range(5)), 0.5, 123, [], '', '')
 
         # assert
         self.assertEqual(2, augmentator._num_augmented_sentences_to_generate_per_method)
@@ -38,7 +38,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in sentence_pairs]
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
-        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, '', 'tsv')
+        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
 
         # assert
         assert_values = [False, False, False, False, False, True]
@@ -54,13 +54,13 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             ('I like ice cream', 'Én szeretem a fagyit.'),
             ('I like bikes.', 'Én szeretem a bicikliket.'),
             ('They liked fish.', 'Ők szerették a halakat.'),
-            ('We hate the red cars.', 'Mi utáljuk a piros autókat.'),
+            ('You hate the red cars.', 'Ti utáljátok a piros autókat.'),
         ]
         eng_dep_trees = [self.english_dep_parser.sentence_to_dep_parse_tree(sent_pair[0]) for sent_pair in sentence_pairs]
         hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in sentence_pairs]
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
-        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, '', 'tsv')
+        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
         augmentator._augmentation_candidate_translations = augmentator.find_augmentable_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(4, len(augmentator._augmentation_candidate_translations))
 
@@ -84,7 +84,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in sentence_pairs]
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
-        augmentator = SubjectObjectAugmentator([], [], 2, 123, '', '')
+        augmentator = SubjectObjectAugmentator([], [], 2, 123, [], '', '')
 
         # action
         eng_res = augmentator.swap_predicates(eng_graph_wrappers[0], eng_graph_wrappers[1])
@@ -106,7 +106,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in sentence_pairs]
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
-        augmentator = SubjectObjectAugmentator([], [], 2, 123, '', '')
+        augmentator = SubjectObjectAugmentator([], [], 2, 123, [], '', '')
 
         # action
         eng_obj_res = augmentator.swap_subtrees(eng_graph_wrappers[0], eng_graph_wrappers[1], 'obj')
@@ -130,13 +130,13 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             ('I like ice cream', 'Én szeretem a fagyit.'),
             ('I like bikes.', 'Én szeretem a bicikliket.'),
             ('They liked fish.', 'Ők szerették a halakat.'),
-            ('We hate the red cars.', 'Mi utáljuk a piros autókat.'),
+            ('You hate the red cars.', 'Ti utáljátok a piros autókat.'),
         ]
         eng_dep_trees = [self.english_dep_parser.sentence_to_dep_parse_tree(sent_pair[0]) for sent_pair in sentence_pairs]
         hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in sentence_pairs]
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
-        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 2, 123, '', 'tsv')
+        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 2, 123, [], '', 'tsv')
         augmentator._augmentation_candidate_translations = augmentator.find_augmentable_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(4, len(augmentator._augmentation_candidate_translations))
 
@@ -157,13 +157,13 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             ('I like ice cream', 'Én szeretem a fagyit.'),
             ('I like bikes.', 'Én szeretem a bicikliket.'),
             ('They liked fish.', 'Ők szerették a halakat.'),
-            ('We hate the red cars.', 'Mi utáljuk a piros autókat.'),
+            ('You hate the red cars.', 'Ti utáljátok a piros autókat.'),
         ]
         eng_dep_trees = [self.english_dep_parser.sentence_to_dep_parse_tree(sent_pair[0]) for sent_pair in sentence_pairs]
         hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in sentence_pairs]
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
-        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, '', 'tsv')
+        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
         augmentator._augmentation_candidate_translations = augmentator.find_augmentable_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(4, len(augmentator._augmentation_candidate_translations))
 
