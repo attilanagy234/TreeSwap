@@ -96,12 +96,16 @@ class SubjectObjectAugmentator(AugmentatorBase):
         else:
             log.info('Finding augmentable sentence pairs...')
             if self.separate_augmentation:
-                self._augmentation_candidate_translations = self.find_augmentable_candidates(self._hun_graphs, self._eng_graphs, with_progress_bar=True)
-                log.info(f'Working with {len(self._augmentation_candidate_translations)} candidate sentence pairs')
-            else:
-                self._separate_candidate_translations = self.find_separate_candidates(self._hun_graphs, self._eng_graphs, with_progress_bar=True)
+                self._separate_candidate_translations = self.find_separate_candidates(self._hun_graphs,
+                                                                                      self._eng_graphs,
+                                                                                      with_progress_bar=True)
                 log.info(f'Working with {len(self._separate_candidate_translations["obj"])} object candidate sentence pairs')
                 log.info(f'Working with {len(self._separate_candidate_translations["nsubj"])} candidate sentence pairs')
+            else:
+                self._augmentation_candidate_translations = self.find_augmentable_candidates(self._hun_graphs,
+                                                                                             self._eng_graphs,
+                                                                                             with_progress_bar=True)
+                log.info(f'Working with {len(self._augmentation_candidate_translations)} candidate sentence pairs')
 
         log.info(f'Going to generate {self._num_augmented_sentences_to_generate_per_method} augmented sentences per method')
         # lemmas_to_graphs = self.group_candidates_by_predicate_lemmas()
