@@ -45,8 +45,8 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         for value, hun_g, eng_g in zip(assert_values, hun_graph_wrappers, eng_graph_wrappers):
             self.assertEqual(value, augmentator.is_eligible_for_augmentation(hun_g, eng_g))
 
-        augmentator._separate_candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
-        self.assertEqual(2, len(augmentator._separate_candidate_translations['both']))
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        self.assertEqual(2, len(augmentator._candidate_translations['both']))
 
     def test_is_eligible_for_separate_augmentation_and_find_augmentable_candidates(self):
         # setup
@@ -71,9 +71,35 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             self.assertEqual(obj_value, augmentator.is_eligible_for_separate_augmentation(hun_g, eng_g, 'obj'))
             self.assertEqual(nsubj_value, augmentator.is_eligible_for_separate_augmentation(hun_g, eng_g, 'nsubj'))
 
-        augmentator._separate_candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs, separate_augmentation=True)
-        self.assertEqual(4, len(augmentator._separate_candidate_translations['obj']))
-        self.assertEqual(4, len(augmentator._separate_candidate_translations['nsubj']))
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs, separate_augmentation=True)
+        self.assertEqual(4, len(augmentator._candidate_translations['obj']))
+        self.assertEqual(4, len(augmentator._candidate_translations['nsubj']))
+
+    def test_add_augmentable_candidates_both(self):
+        # setup
+        sentence_pairs = [
+            ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
+            ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
+            ('He loves your huge ego.', 'Ő szereti a nagy egód.'),
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
+            ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
+            ('I like to make pancakes.', 'Én szeretek palacsintát csinálni.'),  # not same ancestor for hun and eng
+            ('I like ice cream', 'Én szeretem a fagyit.'),
+        ]
+        eng_dep_trees = [self.english_dep_parser.sentence_to_dep_parse_tree(sent_pair[0]) for sent_pair in
+                         sentence_pairs]
+        hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in
+                         sentence_pairs]
+        eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
+        hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
+        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
+
+        # action
+        augmentator.add_augmentable_candidates(hun_graph_wrappers[:4], eng_graph_wrappers[:4])
+        augmentator.add_augmentable_candidates(hun_graph_wrappers[4:], eng_graph_wrappers[4:])
+
+        # assert
+        self.assertEqual(2, len(augmentator._candidate_translations['both']))
 
     def test_group_candidates_by_predicate_lemmas(self):
         # setup
@@ -88,8 +114,8 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
-        augmentator._separate_candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
-        self.assertEqual(4, len(augmentator._separate_candidate_translations['both']))
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        self.assertEqual(4, len(augmentator._candidate_translations['both']))
 
         # action
         lemmas_to_graphs = augmentator.group_candidates_by_predicate_lemmas()
@@ -164,8 +190,8 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 2, 123, [], '', 'tsv')
-        augmentator._separate_candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
-        self.assertEqual(4, len(augmentator._separate_candidate_translations['both']))
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        self.assertEqual(4, len(augmentator._candidate_translations['both']))
 
         # action
         lemmas_to_graphs = augmentator.group_candidates_by_predicate_lemmas()
@@ -191,8 +217,8 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
-        augmentator._separate_candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
-        self.assertEqual(4, len(augmentator._separate_candidate_translations['both']))
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        self.assertEqual(4, len(augmentator._candidate_translations['both']))
 
         translation_sample = [tuple([TranslationGraph(hun_graph_wrappers[i], eng_graph_wrappers[i]) for i in range(2)])]
         augmentator.sample_list = MagicMock(return_value=translation_sample)
@@ -227,12 +253,12 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '',
                                                'tsv', separate_augmentation=True)
-        augmentator._separate_candidate_translations = augmentator.find_candidates(hun_graph_wrappers,
-                                                                                   eng_graph_wrappers,
-                                                                                   with_progress_bar=False,
-                                                                                   separate_augmentation=True)
+        augmentator._candidate_translations = augmentator.find_candidates(hun_graph_wrappers,
+                                                                          eng_graph_wrappers,
+                                                                          with_progress_bar=False,
+                                                                          separate_augmentation=True)
         object_translation_pairs = SubjectObjectAugmentator.sample_item_pairs(
-            augmentator._separate_candidate_translations['obj'], 1)
+            augmentator._candidate_translations['obj'], 1)
 
         # action
         augmentator.swap_object_subtrees(object_translation_pairs, False)
@@ -260,12 +286,12 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '',
                                                'tsv', separate_augmentation=True)
-        augmentator._separate_candidate_translations = augmentator.find_candidates(hun_graph_wrappers,
-                                                                                   eng_graph_wrappers,
-                                                                                   with_progress_bar=False,
-                                                                                   separate_augmentation=True)
+        augmentator._candidate_translations = augmentator.find_candidates(hun_graph_wrappers,
+                                                                          eng_graph_wrappers,
+                                                                          with_progress_bar=False,
+                                                                          separate_augmentation=True)
         subject_translation_pairs = SubjectObjectAugmentator.sample_item_pairs(
-            augmentator._separate_candidate_translations['nsubj'], 1)
+            augmentator._candidate_translations['nsubj'], 1)
 
         # action
         augmentator.swap_subject_subtrees(subject_translation_pairs, False)
