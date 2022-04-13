@@ -43,7 +43,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         # assert
         assert_values = [False, False, False, False, False, True]
         for value, hun_g, eng_g in zip(assert_values, hun_graph_wrappers, eng_graph_wrappers):
-            self.assertEqual(value, augmentator.is_eligible_for_augmentation(hun_g, eng_g))
+            self.assertEqual(value, augmentator.is_eligible_for_both_augmentation(hun_g, eng_g))
 
         augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
         self.assertEqual(2, len(augmentator._candidate_translations['both']))
@@ -68,8 +68,8 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         assert_obj_values = [True, True, False, False, True, True]
         assert_nsubj_values = [False, False, True, True, True, True]
         for obj_value, nsubj_value, hun_g, eng_g in zip(assert_obj_values, assert_nsubj_values, hun_graph_wrappers, eng_graph_wrappers):
-            self.assertEqual(obj_value, augmentator.is_eligible_for_separate_augmentation(hun_g, eng_g, 'obj'))
-            self.assertEqual(nsubj_value, augmentator.is_eligible_for_separate_augmentation(hun_g, eng_g, 'nsubj'))
+            self.assertEqual(obj_value, augmentator.is_eligible_for_augmentation(hun_g, eng_g, 'obj'))
+            self.assertEqual(nsubj_value, augmentator.is_eligible_for_augmentation(hun_g, eng_g, 'nsubj'))
 
         augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs, separate_augmentation=True)
         self.assertEqual(4, len(augmentator._candidate_translations['obj']))
@@ -288,7 +288,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             augmentator._candidate_translations['obj'], 1)
 
         # action
-        augmentator.swap_object_subtrees(object_translation_pairs, False)
+        augmentator.swap_dep_subtrees(object_translation_pairs, 'obj', False)
 
         # assert
         obj_result1 = {'hun': ['Sétáltattam egy csodát az utcán .', 'Én láttam a kutyámat .'],
@@ -321,7 +321,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             augmentator._candidate_translations['nsubj'], 1)
 
         # action
-        augmentator.swap_subject_subtrees(subject_translation_pairs, False)
+        augmentator.swap_dep_subtrees(subject_translation_pairs, 'nsubj', False)
 
         # assert
         nsubj_result1 = {'hun': ['A férfi tegnap sétáltam az erdőben .', 'Én túl sokat beszélt .'],

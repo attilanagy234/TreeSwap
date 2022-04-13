@@ -182,84 +182,37 @@ class SubjectObjectAugmentator(AugmentatorBase):
         if self.separate_augmentation:
             object_translation_pairs = self.sample_item_pairs(self._candidate_translations['obj'],
                                                               pre_filter_sample_cnt)
-            self.swap_object_subtrees(object_translation_pairs, same_predicate_lemma=False)
+
             subject_translation_pairs = self.sample_item_pairs(self._candidate_translations['nsubj'],
                                                                pre_filter_sample_cnt)
-            self.swap_subject_subtrees(subject_translation_pairs, same_predicate_lemma=False)
         else:
-            sampled_translation_pairs = self.sample_item_pairs(self._candidate_translations["both"], pre_filter_sample_cnt)
-            self.swap_subtrees_among_combinations(sampled_translation_pairs, same_predicate_lemma=False)
+            object_translation_pairs = self.sample_item_pairs(self._candidate_translations["both"],
+                                                              pre_filter_sample_cnt)
+            # self.swap_subtrees_among_combinations(sampled_translation_pairs, same_predicate_lemma=False)
+            subject_translation_pairs = object_translation_pairs
+        self.swap_dep_subtrees(object_translation_pairs, 'obj', same_predicate_lemma=False)
+        self.swap_dep_subtrees(subject_translation_pairs, 'nsubj', same_predicate_lemma=False)
 
         log.info('Finished subtree swapping on all permutations')
 
-    def swap_subtrees_among_combinations(self, translation_pairs: List[Tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
+    def swap_dep_subtrees(self, translation_pairs: List[Tuple[TranslationGraph, TranslationGraph]], dep: str, same_predicate_lemma: bool):
+        if dep == 'obj':
+            augmentation_key = 'obj_swapping'
+        elif dep == 'nsubj':
+            augmentation_key = 'subj_swapping'
+        else:
+            raise ValueError("Invalid dependency name value!")
         for translation_pair in tqdm(translation_pairs):
             try:
                 if self.save_original:
                     original_hun_sents, original_eng_sents = self.reconstruct_translation_pair(translation_pair)
 
-                # object swapping
-                hun_sents, eng_sents = self.augment_pair(translation_pair, 'obj')
+                # swapping
+                hun_sents, eng_sents = self.augment_pair(translation_pair, dep)
                 if same_predicate_lemma:
-                    key = 'obj_swapping_same_predicate_lemma'
+                    key = f'{augmentation_key}_same_predicate_lemma'
                 else:
-                    key = 'obj_swapping'
-                if self.save_original:
-                    self._original_augmentation_sentence_pairs[key]['hun'].extend(original_hun_sents)
-                    self._original_augmentation_sentence_pairs[key]['eng'].extend(original_eng_sents)
-                self._augmented_sentence_pairs[key]['hun'].extend(hun_sents)
-                self._augmented_sentence_pairs[key]['eng'].extend(eng_sents)
-
-                # subject swapping
-                hun_sents, eng_sents = self.augment_pair(translation_pair, 'nsubj')
-                if same_predicate_lemma:
-                    key = 'subj_swapping_same_predicate_lemma'
-                else:
-                    key = 'subj_swapping'
-                if self.save_original:
-                    self._original_augmentation_sentence_pairs[key]['hun'].extend(original_hun_sents)
-                    self._original_augmentation_sentence_pairs[key]['eng'].extend(original_eng_sents)
-                self._augmented_sentence_pairs[key]['hun'].extend(hun_sents)
-                self._augmented_sentence_pairs[key]['eng'].extend(eng_sents)
-            except Exception as e:
-                self.error_cnt += 1
-                log.exception(f'Cannot process sentence')
-        log.info(f'Could not perform {self.error_cnt} augmentations so far')
-
-    def swap_object_subtrees(self, translation_pairs: List[Tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
-        for translation_pair in tqdm(translation_pairs):
-            try:
-                if self.save_original:
-                    original_hun_sents, original_eng_sents = self.reconstruct_translation_pair(translation_pair)
-
-                # object swapping
-                hun_sents, eng_sents = self.augment_pair(translation_pair, 'obj')
-                if same_predicate_lemma:
-                    key = 'obj_swapping_same_predicate_lemma'
-                else:
-                    key = 'obj_swapping'
-                if self.save_original:
-                    self._original_augmentation_sentence_pairs[key]['hun'].extend(original_hun_sents)
-                    self._original_augmentation_sentence_pairs[key]['eng'].extend(original_eng_sents)
-                self._augmented_sentence_pairs[key]['hun'].extend(hun_sents)
-                self._augmented_sentence_pairs[key]['eng'].extend(eng_sents)
-            except Exception as e:
-                self.error_cnt += 1
-                log.exception(f'Cannot process sentence')
-        log.info(f'Could not perform {self.error_cnt} augmentations so far')
-
-    def swap_subject_subtrees(self, translation_pairs: List[Tuple[TranslationGraph, TranslationGraph]], same_predicate_lemma: bool):
-        for translation_pair in tqdm(translation_pairs):
-            try:
-                if self.save_original:
-                    original_hun_sents, original_eng_sents = self.reconstruct_translation_pair(translation_pair)
-
-                # object swapping
-                hun_sents, eng_sents = self.augment_pair(translation_pair, 'nsubj')
-                if same_predicate_lemma:
-                    key = 'subj_swapping_same_predicate_lemma'
-                else:
-                    key = 'subj_swapping'
+                    key = augmentation_key
                 if self.save_original:
                     self._original_augmentation_sentence_pairs[key]['hun'].extend(original_hun_sents)
                     self._original_augmentation_sentence_pairs[key]['eng'].extend(original_eng_sents)
@@ -292,7 +245,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         if len(translation_combinations) > sample_cnt:
             translation_combinations = self.sample_list(translation_combinations, sample_cnt)
 
-        self.swap_subtrees_among_combinations(translation_combinations, same_predicate_lemma=True)
+        self.swap_dep_subtrees(translation_combinations, 'obj', same_predicate_lemma=True)
+        self.swap_dep_subtrees(translation_combinations, 'nsubj', same_predicate_lemma=True)
         log.info('Finished subtree swapping with same predicate lemmas')
 
     def augment_pair(self, translation_pair: Tuple[TranslationGraph, TranslationGraph], augmentation_type) -> Tuple[List[str], List[str]]:
@@ -394,21 +348,6 @@ class SubjectObjectAugmentator(AugmentatorBase):
         ids = [int(x.rpartition('_')[-1]) for x in node_ids]
         return min(ids), max(ids)
 
-    # @staticmethod
-    # def find_augmentable_candidates(hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper], with_progress_bar: bool = False) -> List[TranslationGraph]:
-    #     augmentation_candidate_translations = []
-    #
-    #     if with_progress_bar:
-    #         iterable = tqdm(zip(hun_graphs, eng_graphs))
-    #     else:
-    #         iterable = zip(hun_graphs, eng_graphs)
-    #
-    #     for hun_graph, eng_graph in iterable:
-    #         if SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph):
-    #             augmentation_candidate_translations.append(TranslationGraph(hun_graph, eng_graph))
-    #
-    #     return augmentation_candidate_translations
-
     @staticmethod
     def find_candidates(hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper], with_progress_bar: bool = False, separate_augmentation: bool = False) -> Dict[str, List[TranslationGraph]]:
         candidates = {'obj': [], 'nsubj': [], 'both': []}
@@ -419,14 +358,14 @@ class SubjectObjectAugmentator(AugmentatorBase):
             iterable = zip(hun_graphs, eng_graphs)
         if separate_augmentation:
             for hun_graph, eng_graph in iterable:
-                if SubjectObjectAugmentator.is_eligible_for_separate_augmentation(hun_graph, eng_graph, 'obj'):
+                if SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph, 'obj'):
                     candidates['obj'].append(TranslationGraph(hun_graph, eng_graph))
-                if SubjectObjectAugmentator.is_eligible_for_separate_augmentation(hun_graph, eng_graph, 'nsubj'):
+                if SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph, 'nsubj'):
                     candidates['nsubj'].append(TranslationGraph(hun_graph, eng_graph))
             return candidates
         else:
             for hun_graph, eng_graph in iterable:
-                if SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph):
+                if SubjectObjectAugmentator.is_eligible_for_both_augmentation(hun_graph, eng_graph):
                     candidates['both'].append(TranslationGraph(hun_graph, eng_graph))
             return candidates
 
@@ -438,14 +377,14 @@ class SubjectObjectAugmentator(AugmentatorBase):
             self._candidate_translations[k].extend(new_candidates[k])
 
     @staticmethod
-    def is_eligible_for_augmentation(hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
+    def is_eligible_for_both_augmentation(hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper) -> bool:
         """
         Tests if a sentence (graph) pair is eligible for augmentation
         """
 
         # Should contain one nsubj and one obj in both languages
-        if not SubjectObjectAugmentator.is_eligible_for_separate_augmentation(hun_graph, eng_graph, 'obj') or \
-                not SubjectObjectAugmentator.is_eligible_for_separate_augmentation(hun_graph, eng_graph, 'nsubj'):
+        if not SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph, 'obj') or \
+                not SubjectObjectAugmentator.is_eligible_for_augmentation(hun_graph, eng_graph, 'nsubj'):
             return False
 
         hun_nsubj_edges = hun_graph.get_edges_with_property('dep', 'nsubj')
@@ -465,7 +404,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         return True
 
     @staticmethod
-    def is_eligible_for_separate_augmentation(hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper, dep: str) -> bool:
+    def is_eligible_for_augmentation(hun_graph: DependencyGraphWrapper, eng_graph: DependencyGraphWrapper, dep: str) -> bool:
         """
         Tests if a sentence (graph) pair is eligible for augmentation
         """
