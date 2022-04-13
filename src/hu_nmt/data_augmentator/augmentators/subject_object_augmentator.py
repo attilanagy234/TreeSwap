@@ -393,6 +393,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         hun_obj_edges = hun_graph.get_edges_with_property('dep', 'obj')
         eng_obj_edges = eng_graph.get_edges_with_property('dep', 'obj')
 
+        # take the only subject and object edge from the trees
         hun_nsubj_edge = hun_nsubj_edges[0]
         eng_nsubj_edge = eng_nsubj_edges[0]
         hun_obj_edge = hun_obj_edges[0]
@@ -412,7 +413,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         hun_dep_edges = hun_graph.get_edges_with_property('dep', dep)
         eng_dep_edges = eng_graph.get_edges_with_property('dep', dep)
 
-        # Should contain one nsubj or one obj in both languages
+        # Should contain exactly one of the given dependency in each language
         if len(hun_dep_edges) != 1 or len(eng_dep_edges) != 1:
             return False
         else:
