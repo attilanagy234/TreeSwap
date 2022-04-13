@@ -101,6 +101,33 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         # assert
         self.assertEqual(2, len(augmentator._candidate_translations['both']))
 
+    def test_add_augmentable_candidates_subj_or_obj(self):
+        # setup
+        sentence_pairs = [
+            ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
+            ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
+            ('I like ice cream', 'Én szeretem a fagyit.'),  # both
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
+            ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
+            ('He loves your huge ego.', 'Ő szereti a nagy egód.'),  # both
+        ]
+        eng_dep_trees = [self.english_dep_parser.sentence_to_dep_parse_tree(sent_pair[0]) for sent_pair in
+                         sentence_pairs]
+        hun_dep_trees = [self.hungarian_dep_parser.sentence_to_dep_parse_tree(sent_pair[1]) for sent_pair in
+                         sentence_pairs]
+        eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
+        hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
+        augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv',
+                                               separate_augmentation=True)
+
+        # action
+        augmentator.add_augmentable_candidates(hun_graph_wrappers[:4], eng_graph_wrappers[:4])
+        augmentator.add_augmentable_candidates(hun_graph_wrappers[4:], eng_graph_wrappers[4:])
+
+        # assert
+        self.assertEqual(4, len(augmentator._candidate_translations['obj']))
+        self.assertEqual(4, len(augmentator._candidate_translations['nsubj']))
+
     def test_group_candidates_by_predicate_lemmas(self):
         # setup
         sentence_pairs = [
