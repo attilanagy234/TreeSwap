@@ -373,7 +373,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
     def add_augmentable_candidates(self, hun_graphs: List[DependencyGraphWrapper], eng_graphs: List[DependencyGraphWrapper]):
         self._pre_filter_sentence_count += len(eng_graphs)
         new_candidates = self.find_candidates(hun_graphs, eng_graphs, separate_augmentation=self.separate_augmentation)
-        for k, v in self._candidate_translations.items():
+        for k in self._candidate_translations.keys():
             self._candidate_translations[k].extend(new_candidates[k])
 
     @staticmethod
