@@ -20,6 +20,14 @@ class GraphMapper:
         self.weights['nsubj'] = 5
         self.weights['object'] = 5
 
+    def map_sentences(self, hun_sent, eng_sent):
+        hun_graph = self.hun_dep_parser.sentence_to_dep_parse_tree(hun_sent)
+        eng_graph = self.eng_dep_parser.sentence_to_dep_parse_tree(eng_sent)
+
+        mapping = self.map_subgraphs(hun_graph, eng_graph)
+
+        return mapping
+
     def map_subgraphs(self, hun_graph, eng_graph):
         hun_graph, eng_graph = self.add_all_weights(hun_graph, eng_graph)
 
@@ -101,10 +109,10 @@ class GraphMapper:
 
     def get_common_weight(self, edges1, edges2):
         w = 0
-        for (n1, n2, data) in edges1:
+        for (n1, n2, data1) in edges1:
             for (m1, m2, data2) in edges2:
-                if data['dep'].split(':')[0] == data2['dep'].split(':')[0]:
-                    w += data['weight']
+                if data1['dep'].split(':')[0] == data2['dep'].split(':')[0]:
+                    w += data1['weight']
         return w
 
     def max_look_ahead(self, cands, hu_graph, en_graph):
@@ -125,6 +133,53 @@ class GraphMapper:
                 max_cand = (n1, n2)
                 max_score = w1 + w2
         return max_cand
+
+    def find_subgraphs(self, g1, g2):
+        nsubj1 = [n2 for (n1, n2, data) in g1.edges(data=True) if data['dep'] == 'nsubj']
+        nsubj2 = [n2 for (n1, n2, data) in g2.edges(data=True) if data['dep'] == 'nsubj']
+
+        obj1 = [n2 for (n1, n2, data) in g1.edges(data=True) if data['dep'] == 'obj']
+        obj2 = [n2 for (n1, n2, data) in g2.edges(data=True) if data['dep'] == 'obj']
+
+        max_map = None
+        max_score = 0
+        mapping = {}
+
+        for n1 in nsubj1:
+            max_score = 0
+            for n2 in nsubj2:
+                if n2 not in mapping.values():
+                    sub_graph_ids1 = list(nx.descendants(g1, n1))
+                    sub_graph_ids1.append(n1)
+                    subgraph1 = g1.subgraph(sub_graph_ids1)
+                    sub_graph_ids2 = list(nx.descendants(g2, n2))
+                    sub_graph_ids2.append(n2)
+                    subgraph2 = g2.subgraph(sub_graph_ids2)
+
+                    m, score = self.map_subgraphs(subgraph1, subgraph2)
+                    print(n1, n2, score)
+                    if score > max_score:
+                        max_score = score
+            if max_score > 0:
+                mapping[n1] = max_map
+        for n1 in obj1:
+            max_score = 0
+            for n2 in obj2:
+                if n2 not in mapping.values():
+                    sub_graph_ids1 = list(nx.descendants(g1, n1))
+                    sub_graph_ids1.append(n1)
+                    subgraph1 = g1.subgraph(sub_graph_ids1)
+                    sub_graph_ids2 = list(nx.descendants(g2, n2))
+                    sub_graph_ids2.append(n2)
+                    subgraph2 = g2.subgraph(sub_graph_ids2)
+
+                    m, score = self.map_subgraphs(subgraph1, subgraph2)
+                    print(n1, n2, score)
+                    if score > max_score:
+                        max_score = score
+            if max_score > 0:
+                mapping[n1] = max_map
+        return mapping, max_score
 
 
 
