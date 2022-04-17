@@ -25,7 +25,11 @@ log = get_logger(__name__)
 @click.option('--filter_batch_size', default=512, help='Batch size for the translations in the filter.')
 @click.option('--output_format', default='basic', help='Supported output formats: basic (default), tsv')
 @click.option('--save_original/--dont_save_original', default=False)
-def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path, augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path, filter_batch_size, output_format, save_original):
+@click.option('--separate_augmentation', default=False)
+
+def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path,
+         augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
+         filter_batch_size, output_format, save_original, separate_augmentation):
     dep_parsers = {
         'en': EnglishDependencyParser(),
         'hu': SpacyDependencyParser(lang='hu')
@@ -39,8 +43,9 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
     filters = []
     if use_filters:
         filters.append(BleuFilter(filter_quantile, src_model_path, tgt_model_path, sp_model_path, tgt_language, filter_batch_size))
-    augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters, output_path=augmentation_output_path,
-                                           output_format=output_format, save_original=save_original)
+    augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters,
+                                           output_path=augmentation_output_path, output_format=output_format,
+                                           save_original=save_original, separate_augmentation=separate_augmentation)
 
     log.info('Reading parsed dependency trees')
     graph_cnt = 0
