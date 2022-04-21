@@ -16,6 +16,7 @@ class Preprocessor:
         self._source_output_path = source_output_path
         self._target_output_path = target_output_path
 
+
     def preprocess(self):
         log.info('Starting preprocessing...')
         number_of_lines_saved_to_file = 0
@@ -57,9 +58,9 @@ class Preprocessor:
         sentence = sentence.replace('\xad', '-')  # replace soft hyphens with normal hyphens
         if sentence.startswith('"') and sentence.endswith('"'):  # lots of sentences start and end with unnecessary double quotes
             sentence = sentence[1:-1]
-        if sentence.startswith("'") and sentence.endswith("'"):  # lots of sentences start and end with unnecessary single quotes
+        if sentence.startswith("'") and sentence.endswith("'"):
             sentence = sentence[1:-1]
-        if sentence.startswith("`") and sentence.endswith("`"):  # lots of sentences start and end with unnecessary single quotes
+        if sentence.startswith("`") and sentence.endswith("`"):
             sentence = sentence[1:-1]
 
         if sentence.strip().count("'") == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
@@ -72,3 +73,4 @@ class Preprocessor:
         if sentence.startswith('-'):
             sentence = sentence[1:]
         return sentence
+
