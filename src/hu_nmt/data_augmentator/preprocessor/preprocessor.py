@@ -56,21 +56,24 @@ class Preprocessor:
     @staticmethod
     def clean_sentence(sentence):
         sentence = sentence.replace('\xad', '-')  # replace soft hyphens with normal hyphens
-        if sentence.startswith('"') and sentence.endswith('"'):  # lots of sentences start and end with unnecessary double quotes
-            sentence = sentence[1:-1]
-        if sentence.startswith("'") and sentence.endswith("'"):
-            sentence = sentence[1:-1]
-        if sentence.startswith("`") and sentence.endswith("`"):
-            sentence = sentence[1:-1]
+        copy = ""
+        while copy != sentence:
+            copy = sentence
+            if sentence.startswith('"') and sentence.endswith('"'):  # lots of sentences start and end with unnecessary double quotes
+                sentence = sentence[1:-1]
+            if sentence.startswith("'") and sentence.endswith("'"):
+                sentence = sentence[1:-1]
+            if sentence.startswith("`") and sentence.endswith("`"):
+                sentence = sentence[1:-1]
 
-        if sentence.strip().count("'") == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
-            sentence.replace("'", "")
-        if sentence.count('"') == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
-            sentence.replace('"', "")
-        if sentence.count('`') == 1 and (sentence.strip().startswith("`") or sentence.strip().endswith("`")):
-            sentence.replace('`', "")
+            if sentence.strip().count("'") == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
+                sentence.replace("'", "")
+            if sentence.count('"') == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
+                sentence.replace('"', "")
+            if sentence.count('`') == 1 and (sentence.strip().startswith("`") or sentence.strip().endswith("`")):
+                sentence.replace('`', "")
 
-        if sentence.startswith('-'):
-            sentence = sentence[1:]
+            if sentence.startswith('-'):
+                sentence = sentence[1:]
         return sentence
 
