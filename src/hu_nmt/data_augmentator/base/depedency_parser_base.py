@@ -162,6 +162,8 @@ class DependencyParserBase(ABC):
 
     @staticmethod
     def write_dep_graphs_to_file(output_dir, file_idx, list_of_dep_rel_lists):
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
         with open(os.path.join(output_dir, f'{file_idx}.tsv'), 'w') as output_file:
             for dep_rel_list in list_of_dep_rel_lists:
                 for dep_rel in dep_rel_list:
