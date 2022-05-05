@@ -32,17 +32,27 @@ class EnglishDependencyParser(DependencyParserBase):
             target_postag = token['upos']
             target_lemma = token['lemma']
             target_deprel = token['deprel']
+            if 'feats' in token:
+                target_morph = token['feats']
+            else:
+                target_morph = ''
             if token['head'] == 0:
                 source_key = ROOT_KEY
                 source_postag = None
                 source_lemma = None
+                source_morph = None
             else:
                 head = word_dicts[int(token['head']) - 1]
                 source_key = f'{head["text"].lower()}_{head["id"]}'
                 source_postag = head['upos']
                 source_lemma = head['lemma']
+                if 'feats' in head:
+                    source_morph = head['feats']
+                else:
+                    source_morph = ''
 
-            node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_deprel, source_key, source_postag, source_lemma))
+            node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_morph, target_deprel,
+                                                           source_key, source_postag, source_lemma, source_morph))
 
         return node_relationship_list
 
@@ -57,8 +67,8 @@ class EnglishDependencyParser(DependencyParserBase):
         # Add ROOT node
         dep_graph.add_node(ROOT_KEY)
         for node_rel in self.sentence_to_node_relationship_list(self.nlp_pipeline, sent):
-            dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
-            dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
+            dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma, morph=node_rel.source_morph)
+            dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma, morph=node_rel.target_morph)
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
 

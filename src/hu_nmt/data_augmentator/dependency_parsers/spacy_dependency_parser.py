@@ -49,16 +49,20 @@ class SpacyDependencyParser(DependencyParserBase):
             target_postag = token.pos_
             target_lemma = token.lemma_
             target_deprel = token.dep_
+            target_morph = token.morph
             if target_deprel == 'ROOT':
                 source_key = ROOT_KEY
                 source_postag = None
                 source_lemma = None
+                source_morph = None
             else:
                 source_key = f'{token.head}_{token.head.i + 1}'
                 source_postag = token.head.pos_
                 source_lemma = token.head.lemma_
+                source_morph = token.head.morph
 
-            node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_deprel, source_key, source_postag, source_lemma))
+            node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_morph, target_deprel,
+                                                           source_key, source_postag, source_lemma, source_morph))
 
         return node_relationship_list
 
@@ -71,8 +75,8 @@ class SpacyDependencyParser(DependencyParserBase):
         """
         dep_graph = nx.DiGraph()
         for node_rel in self.sentence_to_node_relationship_list(self.nlp_pipeline, sent):
-            dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
-            dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
+            dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma, morph=node_rel.source_morph)
+            dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma, morph=node_rel.target_morph)
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
 
