@@ -41,6 +41,7 @@ class SpacyDependencyParser(DependencyParserBase):
         # We most likely will only pass single sentences.
         if len(sents) > 1:
             log.info(f'Sample has multiple sentences: {sents}')
+            return []
         doc_sent = sents[0]
 
         node_relationship_list = []
