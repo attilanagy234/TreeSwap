@@ -9,37 +9,58 @@ _augmentation_description: "Low resource POC"
 # Multi train config
 
 # train multiple models at the same time with different data
-multi_train: true
+multi_train:
+    active: true
 
-# prefix to use for the generated folders
-multi_train_prefix: base
+    # prefix to use for the generated folders
+    # prefix: aug-0.5
+    prefix: base
 
-# For each folder in this directory it launches a training adding all the files
-# to the corpus
-multi_train_dir: ../../../../../data/Hunglish2/low-resource/training
+    # For each folder in this directory it launches a training adding all the files
+    # to the corpus
+    directory: ../../../../../data/Hunglish2/low-resource/training
 
-# Where the utility scripts are located from the multi train script start
-# location
-utils_path_from_multi_train: ../../../utils
+    # The post fix of the source files (eg. en -> file_name.en)
+    src_postfix: en
 
-# The post fix of the source files (eg. en -> file_name.en)
-src_postfix: hu
+    # The post fix of the target files (eg. en -> file_name.en)
+    tgt_postfix: hu
 
-# The post fix of the target files (eg. en -> file_name.en)
-tgt_postfix: en
+    # All the data files come from the folders in 'multi_train_dir'.
+    # If a file contains the word 'valid' it is used in the validation set.
+    bare: true
 
-# All the data files come from the folders in 'multi_train_dir'.
-# If a file contains the word 'valid' it is used in the validation set.
-bare_multi_train: true
+    # Number of epochs to run in each training
+    epochs: 10
+
+    # Maximum number of tokens in a sentence
+    max_token_count: 32
+
+    augmentation:
+        active: false
+        # This field is set by the scripts
+        directory: ""
+        preprocessor:
+            total_wordcount_min: 0
+            total_wordcount_max: 32
+            wordcount_diff: 75
+            wordcount_ratio_threshold: 1.2
+        scripts_path: ../../../../src
+        preprocess_data_script: preprocess_data.sh
+        src_precompute_script: precompute_hungarian_dependency_trees.sh
+        tgt_precompute_script: precompute_english_dependency_trees.sh
+        augmentation_script: run_subject_object_augmentation.sh
+        precompute_batch_size: 10000
+        augmentation_ratio: 0.5
 
 #------------------------------------------------------------------------------
 # Script configs
 
 # Where the sentencepiece models should be saved during vocab building
-sp_models_path: ../../../../../../data/Hunglish2/combined-32-simple/sp_models
+sp_models_path: ../../../../../data/Hunglish2/combined-32-simple/sp_models
 
 # Where the utility scripts are located
-utils_path: ../../../../utils
+utils_path: ../../../utils
 
 # Model used for translation
 translate_model: run/model.pt
@@ -49,7 +70,7 @@ pair_n_lines: 50
 pair_output_path: run/pair_out.txt
 
 # Path to where all the history files are
-history_path: ../../../history
+history_path: ../../history
 
 # Vocabulary size of the source language
 # (when using shared vocab this is also the size that is used)
@@ -62,8 +83,8 @@ subword_model_type: unigram
 # Data and vocab config
 
 # Vocab
-save_data: ../../../../../../data/Hunglish2/combined-32-simple/vocabs
-src_vocab: ../../../../../../data/Hunglish2/combined-32-simple/vocabs/vocab.huen
+save_data: ../../../../../data/Hunglish2/combined-32-simple/vocabs
+src_vocab: ../../../../../data/Hunglish2/combined-32-simple/vocabs/vocab.huen
 share_vocab: true
 vocab_size_multiple: 1
 src_words_min_frequency: 0
@@ -73,17 +94,27 @@ tgt_words_min_frequency: 0
 transforms: [sentencepiece]
 data:
     hunglish:
-        path_src: ../../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
-        path_tgt: ../../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
+        transforms: [sentencepiece]
+        weight: 1
+    hunglish2:
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
+        transforms: [sentencepiece]
+        weight: 1
+    hunglish3:
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train.en
         transforms: [sentencepiece]
         weight: 1
     valid:
-        path_src: ../../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.hu
-        path_tgt: ../../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.en
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid.en
         transforms: [sentencepiece]
 
 # Sentencepiece opts
-src_subword_model: ../../../../../../data/Hunglish2/combined-32-simple/sp_models/spm_huen.model
+src_subword_model: ../../../../../data/Hunglish2/combined-32-simple/sp_models/spm_huen.model
 src_subword_nbest: 1
 src_subword_alpha: 0.0
 tgt_subword_nbest: 1

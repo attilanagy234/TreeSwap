@@ -16,20 +16,20 @@ class Preprocessor:
         self._source_output_path = source_output_path
         self._target_output_path = target_output_path
 
+
     def preprocess(self):
         log.info('Starting preprocessing...')
         number_of_lines_saved_to_file = 0
         with open(self._source_data_path) as source_file, \
              open(self._target_data_path) as target_file, \
-             open(self._source_output_path, 'w+') as source_output_file, \
-             open(self._target_output_path, 'w+') as target_output_file:
+             open(self._source_output_path, 'w') as source_output_file, \
+             open(self._target_output_path, 'w') as target_output_file:
 
             for i, (source_line, target_line) in enumerate(zip(source_file, target_file)):
                 source_sentence, target_sentence = source_line.strip(), target_line.strip()
+                source_sentence = self.clean_sentence(source_sentence)
+                target_sentence = self.clean_sentence(target_sentence)
                 if self.is_good_length(source_sentence, target_sentence):
-                    source_sentence = self.clean_sentence(source_sentence)
-                    target_sentence = self.clean_sentence(target_sentence)
-
                     source_output_file.write(source_sentence + '\n')
                     target_output_file.write(target_sentence + '\n')
 
@@ -56,8 +56,24 @@ class Preprocessor:
     @staticmethod
     def clean_sentence(sentence):
         sentence = sentence.replace('\xad', '-')  # replace soft hyphens with normal hyphens
-        if sentence.startswith('"') and sentence.endswith('"'):  # lots of sentences start and end with unnecessary double quotes
-            sentence = sentence[1:-1]
-        if sentence.startswith('-'):
-            sentence = sentence[1:]
+        copy = ""
+        while copy != sentence:
+            copy = sentence
+            if sentence.startswith('"') and sentence.endswith('"'):  # lots of sentences start and end with unnecessary double quotes
+                sentence = sentence[1:-1]
+            if sentence.startswith("'") and sentence.endswith("'"):
+                sentence = sentence[1:-1]
+            if sentence.startswith("`") and sentence.endswith("`"):
+                sentence = sentence[1:-1]
+
+            if sentence.strip().count("'") == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
+                sentence.replace("'", "")
+            if sentence.count('"') == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
+                sentence.replace('"', "")
+            if sentence.count('`') == 1 and (sentence.strip().startswith("`") or sentence.strip().endswith("`")):
+                sentence.replace('`', "")
+
+            if sentence.startswith('-'):
+                sentence = sentence[1:]
         return sentence
+

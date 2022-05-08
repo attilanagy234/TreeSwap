@@ -1,10 +1,12 @@
-HISTORY_DIR=$(grep 'history_path:' config.yaml | awk '{ print $2 }')
+#!/bin/bash
+
+HISTORY_DIR=$(yq -r .history_path config.yaml)
 TSV_PATH=$HISTORY_DIR/history.tsv
 
 save_dir=$HISTORY_DIR/$(date '+%Y-%m-%d_%H:%M:%S')
-utils_path=$(grep 'utils_path:' config.yaml | awk '{ print $2 }')
-pair_output_path=$(grep 'pair_output_path:' config.yaml | awk '{ print $2 }')
-translate_model=$(grep 'translate_model:' config.yaml | awk '{ print $2 }')
+utils_path=$(yq -r .utils_path config.yaml)
+pair_output_path=$(yq -r .pair_output_path config.yaml)
+translate_model=$(yq -r .translate_model config.yaml)
 
 echo "--Saving history--"
 

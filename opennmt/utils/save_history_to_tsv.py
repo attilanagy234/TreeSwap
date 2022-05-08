@@ -5,8 +5,8 @@ from typing import Dict
 import yaml
 import argparse
 import pandas as pd
-import re
 import git
+import json
 
 
 def flatten_dict(d, parent_key='', sep='.'):
@@ -48,13 +48,9 @@ def save_history(yaml_path: str, result_path: str, history_path: str, tsv_path: 
 
     # parse bleu scores
     with open(result_path, 'r') as result_file:
-        result_str = result_file.read()
+        results = json.load(result_file)
 
-    match = re.match('[^=]*=\ (\S+)\ ([^/]+)/([^/]+)/([^/]+)/(\S+)', result_str)
-
-    df.loc[df.index[-1], 'bleu_score'] = match.group(1)
-    for i in range(4):
-        df.loc[df.index[-1], f'blue_score_{i+1}'] = match.group(i+2)
+    df.loc[df.index[-1], 'bleu_score'] = results['score']
 
     df.to_csv(tsv_path, sep='\t', index=False)
 

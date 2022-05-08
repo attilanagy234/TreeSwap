@@ -138,7 +138,7 @@ class DependencyParserBase(ABC):
                         process_used_bytes = process.memory_info().rss
                         available_bytes = psutil.virtual_memory().available
                         log.info(f'There could be {available_bytes / process_used_bytes} processes spawned to fill up the available memory')
-                        process_count = max(floor(available_bytes / process_used_bytes), 1)
+                        process_count = min(max(floor(available_bytes / process_used_bytes), 1), mp.cpu_count())
                         log.info(f'Decided to use {process_count} processes based on available memory')
                         first_run = False
 
@@ -155,15 +155,21 @@ class DependencyParserBase(ABC):
                                                 batch_of_sentences)
 
                 # dump to file
-                with open(os.path.join(output_dir, f'{file_idx}.tsv'), 'w') as output_file:
-                    for dep_rel_list in list_of_dep_rel_lists:
-                        for dep_rel in dep_rel_list:
-                            graph_record = f'{dep_rel.target_key}\t{dep_rel.target_postag}\t{dep_rel.target_lemma}' \
-                                           f'\t{dep_rel.target_deprel}\t{dep_rel.source_key}\t{dep_rel.source_postag}\t{dep_rel.source_lemma}\n'
-                            output_file.write(graph_record)
-                        output_file.write('\n')
+                self.write_dep_graphs_to_file(output_dir, file_idx, list_of_dep_rel_lists)
 
                 pbar.update(len(batch_of_sentences))
 
                 file_idx += 1
                 batch_of_sentences = []
+
+    @staticmethod
+    def write_dep_graphs_to_file(output_dir, file_idx, list_of_dep_rel_lists):
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        with open(os.path.join(output_dir, f'{file_idx}.tsv'), 'w') as output_file:
+            for dep_rel_list in list_of_dep_rel_lists:
+                for dep_rel in dep_rel_list:
+                    graph_record = f'{dep_rel.target_key}\t{dep_rel.target_postag}\t{dep_rel.target_lemma}' \
+                                   f'\t{dep_rel.target_deprel}\t{dep_rel.source_key}\t{dep_rel.source_postag}\t{dep_rel.source_lemma}\n'
+                    output_file.write(graph_record)
+                output_file.write('\n')

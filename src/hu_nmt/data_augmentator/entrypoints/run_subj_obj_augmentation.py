@@ -5,27 +5,47 @@ from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
+from hu_nmt.data_augmentator.filters.bleu_filter import BleuFilter
 
 log = get_logger(__name__)
 
 
 @click.command()
-@click.argument('eng_data_folder')
-@click.argument('hun_data_folder')
+@click.argument('src_language')
+@click.argument('tgt_language')
+@click.argument('src_data_folder')
+@click.argument('tgt_data_folder')
 @click.argument('augmentation_output_path')
 @click.argument('augmented_data_ratio')
-@click.option('--output_format', default='tsv', help='Supported output formats: tsv (default), basic')
+@click.option('--use_filters', is_flag=True, default=False, help='Use filters after the augmentation')
+@click.option('--filter_quantile', default=0.0, help='Quantile to use when filtering with cosine similarity. (Throw away anything below this quantile.)')
+@click.option('--src_model_path', default='', help='Path to model to translate the source sentences with')
+@click.option('--tgt_model_path', default='', help='Path to model to translate the target sentences with')
+@click.option('--sp_model_path', default='', help='Sentencepiece model path')
+@click.option('--filter_batch_size', default=512, help='Batch size for the translations in the filter.')
+@click.option('--output_format', default='basic', help='Supported output formats: basic (default), tsv')
 @click.option('--save_original/--dont_save_original', default=False)
-def main(eng_data_folder, hun_data_folder, augmentation_output_path, augmented_data_ratio, output_format, save_original):
-    eng_dep_parser = EnglishDependencyParser()
-    eng_dep_tree_generator = eng_dep_parser.read_parsed_dep_trees_from_files(eng_data_folder, per_file=True)
+@click.option('--separate_augmentation', default=False)
+
+def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path,
+         augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
+         filter_batch_size, output_format, save_original, separate_augmentation):
+    dep_parsers = {
+        'en': EnglishDependencyParser(),
+        'hu': SpacyDependencyParser(lang='hu')
+    }
+
+    eng_dep_tree_generator = dep_parsers[src_language].read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
     # log.info(f'Number of English sentences used for augmentation: {len(eng_wrappers)}')
-    hun_dep_parser = SpacyDependencyParser(lang='hu')
-    hun_dep_tree_generator = hun_dep_parser.read_parsed_dep_trees_from_files(hun_data_folder, per_file=True)
+    hun_dep_tree_generator = dep_parsers[tgt_language].read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
     # log.info(f'Number of Hungarian sentences used for augmentation: {len(eng_wrappers)}')
 
-    augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, output_path=augmentation_output_path,
-                                           output_format=output_format, save_original=save_original)
+    filters = []
+    if use_filters:
+        filters.append(BleuFilter(filter_quantile, src_model_path, tgt_model_path, sp_model_path, tgt_language, filter_batch_size))
+    augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters,
+                                           output_path=augmentation_output_path, output_format=output_format,
+                                           save_original=save_original, separate_augmentation=separate_augmentation)
 
     log.info('Reading parsed dependency trees')
     graph_cnt = 0
