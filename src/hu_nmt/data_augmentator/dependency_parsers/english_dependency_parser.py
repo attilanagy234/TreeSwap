@@ -14,7 +14,7 @@ ROOT_KEY = 'root_0'
 class EnglishDependencyParser(DependencyParserBase):
     def __init__(self):
         self.nlp_pipeline = stanza.Pipeline(lang='en', processors='tokenize,mwt,pos,lemma,depparse')
-        super().__init__(self.nlp_pipeline, use_multiprocessing=True)
+        super().__init__(self.nlp_pipeline, use_multiprocessing=False)
 
     @staticmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
