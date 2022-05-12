@@ -39,6 +39,10 @@ class DependencyParserBase(ABC):
         self.nlp_pipeline = nlp_pipeline
         self.use_multiprocessing = use_multiprocessing
 
+    def sentence_to_graph_wrapper(self, sentence) -> DependencyGraphWrapper:
+        graph = self.sentence_to_dep_parse_tree(sentence)
+        return DependencyGraphWrapper(graph)
+
     @abstractmethod
     def sentence_to_dep_parse_tree(self, sentence):
         raise NotImplementedError
