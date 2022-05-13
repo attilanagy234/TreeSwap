@@ -1,11 +1,11 @@
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 
 
 class DependencyParserFactory:
     dep_parsers = {
-        'en': EnglishDependencyParser,
+        'en': StanzaDependencyParser(lang='en'),
         'hu': lambda: SpacyDependencyParser(lang='hu')
     }
 

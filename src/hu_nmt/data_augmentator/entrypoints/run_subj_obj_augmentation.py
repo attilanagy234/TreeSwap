@@ -1,7 +1,7 @@
 import click
 from tqdm import tqdm
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
@@ -31,7 +31,7 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
          augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
          filter_batch_size, output_format, save_original, separate_augmentation):
     dep_parsers = {
-        'en': EnglishDependencyParser(),
+        'en': StanzaDependencyParser(lang='en'),
         'hu': SpacyDependencyParser(lang='hu')
     }
 

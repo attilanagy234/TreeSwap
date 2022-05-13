@@ -2,7 +2,7 @@ import os
 import unittest
 
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
 
 dirname = os.path.dirname(__file__)
 
@@ -12,7 +12,7 @@ class DependencyGraphWrapperTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         sentence = 'Helen took her dog for a walk in the woods.'
-        cls.eng_dep_parser = EnglishDependencyParser()
+        cls.eng_dep_parser = StanzaDependencyParser(lang='en')
         graph = cls.eng_dep_parser.sentence_to_dep_parse_tree(sentence)
         cls.dep_graph_wrapper = DependencyGraphWrapper(graph)
 
