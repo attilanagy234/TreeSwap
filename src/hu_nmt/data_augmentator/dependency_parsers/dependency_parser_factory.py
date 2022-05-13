@@ -5,7 +5,8 @@ from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import S
 
 class DependencyParserFactory:
     dep_parsers = {
-        'en': StanzaDependencyParser(lang='en'),
+        'en': lambda: StanzaDependencyParser(lang='en'),
+        'de': lambda: StanzaDependencyParser(lang='de'),
         'hu': lambda: SpacyDependencyParser(lang='hu')
     }
 

@@ -29,7 +29,7 @@ if __name__ == '__main__':
         graph = hun_dep_graph_wrapper
     elif LANG == 'DE':
         sentence = 'Ich liebe lange Spaziergänge in den Bergen.'
-        de_dep_parser = SpacyDependencyParser(lang='de')
+        de_dep_parser = StanzaDependencyParser(lang='de')
         dep_graph = de_dep_parser.sentence_to_dep_parse_tree(sentence)
         hun_dep_graph_wrapper = DependencyGraphWrapper(dep_graph)
         hun_dep_graph_wrapper.display_graph()
