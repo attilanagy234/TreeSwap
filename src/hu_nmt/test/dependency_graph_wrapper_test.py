@@ -79,3 +79,7 @@ class DependencyGraphWrapperTest(unittest.TestCase):
         actual_target_node = '.'
         self.assertEqual(actual_source_node, source_node.split('_')[0])
         self.assertEqual(actual_target_node, target_node.split('_')[0])
+
+    def test_get_node_property(self):
+        self.assertEqual(self.dep_graph_wrapper.get_node_property('dog_4', 'postag'), 'NOUN')
+
