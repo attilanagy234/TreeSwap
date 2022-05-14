@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
@@ -13,7 +13,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.english_dep_parser = EnglishDependencyParser()
+        cls.english_dep_parser = StanzaDependencyParser(lang='en')
         cls.hungarian_dep_parser = SpacyDependencyParser(lang='hu')
 
     def test_subject_object_augmentator_setup(self):
