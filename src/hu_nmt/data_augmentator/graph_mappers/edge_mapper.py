@@ -135,6 +135,23 @@ class EdgeMapper:
                 max_edges = [(s2, d2, data2)]
             elif intersect_count == max_children:
                 max_edges.append((s2, d2, data2))
+        if len(max_edges) > 1:
+            children1 = [e[2]['dep'] for e in g1.out_edges(s1, data=True)]
+            counter1 = Counter(children1)
+            max_edges = []
+            max_children = 0
+
+            for (s2, d2, data2) in cands:
+                children2 = [e[2]['dep'] for e in g2.out_edges(s2, data=True)]
+
+                counter2 = Counter(children2)
+                intersection = counter1 & counter2
+                intersect_count = len(list(intersection.elements()))
+                if intersect_count > max_children:
+                    max_children = intersect_count
+                    max_edges = [(s2, d2, data2)]
+                elif intersect_count == max_children:
+                    max_edges.append((s2, d2, data2))
         return max_edges
 
     def get_jaccard_index(self, g1, g2, mapping):
