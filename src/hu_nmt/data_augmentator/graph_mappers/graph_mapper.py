@@ -1,15 +1,8 @@
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
 
-from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-
-import numpy as np
-from tqdm.notebook import tqdm
 from collections import defaultdict
 import networkx as nx
-from networkx.drawing.nx_agraph import graphviz_layout
-import matplotlib.pyplot as plt
 
 
 class GraphMapper:
@@ -24,7 +17,7 @@ class GraphMapper:
         hun_graph = self.hun_dep_parser.sentence_to_dep_parse_tree(hun_sent)
         eng_graph = self.eng_dep_parser.sentence_to_dep_parse_tree(eng_sent)
 
-        mapping = self.map_subgraphs(hun_graph, eng_graph)
+        mapping, score = self.map_subgraphs(hun_graph, eng_graph)
 
         return mapping
 
@@ -55,10 +48,6 @@ class GraphMapper:
     def get_root(self, graph):
         # This should yield the artificial ROOT node on top of the dependency tree
         return [n for n, d in graph.in_degree() if d == 0][0]
-
-    weights = defaultdict(lambda: 1)
-    weights['nsubj'] = 5
-    weights['object'] = 5
 
     def add_weight(self, g):
         for (n1, n2, data) in g.edges(data=True):
