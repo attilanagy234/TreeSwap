@@ -63,7 +63,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
 
         # action
-        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._tgt_graphs, augmentator._src_graphs)
 
         # assert
         self.assertEqual(2, len(augmentator._candidate_translations['both']))
@@ -73,7 +73,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         sentence_pairs = [
             ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
             ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
-            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun, subj root postag not the same
             ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
             ('I like ice cream', 'Én szeretem a fagyit.'),  # both
             ('He loves your huge ego.', 'Ő szereti a nagy egód.'), # both
@@ -86,17 +86,20 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
         # assert
         assert_obj_values = [True, True, False, False, True, True]
-        assert_nsubj_values = [False, False, True, True, True, True]
+        assert_nsubj_values = [False, False, False, True, True, True]
+        i = 0
         for obj_value, nsubj_value, hun_g, eng_g in zip(assert_obj_values, assert_nsubj_values, hun_graph_wrappers, eng_graph_wrappers):
+            print(i)
             self.assertEqual(obj_value, augmentator.is_eligible_for_augmentation(hun_g, eng_g, 'obj'))
             self.assertEqual(nsubj_value, augmentator.is_eligible_for_augmentation(hun_g, eng_g, 'nsubj'))
+            i += 1
 
     def test_find_augmentable_candidates_for_separate_augmentation(self):
         # setup
         sentence_pairs = [
             ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
             ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
-            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun, subj root postag not the same
             ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
             ('I like ice cream', 'Én szeretem a fagyit.'),  # both
             ('He loves your huge ego.', 'Ő szereti a nagy egód.'), # both
@@ -108,11 +111,11 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
 
         # action
-        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs, separate_augmentation=True)
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._tgt_graphs, augmentator._src_graphs, separate_augmentation=True)
 
         # assert
         self.assertEqual(4, len(augmentator._candidate_translations['obj']))
-        self.assertEqual(4, len(augmentator._candidate_translations['nsubj']))
+        self.assertEqual(3, len(augmentator._candidate_translations['nsubj']))
 
     def test_add_augmentable_candidates_both(self):
         # setup
@@ -146,7 +149,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
             ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
             ('I like ice cream', 'Én szeretem a fagyit.'),  # both
-            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun, subj root postag not the same
             ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
             ('He loves your huge ego.', 'Ő szereti a nagy egód.'),  # both
         ]
@@ -165,7 +168,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
         # assert
         self.assertEqual(4, len(augmentator._candidate_translations['obj']))
-        self.assertEqual(4, len(augmentator._candidate_translations['nsubj']))
+        self.assertEqual(3, len(augmentator._candidate_translations['nsubj']))
 
     def test_group_candidates_by_predicate_lemmas(self):
         # setup
@@ -180,7 +183,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
-        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._tgt_graphs, augmentator._src_graphs)
         self.assertEqual(4, len(augmentator._candidate_translations['both']))
 
         # action
@@ -256,7 +259,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 2, 123, [], '', 'tsv')
-        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._tgt_graphs, augmentator._src_graphs)
         self.assertEqual(4, len(augmentator._candidate_translations['both']))
 
         # action
@@ -264,10 +267,10 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         augmentator.augment_subtree_swapping_with_same_predicate_lemmas(lemmas_to_graphs)
 
         # assert
-        self.assertEqual(6, len(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma']['hun']))
-        self.assertEqual(6, len(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma']['eng']))
-        result = {'hun': ['Én szeretem a bicikliket .', 'Én szeretem a fagyit .', 'Én szeretem a halakat .', 'Ők szerették a fagyit .', 'Én szeretem a halakat .', 'Ők szerették a bicikliket .'],
-                  'eng': ['i like bikes', 'i like ice cream .', 'i like fish', 'they liked ice cream .', 'i like fish .', 'they liked bikes .']}
+        self.assertEqual(6, len(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma']['src']))
+        self.assertEqual(6, len(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma']['tgt']))
+        result = {'src': ['Én szeretem a bicikliket .', 'Én szeretem a fagyit .', 'Én szeretem a halakat .', 'Ők szerették a fagyit .', 'Én szeretem a halakat .', 'Ők szerették a bicikliket .'],
+                  'tgt': ['i like bikes', 'i like ice cream .', 'i like fish', 'they liked ice cream .', 'i like fish .', 'they liked bikes .']}
         self.assertEqual(result, augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma'])
 
     def test_augment_subtree_swapping_with_same_predicate_lemmas_less_sample_count(self):
@@ -283,7 +286,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         eng_graph_wrappers = [DependencyGraphWrapper(tree) for tree in eng_dep_trees]
         hun_graph_wrappers = [DependencyGraphWrapper(tree) for tree in hun_dep_trees]
         augmentator = SubjectObjectAugmentator(eng_graph_wrappers, hun_graph_wrappers, 0.5, 123, [], '', 'tsv')
-        augmentator._candidate_translations = augmentator.find_candidates(augmentator._hun_graphs, augmentator._eng_graphs)
+        augmentator._candidate_translations = augmentator.find_candidates(augmentator._tgt_graphs, augmentator._src_graphs)
         self.assertEqual(4, len(augmentator._candidate_translations['both']))
 
         translation_sample = [tuple([TranslationGraph(hun_graph_wrappers[i], eng_graph_wrappers[i]) for i in range(2)])]
@@ -298,8 +301,8 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         translation_combinations, sample_count = augmentator.sample_list.call_args[0]
         self.assertEqual(3, len(translation_combinations))
         self.assertEqual(1, sample_count)
-        result = {'hun': ['Én szeretem a bicikliket .', 'Én szeretem a fagyit .'],
-                  'eng': ['i like bikes', 'i like ice cream .']}
+        result = {'src': ['Én szeretem a bicikliket .', 'Én szeretem a fagyit .'],
+                  'tgt': ['i like bikes', 'i like ice cream .']}
         self.assertEqual(result, augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma'])
         print(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma'])
 
@@ -330,10 +333,10 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         augmentator.swap_dep_subtrees(object_translation_pairs, 'obj', False)
 
         # assert
-        obj_result1 = {'hun': ['Sétáltattam egy csodát az utcán .', 'Én láttam a kutyámat .'],
-                  'eng': ['i walked a miracle down the street .', 'have witnessed my dog .']}
-        obj_result2 = {'hun': ['Én láttam a kutyámat .', 'Sétáltattam egy csodát az utcán .'],
-                   'eng': ['have witnessed my dog .', 'i walked a miracle down the street .']}
+        obj_result1 = {'src': ['Sétáltattam egy csodát az utcán .', 'Én láttam a kutyámat .'],
+                  'tgt': ['i walked a miracle down the street .', 'have witnessed my dog .']}
+        obj_result2 = {'src': ['Én láttam a kutyámat .', 'Sétáltattam egy csodát az utcán .'],
+                   'tgt': ['have witnessed my dog .', 'i walked a miracle down the street .']}
         self.assertIn(augmentator._augmented_sentence_pairs['obj_swapping'], [obj_result1, obj_result2])
 
     def test_swap_subject_subtrees(self):
@@ -363,10 +366,10 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         augmentator.swap_dep_subtrees(subject_translation_pairs, 'nsubj', False)
 
         # assert
-        nsubj_result1 = {'hun': ['A férfi tegnap sétáltam az erdőben .', 'Én túl sokat beszélt .'],
-                  'eng': ['yesterday the man walked in the forest .', 'i talked too much .']}
-        nsubj_result2 = {'hun': ['Én túl sokat beszélt .', 'A férfi tegnap sétáltam az erdőben .'],
-                   'eng': ['i talked too much .', 'yesterday the man walked in the forest .']}
+        nsubj_result1 = {'src': ['A férfi tegnap sétáltam az erdőben .', 'Én túl sokat beszélt .'],
+                  'tgt': ['yesterday the man walked in the forest .', 'i talked too much .']}
+        nsubj_result2 = {'src': ['Én túl sokat beszélt .', 'A férfi tegnap sétáltam az erdőben .'],
+                   'tgt': ['i talked too much .', 'yesterday the man walked in the forest .']}
         self.assertIn(augmentator._augmented_sentence_pairs['subj_swapping'], [nsubj_result1, nsubj_result2])
 
 
