@@ -57,3 +57,7 @@ class DependencyGraphWrapper:
         sub_graph = list(nx.descendants(self._graph, node_id))
         sub_graph.append(node_id)
         return sub_graph
+
+    def get_node_property(self, node_id, property):
+        return self._graph.nodes[node_id][property]
+

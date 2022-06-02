@@ -11,10 +11,10 @@ log = get_logger(__name__)
 ROOT_KEY = 'root_0'
 
 
-class EnglishDependencyParser(DependencyParserBase):
-    def __init__(self):
-        self.nlp_pipeline = stanza.Pipeline(lang='en', processors='tokenize,mwt,pos,lemma,depparse')
-        super().__init__(self.nlp_pipeline, use_multiprocessing=True)
+class StanzaDependencyParser(DependencyParserBase):
+    def __init__(self, lang):
+        self.nlp_pipeline = stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
+        super().__init__(self.nlp_pipeline, use_multiprocessing=False)
 
     @staticmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
@@ -79,4 +79,4 @@ class EnglishDependencyParser(DependencyParserBase):
         Args:
             pair: tuple[pipeline, sentence]
         """
-        return EnglishDependencyParser.sentence_to_node_relationship_list(pair[0], pair[1])
+        return StanzaDependencyParser.sentence_to_node_relationship_list(pair[0], pair[1])
