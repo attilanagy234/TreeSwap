@@ -154,11 +154,15 @@ class EdgeMapper:
                     max_edges.append((s2, d2, data2))
         return max_edges
 
-    def get_jaccard_index(self, g1, g2, mapping):
+    def get_jaccard_index_from_mapping(self, g1, g2, mapping):
         edges1 = len(g1.edges)
         edges2 = len(g2.edges)
         intersect = len(mapping)
         return (intersect) / (edges1 + edges2 - intersect)
+
+    def get_jaccard_index(self, g1, g2):
+        mapping = self.map_edges(g1, g2)
+        return self.get_jaccard_index_from_mapping(g1, g2, mapping)
 
 
 
