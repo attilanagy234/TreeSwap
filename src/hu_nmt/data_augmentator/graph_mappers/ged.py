@@ -64,7 +64,7 @@ class GED:
                                    node_subst_cost=self._node_subst_cost, node_del_cost=self._node_del_or_add,
                                    node_ins_cost=self._node_del_or_add, edge_subst_cost=self._edge_subs_cost,
                                    edge_del_cost=self._edge_del_or_add, edge_ins_cost=self._edge_del_or_add,
-                                   roots=(graph1.nodes['root_0'], graph2.nodes['root_1']), upper_bound=None,
+                                   roots=('root_0', 'root_0'), upper_bound=None,
                                    timeout=self.timeout)
 
     def get_normalized_distance(self, graph1, graph2):
