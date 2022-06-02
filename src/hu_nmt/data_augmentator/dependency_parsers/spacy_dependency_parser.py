@@ -16,8 +16,7 @@ class SpacyDependencyParser(DependencyParserBase):
     def __init__(self, lang):
         if lang == 'hu':
             try:
-                # self.nlp_pipeline = huspacy.load()
-                self.nlp_pipeline = spacy.load('hu_core_news_trf')
+                self.nlp_pipeline = huspacy.load()
             except OSError as e:
                 log.info(f'Could not load {lang} model:',e)
                 log.info('Downloading model')
