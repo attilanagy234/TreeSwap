@@ -41,7 +41,7 @@ def main(src_lang_code, tgt_lang_code, src_input_path, tgt_input_path, dep_tree_
                 src_sents = src_dep_parser.sentence_to_node_relationship_list(src_dep_parser.nlp_pipeline, src_sent)
                 tgt_sents = tgt_dep_parser.sentence_to_node_relationship_list(tgt_dep_parser.nlp_pipeline, tgt_sent)
             except:
-                log.error(f'Could not compute dependency tree for one of the sentences: src: {src_sent}, tgt: {tgt_sent}')
+                log.exception(f'Could not compute dependency tree for one of the sentences: src: {src_sent}, tgt: {tgt_sent}')
                 continue
             if src_sents == [] or tgt_sents == []:
                 continue
