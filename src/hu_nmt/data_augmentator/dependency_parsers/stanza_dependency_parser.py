@@ -34,6 +34,7 @@ class StanzaDependencyParser(DependencyParserBase):
             try:
                 target_lemma = token['lemma']
             except:
+                print(f'{sent=}')
                 print(f'{token=}')
                 exit(1)
             target_deprel = token['deprel']
