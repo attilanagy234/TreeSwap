@@ -31,7 +31,11 @@ class StanzaDependencyParser(DependencyParserBase):
             token = word.to_dict()
             target_key = f'{token["text"].lower()}_{token["id"]}'
             target_postag = token['upos']
-            target_lemma = token['lemma']
+            try:
+                target_lemma = token['lemma']
+            except:
+                print(f'{token=}')
+                exit(1)
             target_deprel = token['deprel']
             if token['head'] == 0:
                 source_key = ROOT_KEY
