@@ -35,7 +35,4 @@ jobs:
         working-directory: ./src
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
-      - name: Run pytest
-        working-directory: ./src
-        run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test/
       
