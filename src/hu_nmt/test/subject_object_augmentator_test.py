@@ -23,6 +23,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         # assert
         self.assertEqual(2, augmentator._num_augmented_sentences_to_generate_per_method)
 
+
     def test_is_eligible_for_both_augmentation(self):
         # setup
         sentence_pairs = [
