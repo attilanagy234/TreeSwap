@@ -2,8 +2,8 @@ Péter_1	PROPN	Péter	nsubj	elvitte_2	VERB	elvisz
 elvitte_2	VERB	elvisz	ROOT	root_0	None	None
 a_3	DET	a	det	kutyát_4	NOUN	kutya
 kutyát_4	NOUN	kutya	obj	sétálni_5	VERB	sétál
-sétálni_5	VERB	sétál	conj	elvitte_2	VERB	elvisz
+sétálni_5	VERB	sétál	xcomp	elvitte_2	VERB	elvisz
 az_6	DET	az	det	erdőbe_7	NOUN	erdő
-erdőbe_7	NOUN	erdő	nmod	sétálni_5	VERB	sétál
+erdőbe_7	NOUN	erdő	obl	sétálni_5	VERB	sétál
 ._8	PUNCT	.	punct	elvitte_2	VERB	elvisz
 

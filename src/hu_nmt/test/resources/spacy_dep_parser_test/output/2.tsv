@@ -1,6 +1,6 @@
-Ma_1	ADV	ma	advmod	elmegyek_2	VERB	elmegy
+Ma_1	ADV	ma	advmod:tlocy	elmegyek_2	VERB	elmegy
 elmegyek_2	VERB	elmegy	ROOT	root_0	None	None
 a_3	DET	a	det	boltba_4	NOUN	bolt
-boltba_4	NOUN	bolt	nmod	elmegyek_2	VERB	elmegy
+boltba_4	NOUN	bolt	obl	elmegyek_2	VERB	elmegy
 ._5	PUNCT	.	punct	elmegyek_2	VERB	elmegy
 
