@@ -37,4 +37,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
       - name: Run tests
         working-directory: ./src
+        # only running tests that do not need a stanza/spacy model
+        # - donwloading the models at each run takes a lot of time
+        # - caching the models is not an option in the free github tier (500MB cap)
         run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test/dependency_graph_wrapper_test.py hu_nmt/test/subject_object_augmentator_filtering_test.py
