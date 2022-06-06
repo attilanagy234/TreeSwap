@@ -44,4 +44,6 @@ jobs:
           key: stanza
       - name: Run tests
         working-directory: ./src
+        env:
+          CICD: true
         run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test

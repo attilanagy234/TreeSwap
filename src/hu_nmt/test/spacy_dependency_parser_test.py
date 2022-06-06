@@ -2,6 +2,8 @@ import os
 import unittest
 import filecmp
 import networkx as nx
+import pytest
+
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 
@@ -20,6 +22,7 @@ class SpacyDependencyParserTest(unittest.TestCase):
         if not isinstance(dep_graph, nx.DiGraph):
             raise TypeError('Dependency graph needs to be a nx DiGraph')
 
+    @pytest.mark.skipif(os.getenv('CICD') == 'true', reason='Do not run test in CI/CD build.')
     def test_sentence_to_dep_parse_tree_de(self):
         de_dep_parser = SpacyDependencyParser(lang='de')
         de_sentence = 'Ich liebe lange Spaziergänge in den Bergen.'
@@ -27,6 +30,7 @@ class SpacyDependencyParserTest(unittest.TestCase):
         if not isinstance(dep_graph, nx.DiGraph):
             raise TypeError('Dependency graph needs to be a nx DiGraph')
 
+    @pytest.mark.skipif(os.getenv('CICD') == 'true', reason='Do not run test in CI/CD build.')
     def test_sentence_to_dep_parse_tree_fr(self):
         de_dep_parser = SpacyDependencyParser(lang='fr')
         de_sentence = "J'ai 20 ans."
@@ -44,7 +48,7 @@ class SpacyDependencyParserTest(unittest.TestCase):
         output_dir = os.path.join(test_base_dir, 'output')
         expected_dir = os.path.join(test_base_dir, 'expected')
         file_batch_size = 1
-        self.hun_dep_parser.sentences_to_serialized_dep_graph_files(sentences, output_dir, file_batch_size)
+        self.hun_dep_parser.sentences_to_serialized_dep_graph_files(iter(sentences), output_dir, file_batch_size)
         output_file_cnts = len(get_files_in_folder(output_dir))
         expected_file_cnts = len(get_files_in_folder(expected_dir))
         self.assertEqual(expected_file_cnts, output_file_cnts)
