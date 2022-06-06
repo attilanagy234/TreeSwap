@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 on:
   push:
     branches:
@@ -23,7 +23,9 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
-      - name: Install dependencies
+      - name: Install other dependencies
+        run: sudo apt-get install -y graphviz
+      - name: Install poetry dependencies
         run: cd src && poetry install
       - name: Run pytest
         run: PYTHONPATH=src/ poetry run python -m pytest -v --cov=src/hu_nmt/data_augmentator src/hu_nmt/test/
