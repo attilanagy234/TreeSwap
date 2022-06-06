@@ -21,8 +21,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install poetry
         run: pip install poetry==${{ matrix.poetry-version }}
-      - name: Cache poetry env
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
         id: cache
         with:
           path: ./src/.venv
@@ -38,5 +37,5 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
       - name: Run pytest
         working-directory: ./src
-        run: PYTHONPATH=. poetry run python -m pytest -v --cov=src/hu_nmt/data_augmentator src/hu_nmt/test/
+        run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test/
       
