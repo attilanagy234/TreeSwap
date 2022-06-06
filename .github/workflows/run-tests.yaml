@@ -29,9 +29,13 @@ jobs:
           key: poetry-${{ hashFiles('./src/pyproject.toml') }}
       - name: Install other dependencies
         run: sudo apt-get install -y graphviz graphviz-dev
+      - name: Update poetry config
+        working-directory: ./src
+        run: poetry config settings.virtualenvs.in-project true
       - name: Install poetry dependencies
         working-directory: ./src
         run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
       - name: Run pytest
         working-directory: ./src
         run: PYTHONPATH=. poetry run python -m pytest -v --cov=src/hu_nmt/data_augmentator src/hu_nmt/test/
