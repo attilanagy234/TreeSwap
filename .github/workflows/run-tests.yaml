@@ -44,4 +44,4 @@ jobs:
           key: stanza
       - name: Run tests
         working-directory: ./src
-        run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test/subject_object_augmentator_test.py::SubjectObjectAugmentatorTests::test_is_eligible_for_both_augmentation
+        run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test
