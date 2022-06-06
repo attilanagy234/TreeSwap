@@ -36,6 +36,10 @@ jobs:
         working-directory: ./src
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
+      - name: Install huspacy model
+        working-directory: ./src
+        run: poetry run python -c "import huspacy; huspacy.download('hu_core_news_trf')"
+        if: steps.cache.outputs.cache-hit != 'true'
       - name: Cache stanza models
         uses: actions/cache@v3
         id: cache-stanza

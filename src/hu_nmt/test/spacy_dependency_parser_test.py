@@ -1,4 +1,5 @@
 import os
+import pathlib
 import unittest
 import filecmp
 import networkx as nx
@@ -44,14 +45,14 @@ class SpacyDependencyParserTest(unittest.TestCase):
             'Ma elmegyek a boltba.',
             'Róbert kihívta Ákost egy futóversenyre.'
         ]
-        test_base_dir = './resources/spacy_dep_parser_test'
-        output_dir = os.path.join(test_base_dir, 'output')
-        expected_dir = os.path.join(test_base_dir, 'expected')
+        test_base_dir = pathlib.Path(__file__).parent.resolve() / 'resources' / 'spacy_dep_parser_test'
+        output_dir = test_base_dir / 'output'
+        expected_dir = test_base_dir / 'expected'
         file_batch_size = 1
-        self.hun_dep_parser.sentences_to_serialized_dep_graph_files(iter(sentences), output_dir, file_batch_size)
-        output_file_cnts = len(get_files_in_folder(output_dir))
-        expected_file_cnts = len(get_files_in_folder(expected_dir))
+        self.hun_dep_parser.sentences_to_serialized_dep_graph_files(iter(sentences), str(output_dir), file_batch_size)
+        output_file_cnts = len(get_files_in_folder(str(output_dir)))
+        expected_file_cnts = len(get_files_in_folder(str(expected_dir)))
         self.assertEqual(expected_file_cnts, output_file_cnts)
-        self.assertTrue(filecmp.cmp(os.path.join(expected_dir, '1.tsv'), os.path.join(output_dir, '1.tsv')))
-        self.assertTrue(filecmp.cmp(os.path.join(expected_dir, '2.tsv'), os.path.join(output_dir, '2.tsv')))
-        self.assertTrue(filecmp.cmp(os.path.join(expected_dir, '3.tsv'), os.path.join(output_dir, '3.tsv')))
+        self.assertTrue(filecmp.cmp(str(expected_dir / '1.tsv'), str(output_dir / '1.tsv')))
+        self.assertTrue(filecmp.cmp(str(expected_dir / '2.tsv'), str(output_dir / '2.tsv')))
+        self.assertTrue(filecmp.cmp(str(expected_dir / '3.tsv'), str(output_dir / '3.tsv')))
