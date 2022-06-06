@@ -31,7 +31,7 @@ jobs:
         run: sudo apt-get install -y graphviz graphviz-dev
       - name: Update poetry config
         working-directory: ./src
-        run: poetry config settings.virtualenvs.in-project true
+        run: poetry config virtualenvs.in-project true
       - name: Install poetry dependencies
         working-directory: ./src
         run: poetry install
