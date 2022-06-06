@@ -35,4 +35,5 @@ jobs:
         working-directory: ./src
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
-      
+      - name: Run tests
+        run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test/dependency_graph_wrapper_test.py hu_nmt/test/subject_object_augmentator_filtering_test.py
