@@ -128,6 +128,8 @@ class DependencyParserBase(ABC):
                         batch_of_sentences.append((self.nlp_pipeline, next(sentences_iter)))
                 except StopIteration:
                     have_more_sentences_to_process = False
+                    if len(batch_of_sentences) == 0:
+                        break
 
                 if self.use_multiprocessing:
                     if first_run:
