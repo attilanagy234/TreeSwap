@@ -24,7 +24,7 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Install other dependencies
-        run: sudo apt-get install -y graphviz
+        run: sudo apt-get install -y graphviz graphviz-dev
       - name: Install poetry dependencies
         run: cd src && poetry install
       - name: Run pytest
