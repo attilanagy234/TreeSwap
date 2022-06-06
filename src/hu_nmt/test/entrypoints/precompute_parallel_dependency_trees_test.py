@@ -6,17 +6,17 @@ from click.testing import CliRunner
 from hu_nmt.data_augmentator.entrypoints.precompute_parallel_dependency_trees import main
 
 resources_path = pathlib.Path(__file__).parent.parent.resolve() / 'resources'
-de_en_path = resources_path / 'de-en'
+hu_en_path = resources_path / 'hu-en'
 
 
 class PrecomputeParallelDependencyTreesTests(unittest.TestCase):
     def test_main_entrypoint(self):
         # setup
-        src_lang_code = 'de'
+        src_lang_code = 'hu'
         tgt_lang_code = 'en'
-        src_input_path = de_en_path / 'de.tsv'
-        tgt_input_path = de_en_path / 'en.tsv'
-        dep_tree_output_path = de_en_path / 'outputs' / 'dep_trees'
+        src_input_path = hu_en_path / 'hu.tsv'
+        tgt_input_path = hu_en_path / 'en.tsv'
+        dep_tree_output_path = hu_en_path / 'outputs' / 'dep_trees'
         file_batch_size = 2
 
         # action
