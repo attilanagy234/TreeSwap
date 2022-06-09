@@ -33,12 +33,15 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
     def sample_item_pairs(items: List, sample_count: int):
         sampled_index_pairs: Set[Tuple[int, int]] = set()
         pbar = tqdm(total=sample_count)
+        size = 0
         while len(sampled_index_pairs) < sample_count:
             (x, y) = np.random.choice(len(items), 2, replace=False)
             if GraphBasedAugmentator._is_similar(items[x].hun, items[y].hun) and \
                     GraphBasedAugmentator._is_similar(items[x].eng, items[y].eng):
                 sampled_index_pairs.add((x, y))
-                pbar.update(1)
+                change = len(sampled_index_pairs) - size
+                pbar.update(change)
+                size = len(sampled_index_pairs)
 
         return [(items[x], items[y]) for x, y in sampled_index_pairs]
 
