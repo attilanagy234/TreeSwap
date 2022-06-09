@@ -21,12 +21,12 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         super().__init__(eng_graphs, hun_graphs, augmented_data_ratio, random_seed, filters, output_path, output_format,
                          save_original, separate_augmentation)
 
-        self.threshold = threshold
+        GraphBasedAugmentator.threshold = threshold
 
         if similarity_type == 'ged':
-            self.similarity = GED(src_lang_code, tgt_lang_code)
+            GraphBasedAugmentator.similarity = GED(src_lang_code, tgt_lang_code)
         elif similarity_type == 'edge_mapper':
-            self.similarity = EdgeMapper(src_lang_code, tgt_lang_code)
+            GraphBasedAugmentator.similarity = EdgeMapper(src_lang_code, tgt_lang_code)
 
     @staticmethod
     def sample_item_pairs(items: List, sample_count: int):
