@@ -1,6 +1,7 @@
 from typing import Tuple, List, Set, Optional
 
 import numpy as np
+from tqdm import tqdm
 
 from filtering import Filter
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
@@ -31,11 +32,13 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
     @staticmethod
     def sample_item_pairs(items: List, sample_count: int):
         sampled_index_pairs: Set[Tuple[int, int]] = set()
+        pbar = tqdm(total=sample_count)
         while len(sampled_index_pairs) < sample_count:
             (x, y) = np.random.choice(len(items), 2, replace=False)
             if GraphBasedAugmentator._is_similar(items[x].hun, items[y].hun) and \
                     GraphBasedAugmentator._is_similar(items[x].eng, items[y].eng):
                 sampled_index_pairs.add((x, y))
+                pbar.update(1)
 
         return [(items[x], items[y]) for x, y in sampled_index_pairs]
 
