@@ -31,7 +31,8 @@ class StanzaDependencyParser(DependencyParserBase):
             token = word.to_dict()
             target_key = f'{token["text"].lower()}_{token["id"]}'
             target_postag = token['upos']
-            target_lemma = token['lemma']
+            #target_lemma = token['lemma']
+            target_lemma = token.get('lemma')
             target_deprel = token['deprel']
             if 'feats' in token:
                 target_morph = token['feats']
