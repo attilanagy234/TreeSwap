@@ -89,11 +89,11 @@ class DependencyParserBase(ABC):
                             yield graph
                         graph = nx.DiGraph()
                     else:
-                        target_key, target_postag, target_lemma, target_morph, target_deprel, \
-                        source_key, source_postag, source_lemma, source_morph = line.split('\t')
+                        target_key, target_postag, target_lemma, target_deprel, \
+                        source_key, source_postag, source_lemma = line.split('\t')
 
-                        graph.add_node(source_key, postag=source_postag, lemma=source_lemma, morph=source_morph)
-                        graph.add_node(target_key, postag=target_postag, lemma=target_lemma, morph=target_morph)
+                        graph.add_node(source_key, postag=source_postag, lemma=source_lemma)
+                        graph.add_node(target_key, postag=target_postag, lemma=target_lemma)
                         graph.add_edge(source_key, target_key, dep=target_deprel)
                 if per_file:
                     yield dep_graphs
