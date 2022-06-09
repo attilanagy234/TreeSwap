@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import networkx as nx
@@ -14,7 +15,7 @@ ROOT_KEY = 'root_0'
 class StanzaDependencyParser(DependencyParserBase):
     def __init__(self, lang):
         self.nlp_pipeline = stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
-        super().__init__(self.nlp_pipeline, use_multiprocessing=False)
+        super().__init__(self.nlp_pipeline, use_multiprocessing=os.getenv('USE_MULTIPROCESSING', False))
 
     @staticmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
