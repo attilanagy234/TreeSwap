@@ -30,7 +30,7 @@ log = get_logger(__name__)
 @click.option('--save_original/--dont_save_original', default=False)
 @click.option('--separate_augmentation', default=False)
 @click.option('--augmentation_type', default='base')
-@click.option('--treshold', default=0.5)
+@click.option('--threshold', default=0.5)
 def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path, augmented_data_ratio,
          use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path, filter_batch_size, output_format,
          save_original, separate_augmentation, augmentation_type, threshold):
