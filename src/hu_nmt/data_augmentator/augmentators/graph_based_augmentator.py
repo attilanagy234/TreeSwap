@@ -41,5 +41,5 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
 
     @staticmethod
     def _is_similar(src_graph, tgt_graph):
-        return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_graph, tgt_graph) >= \
+        return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_graph.graph, tgt_graph.graph) >= \
                GraphBasedAugmentator.threshold
