@@ -21,7 +21,7 @@ class StanzaDependencyParser(DependencyParserBase):
         doc = nlp_pipeline(sent)
         # We most likely will only pass single sentences.
         if len(doc.sentences) != 1:
-            log.info(f'Sample has multiple sentences: {[s.text for s in doc.sentences]}')
+            log.debug(f'Sample has multiple sentences: {[s.text for s in doc.sentences]}')
             return []
         sent = doc.sentences[0]
 

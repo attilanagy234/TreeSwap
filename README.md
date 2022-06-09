@@ -1,4 +1,7 @@
 # syntax-augmentation-nmt
+
+[![Tests](https://github.com/attilanagy234/syntax-augmentation-nmt/actions/workflows/run-tests.yaml/badge.svg)](https://github.com/attilanagy234/syntax-augmentation-nmt/actions/workflows/run-tests.yaml)
+
 Complimentary code for our paper [Syntax-based data augmentation for Hungarian-English machine translation](https://arxiv.org/abs/2201.06876) submitted to the XVIII. Conference on Hungarian Computational Linguistics.
 
 ## Trained models

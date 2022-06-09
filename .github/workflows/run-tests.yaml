@@ -1,0 +1,53 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run_tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8]
+        poetry-version: [1.1.12]
+        os: [ubuntu-18.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: pip install poetry==${{ matrix.poetry-version }}
+      - name: Cache poetry venv
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ./src/.venv
+          key: poetry-${{ hashFiles('./src/pyproject.toml') }}
+      - name: Install other dependencies
+        run: sudo apt-get install -y graphviz graphviz-dev
+      - name: Update poetry config
+        working-directory: ./src
+        run: poetry config virtualenvs.in-project true
+      - name: Install poetry dependencies
+        working-directory: ./src
+        run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Install huspacy model
+        working-directory: ./src
+        run: poetry run python -c "import huspacy; huspacy.download('hu_core_news_trf')"
+        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Cache stanza models
+        uses: actions/cache@v3
+        id: cache-stanza
+        with:
+          path: ~/stanza_resources
+          key: stanza
+      - name: Run tests
+        working-directory: ./src
+        env:
+          CICD: true
+        run: PYTHONPATH=. poetry run python -m pytest -v --cov=hu_nmt/data_augmentator hu_nmt/test
