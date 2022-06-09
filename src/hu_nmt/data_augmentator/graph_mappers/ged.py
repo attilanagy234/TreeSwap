@@ -1,9 +1,11 @@
 from networkx import graph_edit_distance
 
 from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
+from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
 
 
-class GED:
+class GED(GraphSimilarityBase):
+
     _src_dep_parser = None
     _tgt_dep_parser = None
 
@@ -73,6 +75,17 @@ class GED:
         return float(max_dist - dist) / float(max_dist)
 
     def get_normalized_distance_from_sentences(self, src_sent, tgt_sent):
+        src_graph = self.src_dep_parser.sentence_to_dep_parse_tree(src_sent)
+        tgt_graph = self.tgt_dep_parser.sentence_to_dep_parse_tree(tgt_sent)
+
+        return self.get_normalized_distance(src_graph, tgt_graph)
+
+    def get_similarity_from_graphs(self, graph1, graph2):
+        dist = self.get_ged(graph1, graph2)
+        max_dist = len(graph1.nodes) * 2 - 2 + 2 * len(graph2.nodes) - 2
+        return float(max_dist - dist) / float(max_dist)
+
+    def get_similarity_from_sentences(self, src_sent, tgt_sent):
         src_graph = self.src_dep_parser.sentence_to_dep_parse_tree(src_sent)
         tgt_graph = self.tgt_dep_parser.sentence_to_dep_parse_tree(tgt_sent)
 

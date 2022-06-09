@@ -2,8 +2,10 @@ import networkx as nx
 from collections import defaultdict, Counter
 import nltk
 
+from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
 
-class EdgeMapper:
+
+class EdgeMapper(GraphSimilarityBase):
     def __init__(self, src_lang_code, tgt_lang_code, use_pos=False):
         self.deps = {}
         self.dep_weights = defaultdict(lambda: 1)
@@ -163,6 +165,12 @@ class EdgeMapper:
     def get_jaccard_index(self, g1, g2):
         mapping = self.map_edges(g1, g2)
         return self.get_jaccard_index_from_mapping(g1, g2, mapping)
+
+    def get_similarity_from_graphs(self, src_graph, tgt_graph):
+        return self.get_jaccard_index(src_graph, tgt_graph)
+
+    def get_similarity_from_sentences(self, src_sent, tgt_sent):
+        pass
 
 
 
