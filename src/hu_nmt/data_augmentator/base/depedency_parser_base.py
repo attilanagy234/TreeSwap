@@ -36,6 +36,9 @@ class DependencyParserBase(ABC):
     def __init__(self, nlp_pipeline, use_multiprocessing: bool):
         self.nlp_pipeline = nlp_pipeline
         self.use_multiprocessing = use_multiprocessing
+        log.info(f'{self.use_multiprocessing=}')
+        if self.use_multiprocessing:
+            log.info('Using multiprocessing')
 
     @abstractmethod
     def sentence_to_dep_parse_tree(self, sentence):
