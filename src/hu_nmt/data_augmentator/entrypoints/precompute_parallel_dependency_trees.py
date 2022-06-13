@@ -22,8 +22,8 @@ def main(src_lang_code, tgt_lang_code, src_input_path, tgt_input_path, dep_tree_
     src_sentence_generator: Iterator = src_dep_parser.get_file_line_generator(src_input_path)
     tgt_sentence_generator: Iterator = tgt_dep_parser.get_file_line_generator(tgt_input_path)
 
-    src_dep_parser.sentences_to_serialized_dep_graph_files(src_sentence_generator, os.path.join(dep_tree_output_path, src_lang_code), file_batch_size)
-    tgt_dep_parser.sentences_to_serialized_dep_graph_files(tgt_sentence_generator, os.path.join(dep_tree_output_path, tgt_lang_code), file_batch_size)
+    src_dep_parser.sentences_to_serialized_dep_graph_files(src_sentence_generator, os.path.join(dep_tree_output_path, src_lang_code), int(file_batch_size))
+    tgt_dep_parser.sentences_to_serialized_dep_graph_files(tgt_sentence_generator, os.path.join(dep_tree_output_path, tgt_lang_code), int(file_batch_size))
 
     # have_more_sentences_to_process = True
     # file_idx = 1
