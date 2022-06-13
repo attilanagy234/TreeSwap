@@ -158,7 +158,7 @@ class DependencyParserBase(ABC):
                                                 batch_of_sentences)
 
                 # dump to file
-                print(list_of_dep_rel_lists)
+                print(list(list_of_dep_rel_lists))
                 self.write_dep_graphs_to_file(output_dir, file_idx, list_of_dep_rel_lists)
 
                 pbar.update(len(batch_of_sentences))
