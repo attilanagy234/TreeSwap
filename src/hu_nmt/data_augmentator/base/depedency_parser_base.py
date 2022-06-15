@@ -36,6 +36,9 @@ class DependencyParserBase(ABC):
     def __init__(self, nlp_pipeline, use_multiprocessing: bool):
         self.nlp_pipeline = nlp_pipeline
         self.use_multiprocessing = use_multiprocessing
+        log.info(f'{self.use_multiprocessing=}')
+        if self.use_multiprocessing:
+            log.info('Using multiprocessing')
 
     @abstractmethod
     def sentence_to_dep_parse_tree(self, sentence):
@@ -97,11 +100,11 @@ class DependencyParserBase(ABC):
         return [DependencyGraphWrapper(x) for x in dep_graphs]
 
     def file_to_serialized_dep_graph_files(self, sentences_path: str, output_dir: str, file_batch_size: int):
-        sentence_generator = self._get_file_line_generator(sentences_path)
+        sentence_generator = self.get_file_line_generator(sentences_path)
         self.sentences_to_serialized_dep_graph_files(sentence_generator, output_dir, file_batch_size)
 
     @staticmethod
-    def _get_file_line_generator(file_path: str):
+    def get_file_line_generator(file_path: str):
         with open(file_path, 'r') as file:
             for line in file:
                 yield line.strip()
@@ -128,6 +131,8 @@ class DependencyParserBase(ABC):
                         batch_of_sentences.append((self.nlp_pipeline, next(sentences_iter)))
                 except StopIteration:
                     have_more_sentences_to_process = False
+                    if len(batch_of_sentences) == 0:
+                        break
 
                 if self.use_multiprocessing:
                     if first_run:

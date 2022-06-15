@@ -16,13 +16,13 @@ class SpacyDependencyParser(DependencyParserBase):
     def __init__(self, lang):
         if lang == 'hu':
             try:
-                self.nlp_pipeline = huspacy.load()
+                self.nlp_pipeline = huspacy.load('hu_core_news_trf')
             except OSError as e:
                 log.info(f'Could not load {lang} model:',e)
                 log.info('Downloading model')
-                huspacy.download()
+                huspacy.download('hu_core_news_trf')
                 log.info('Retrying model loading')
-                self.nlp_pipeline = huspacy.load()
+                self.nlp_pipeline = huspacy.load('hu_core_news_trf')
 
         elif lang == 'de':
             self.nlp_pipeline = spacy.load("de_core_news_sm")
@@ -40,7 +40,7 @@ class SpacyDependencyParser(DependencyParserBase):
             del sents[-1]
         # We most likely will only pass single sentences.
         if len(sents) > 1:
-            log.info(f'Sample has multiple sentences: {sents}')
+            log.debug(f'Sample has multiple sentences: {sents}')
             return []
         doc_sent = sents[0]
 
