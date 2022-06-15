@@ -19,10 +19,10 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, src_graphs: Optional[List[DependencyGraphWrapper]],
-                 tgt_graphs: Optional[List[DependencyGraphWrapper]],
-                 augmented_data_ratio: float, random_seed: int, filters: List[Filter], output_path: str,
-                 output_format: str, save_original: bool = False, separate_augmentation: bool = False):
+    def __init__(self, src_graphs: Optional[List[DependencyGraphWrapper]] = None,
+                 tgt_graphs: Optional[List[DependencyGraphWrapper]] = None,
+                 augmented_data_ratio: float = 0.5, random_seed: int = 123, filters: List[Filter] = None, output_path: str = './augmentations',
+                 output_format: str = 'tsv', save_original: bool = False, separate_augmentation: bool = False):
         super().__init__()
         if src_graphs and tgt_graphs and len(src_graphs) != len(tgt_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
