@@ -35,10 +35,10 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
         'hu': SpacyDependencyParser(lang='hu')
     }
 
-    eng_dep_tree_generator = dep_parsers[src_language].read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
-    # log.info(f'Number of English sentences used for augmentation: {len(eng_wrappers)}')
-    hun_dep_tree_generator = dep_parsers[tgt_language].read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
-    # log.info(f'Number of Hungarian sentences used for augmentation: {len(eng_wrappers)}')
+    src_dep_tree_generator = dep_parsers[src_language].read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
+    # log.info(f'Number of source sentences used for augmentation: {len(eng_wrappers)}')
+    tgt_dep_tree_generator = dep_parsers[tgt_language].read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
+    # log.info(f'Number of target sentences used for augmentation: {len(eng_wrappers)}')
 
     filters = []
     if use_filters:
@@ -50,15 +50,15 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
     log.info('Reading parsed dependency trees')
     graph_cnt = 0
     with tqdm() as pbar:
-        for eng_dep_tree_batch, hun_dep_tree_batch in zip(eng_dep_tree_generator, hun_dep_tree_generator):
-            eng_wrapper_batch = [DependencyGraphWrapper(tree) for tree in eng_dep_tree_batch]
-            hun_wrapper_batch = [DependencyGraphWrapper(tree) for tree in hun_dep_tree_batch]
+        for src_dep_tree_batch, tgt_dep_tree_batch in zip(src_dep_tree_generator, tgt_dep_tree_generator):
+            src_wrapper_batch = [DependencyGraphWrapper(tree) for tree in src_dep_tree_batch]
+            tgt_wrapper_batch = [DependencyGraphWrapper(tree) for tree in tgt_dep_tree_batch]
 
-            graph_cnt += len(eng_wrapper_batch)
+            graph_cnt += len(src_wrapper_batch)
 
-            augmentator.add_augmentable_candidates(hun_wrapper_batch, eng_wrapper_batch)
+            augmentator.add_augmentable_candidates(tgt_wrapper_batch, src_wrapper_batch)
 
-            pbar.update(len(eng_wrapper_batch))
+            pbar.update(len(src_wrapper_batch))
 
     log.info(f'Have parsed {graph_cnt} sentence graphs')
 
