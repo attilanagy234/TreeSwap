@@ -3,6 +3,7 @@ from typing import List
 
 import networkx as nx
 import stanza
+from stanza.pipeline.core import LanguageNotDownloadedError
 
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship
 from hu_nmt.data_augmentator.utils.logger import get_logger
@@ -14,7 +15,12 @@ ROOT_KEY = 'root_0'
 
 class StanzaDependencyParser(DependencyParserBase):
     def __init__(self, lang):
-        self.nlp_pipeline = stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
+        try:
+            self.nlp_pipeline = stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
+        except LanguageNotDownloadedError as e:
+            log.info(f'Could not find Stanza model for lang: {lang}. Downloading it now...')
+            stanza.download(lang)
+            self.nlp_pipeline = stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
         super().__init__(self.nlp_pipeline, use_multiprocessing=os.getenv('USE_MULTIPROCESSING', False))
 
     @staticmethod

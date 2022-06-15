@@ -7,9 +7,12 @@ class DependencyParserFactory:
     dep_parsers = {
         'en': lambda: StanzaDependencyParser(lang='en'),
         'de': lambda: StanzaDependencyParser(lang='de'),
-        'hu': lambda: SpacyDependencyParser(lang='hu')
-    }
+        'hu': lambda: SpacyDependencyParser(lang='hu'),
+        'uk': lambda: StanzaDependencyParser(lang='uk'),
+        'fr': lambda: StanzaDependencyParser(lang='fr'),
+        'ja': lambda: StanzaDependencyParser(lang='ja'),
 
+    }
     @classmethod
     def get_dependency_parser(cls, lang_code) -> DependencyParserBase:
         return cls.dep_parsers[lang_code]()
