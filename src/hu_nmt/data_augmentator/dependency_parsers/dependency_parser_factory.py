@@ -5,13 +5,12 @@ from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import S
 
 class DependencyParserFactory:
     dep_parsers = {
-        'en': lambda: StanzaDependencyParser(lang='en'),
-        'de': lambda: StanzaDependencyParser(lang='de'),
+        'en': lambda: StanzaDependencyParser(lang='en', processors='tokenize, pos, lemma, depparse'),
+        'ja': lambda: StanzaDependencyParser(lang='ja', processors='tokenize, pos, lemma, depparse'),
+        'de': lambda: StanzaDependencyParser(lang='de', processors='tokenize, mwt, pos, lemma, depparse'),
+        'uk': lambda: StanzaDependencyParser(lang='uk', processors='tokenize, mwt, pos, lemma, depparse'),
+        'fr': lambda: StanzaDependencyParser(lang='fr', processors='tokenize, mwt, pos, lemma, depparse'),
         'hu': lambda: SpacyDependencyParser(lang='hu'),
-        'uk': lambda: StanzaDependencyParser(lang='uk'),
-        'fr': lambda: StanzaDependencyParser(lang='fr'),
-        'ja': lambda: StanzaDependencyParser(lang='ja'),
-
     }
     @classmethod
     def get_dependency_parser(cls, lang_code) -> DependencyParserBase:

@@ -14,13 +14,13 @@ ROOT_KEY = 'root_0'
 
 
 class StanzaDependencyParser(DependencyParserBase):
-    def __init__(self, lang):
+    def __init__(self, lang, processors):
         try:
-            self.nlp_pipeline = stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
+            self.nlp_pipeline = stanza.Pipeline(lang=lang, processors=processors)
         except LanguageNotDownloadedError as e:
             log.info(f'Could not find Stanza model for lang: {lang}. Downloading it now...')
             stanza.download(lang)
-            self.nlp_pipeline = stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
+            self.nlp_pipeline = stanza.Pipeline(lang=lang, processors=processors)
         super().__init__(self.nlp_pipeline, use_multiprocessing=os.getenv('USE_MULTIPROCESSING', False))
 
     @staticmethod
