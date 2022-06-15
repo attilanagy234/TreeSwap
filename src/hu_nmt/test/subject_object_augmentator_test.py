@@ -73,7 +73,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         sentence_pairs = [
             ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
             ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
-            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun, subj root postag not the same
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
             ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
             ('I like ice cream', 'Én szeretem a fagyit.'),  # both
             ('He loves your huge ego.', 'Ő szereti a nagy egód.'), # both
@@ -86,7 +86,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
         # assert
         assert_obj_values = [True, True, False, False, True, True]
-        assert_nsubj_values = [False, False, False, True, True, True]
+        assert_nsubj_values = [False, False, True, True, True, True]
         i = 0
         for obj_value, nsubj_value, hun_g, eng_g in zip(assert_obj_values, assert_nsubj_values, hun_graph_wrappers, eng_graph_wrappers):
             print(i)
@@ -99,7 +99,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         sentence_pairs = [
             ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
             ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
-            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun, subj root postag not the same
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
             ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
             ('I like ice cream', 'Én szeretem a fagyit.'),  # both
             ('He loves your huge ego.', 'Ő szereti a nagy egód.'), # both
@@ -115,7 +115,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
         # assert
         self.assertEqual(4, len(augmentator._candidate_translations['obj']))
-        self.assertEqual(3, len(augmentator._candidate_translations['nsubj']))
+        self.assertEqual(4, len(augmentator._candidate_translations['nsubj']))
 
     def test_add_augmentable_candidates_both(self):
         # setup
@@ -149,7 +149,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
             ('I walked my dog down the street.', 'Sétáltattam a kutyámat az utcán.'),  # no subj in hun
             ('Have witnessed a miracle.', 'Én láttam egy csodát.'),  # no subj in eng
             ('I like ice cream', 'Én szeretem a fagyit.'),  # both
-            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun, subj root postag not the same
+            ('I have witnessed a miracle.', 'Én egy csodának voltam a szemtanúja.'),  # no obj in hun
             ('I talked too much.', 'Én túl sokat beszéltem.'),  # no obj in eng
             ('He loves your huge ego.', 'Ő szereti a nagy egód.'),  # both
         ]
@@ -168,7 +168,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
         # assert
         self.assertEqual(4, len(augmentator._candidate_translations['obj']))
-        self.assertEqual(3, len(augmentator._candidate_translations['nsubj']))
+        self.assertEqual(4, len(augmentator._candidate_translations['nsubj']))
 
     def test_group_candidates_by_predicate_lemmas(self):
         # setup
