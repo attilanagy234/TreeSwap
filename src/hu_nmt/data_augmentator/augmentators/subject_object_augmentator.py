@@ -500,12 +500,12 @@ class SubjectObjectAugmentator(AugmentatorBase):
                     os.mkdir(f'{self._output_path}/original_{augmentation_type}')
                 for lang in ['src', 'tgt']:
                     if self.save_original:
-                        with open(f'{self._output_path}/original_{augmentation_type}/{augmentation_type}.{lang[:2]}',
+                        with open(f'{self._output_path}/original_{augmentation_type}/{augmentation_type}.{lang}',
                                   'w+') as original_file:
                             for sent in self._original_augmentation_sentence_pairs[augmentation_type][lang]:
                                 original_file.write(sent)
                                 original_file.write('\n')
-                    with open(f'{self._output_path}/{augmentation_type}/{augmentation_type}.{lang[:2]}', 'w+') as f:
+                    with open(f'{self._output_path}/{augmentation_type}/{augmentation_type}.{lang}', 'w+') as f:
                         for sent in self._augmented_sentence_pairs[augmentation_type][lang]:
                             f.write(sent)
                             f.write('\n')
