@@ -9,8 +9,7 @@ class DependencyParserFactory:
         'ja': lambda: StanzaDependencyParser(lang='ja', processors='tokenize, pos, lemma, depparse'),
         'hr': lambda: StanzaDependencyParser(lang='hr', processors='tokenize, pos, lemma, depparse'),
         'ru': lambda: StanzaDependencyParser(lang='ru', processors='tokenize, pos, lemma, depparse'),
-        # Cannot load it, need to look into it
-        # 'cz': lambda: StanzaDependencyParser(lang='cz', processors='tokenize, pos, lemma, depparse'),
+        'cs': lambda: StanzaDependencyParser(lang='cs', processors='tokenize, mwt, pos, lemma, depparse'),
         'de': lambda: StanzaDependencyParser(lang='de', processors='tokenize, mwt, pos, lemma, depparse'),
         'uk': lambda: StanzaDependencyParser(lang='uk', processors='tokenize, mwt, pos, lemma, depparse'),
         'fr': lambda: StanzaDependencyParser(lang='fr', processors='tokenize, mwt, pos, lemma, depparse'),
