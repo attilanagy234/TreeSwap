@@ -1,4 +1,5 @@
 import os
+import pathlib
 from functools import partial
 from typing import List
 import networkx as nx
@@ -16,9 +17,13 @@ ROOT_KEY = 'root_0'
 class StanzaDependencyParser(DependencyParserBase):
     def __init__(self, lang):
         nlp_pipeline_constructor = partial(stanza.Pipeline, lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
+        if not pathlib.Path(f'~/stanza_resources/{lang}').exists():
+            stanza.download(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')
+
         use_multiprocessing = False
         if os.getenv('USE_MULTIPROCESSING', False) == 'True':
             use_multiprocessing = True
+
         super().__init__(nlp_pipeline_constructor, use_multiprocessing=use_multiprocessing)
 
     @staticmethod
