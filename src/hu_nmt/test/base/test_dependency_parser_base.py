@@ -51,11 +51,12 @@ class DependencyParserBaseTests(unittest.TestCase):
         dep_tree_output_path = self.hu_en_path / 'outputs' / 'dep_trees'
         en_output_path = dep_tree_output_path / 'en'
         batch_size = 2
+        with open(en_input_path) as en_input_file:
+            sentences = en_input_file.readlines()[:2]
 
         # action
         en_dep_parser = DependencyParserFactory.get_dependency_parser('en')
-        sentence_generator: Iterator = en_dep_parser.get_file_line_generator(str(en_input_path))
-        en_dep_parser.sentences_to_serialized_dep_graph_files(sentence_generator, str(en_output_path), batch_size)
+        en_dep_parser.sentences_to_serialized_dep_graph_files(iter(sentences), str(en_output_path), batch_size)
 
         # assert
         files = [file for file in dep_tree_output_path.glob('en/*') if file.is_file()]
@@ -68,7 +69,7 @@ class DependencyParserBaseTests(unittest.TestCase):
     @patch('multiprocessing.cpu_count')
     def test_sentences_to_serialized_dep_graph_files_multiprocessing(self, cpu_count_mock):
         os.environ['USE_MULTIPROCESSING'] = 'True'
-        cpu_count_mock.return_value = 2
+        cpu_count_mock.return_value = 1
         self.test_sentences_to_serialized_dep_graph_files()
 
     def test_create_mini_batches(self):
