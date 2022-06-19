@@ -17,7 +17,7 @@ ROOT_KEY = 'root_0'
 class StanzaDependencyParser(DependencyParserBase):
     def __init__(self, lang, processors):
         nlp_pipeline_constructor = partial(stanza.Pipeline, lang=lang, processors=processors)
-        if not pathlib.Path(f'~/stanza_resources/{lang}').exists():
+        if not pathlib.Path(f'{os.getenv("HOME")}/stanza_resources/{lang}').resolve().exists():
             stanza.download(lang=lang, processors=processors)
 
         use_multiprocessing = False
