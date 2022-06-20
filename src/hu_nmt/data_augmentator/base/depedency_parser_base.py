@@ -189,6 +189,7 @@ class DependencyParserBase(ABC):
                     proc_pool.join()
 
                     # unpack results
+                    log.info('Unpacking results')
                     list_of_dep_rel_lists = []
                     for result in list_of_results:
                         list_of_dep_rel_lists.extend(result)

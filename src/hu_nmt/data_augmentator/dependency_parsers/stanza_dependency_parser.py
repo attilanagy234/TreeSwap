@@ -80,6 +80,8 @@ class StanzaDependencyParser(DependencyParserBase):
     @staticmethod
     def _sentence_process_batch_to_node_relationship_list(process_batch: SentenceProcessBatch) \
             -> List[List[NodeRelationship]]:
+        log.info('Creating pipeline in process')
         pipeline = process_batch.pipeline_constructor()
+        log.info('Processing sentences in process')
         return [StanzaDependencyParser.sentence_to_node_relationship_list(pipeline, sentence)
                 for sentence in process_batch.sentences]
