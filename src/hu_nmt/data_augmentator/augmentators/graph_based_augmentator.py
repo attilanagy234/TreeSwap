@@ -27,7 +27,7 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         if similarity_type == 'ged':
             GraphBasedAugmentator.similarity = GED(src_lang_code, tgt_lang_code)
         elif similarity_type == 'edge_mapper':
-            GraphBasedAugmentator.similarity = EdgeMapper(src_lang_code, tgt_lang_code)
+            GraphBasedAugmentator.similarity = EdgeMapper()
 
     @staticmethod
     def sample_item_pairs(items: List, sample_count: int):

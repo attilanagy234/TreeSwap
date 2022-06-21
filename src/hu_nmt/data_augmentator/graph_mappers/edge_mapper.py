@@ -6,15 +6,9 @@ from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSim
 
 
 class EdgeMapper(GraphSimilarityBase):
-    def __init__(self, src_lang_code, tgt_lang_code, use_pos=False):
+    def __init__(self):
         self.deps = {}
         self.dep_weights = defaultdict(lambda: 1)
-        if src_lang_code == 'hu' and tgt_lang_code == 'en':
-            # self.deps['obl'] = 'case'
-            self.deps['obl'] = 'obl'
-        elif src_lang_code == 'en' and tgt_lang_code == 'hu':
-            # self.deps['case'] = 'obl'
-            self.deps['case'] = 'case'
 
         self.dep_weights['nsubj'] = 3
         self.dep_weights['obj'] = 3
@@ -23,8 +17,6 @@ class EdgeMapper(GraphSimilarityBase):
         self.dep_weights['case'] = 2
         self.dep_weights['amod'] = 2
         self.dep_weights['advmod'] = 2
-
-        self.use_pos = use_pos
 
     def map_edges(self, g1: nx.DiGraph, g2: nx.DiGraph):
         g1 = self.add_weight(g1)

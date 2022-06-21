@@ -1,5 +1,5 @@
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
-from hu_nmt.data_augmentator.dependency_parsers.english_dependency_parser import EnglishDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
 
 from collections import defaultdict
 import networkx as nx
@@ -8,7 +8,7 @@ import networkx as nx
 class GraphMapper:
     def __init__(self):
         self.hun_dep_parser = SpacyDependencyParser(lang='hu')
-        self.eng_dep_parser = EnglishDependencyParser()
+        self.eng_dep_parser = StanzaDependencyParser('en')
         self.weights = defaultdict(lambda: 1)
         self.weights['nsubj'] = 5
         self.weights['object'] = 5
