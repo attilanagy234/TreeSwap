@@ -182,9 +182,9 @@ class DependencyParserBase(ABC):
                     # map to processes
                     log.info('Mapping sentences to processes')
                     proc_pool = mp.get_context('spawn').Pool(process_count)
-                    list_of_results = proc_pool.imap(self._sentence_process_batch_to_node_relationship_list,
-                                                     process_batches,
-                                                     chunksize=max(int(len(batch_of_sentences) / process_count), 1))
+                    list_of_results = proc_pool.map(self._sentence_process_batch_to_node_relationship_list,
+                                                    process_batches,
+                                                    chunksize=max(int(len(batch_of_sentences) / process_count), 1))
                     proc_pool.close()
                     proc_pool.join()
 
