@@ -52,7 +52,7 @@ class DependencyParserBaseTests(unittest.TestCase):
         en_output_path = dep_tree_output_path / 'en'
         batch_size = 2
         with open(en_input_path) as en_input_file:
-            sentences = en_input_file.readlines()[:2]
+            sentences = en_input_file.readlines()
 
         # action
         en_dep_parser = DependencyParserFactory.get_dependency_parser('en')
