@@ -51,6 +51,11 @@ class DependencyParserBaseTests(unittest.TestCase):
         dep_tree_output_path = self.hu_en_path / 'outputs' / 'dep_trees'
         en_output_path = dep_tree_output_path / 'en'
         batch_size = 2
+
+        if os.path.exists(en_output_path):
+            for f in os.listdir(en_output_path):
+                os.remove(os.path.join(en_output_path, f))
+
         with open(en_input_path) as en_input_file:
             sentences = en_input_file.readlines()
 
