@@ -1,10 +1,12 @@
+from functools import partial
 from typing import List
 
 import huspacy
 import networkx as nx
 import spacy
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship
+from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship, \
+    SentenceProcessUnit, SentenceProcessBatch
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
@@ -16,21 +18,21 @@ class SpacyDependencyParser(DependencyParserBase):
     def __init__(self, lang):
         if lang == 'hu':
             try:
-                self.nlp_pipeline = huspacy.load('hu_core_news_trf')
+                nlp_pipeline_constructor = partial(huspacy.load, 'hu_core_news_trf')
             except OSError as e:
                 log.info(f'Could not load {lang} model:',e)
                 log.info('Downloading model')
                 huspacy.download('hu_core_news_trf')
                 log.info('Retrying model loading')
-                self.nlp_pipeline = huspacy.load('hu_core_news_trf')
+                nlp_pipeline_constructor = partial(huspacy.load, 'hu_core_news_trf')
 
         elif lang == 'de':
-            self.nlp_pipeline = spacy.load("de_core_news_sm")
+            nlp_pipeline_constructor = partial(spacy.load, "de_core_news_sm")
         elif lang == 'fr':
-            self.nlp_pipeline = spacy.load("fr_core_news_sm")
+            nlp_pipeline_constructor = partial(spacy.load, "fr_core_news_sm")
         else:
             raise ValueError(f'Language {lang} is not supported by the SpacyDependencyParser.')
-        super().__init__(self.nlp_pipeline, use_multiprocessing=False)
+        super().__init__(nlp_pipeline_constructor, use_multiprocessing=False)
 
     @staticmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
@@ -78,9 +80,12 @@ class SpacyDependencyParser(DependencyParserBase):
         return dep_graph
 
     @staticmethod
-    def _sentence_pipeline_pair_to_node_relationship_list(pair):
-        """
-        Args:
-            pair: tuple[pipeline, sentence]
-        """
-        return SpacyDependencyParser.sentence_to_node_relationship_list(pair[0], pair[1])
+    def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit):
+        return SpacyDependencyParser.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
+
+    @staticmethod
+    def _sentence_process_batch_to_node_relationship_list(process_batch: SentenceProcessBatch) \
+            -> List[List[NodeRelationship]]:
+        pipeline = process_batch.pipeline_constructor()
+        return [SpacyDependencyParser.sentence_to_node_relationship_list(pipeline, sentence)
+                for sentence in process_batch.sentences]
