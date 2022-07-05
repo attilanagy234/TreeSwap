@@ -10,6 +10,7 @@ from tqdm import tqdm
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
+from hu_nmt.data_augmentator.utils.types.postag_types import PostagType
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.filters.filter import Filter
 
@@ -452,6 +453,12 @@ class SubjectObjectAugmentator(AugmentatorBase):
         if not SubjectObjectAugmentator.is_consecutive_subsequence(src_dep_subgraph):
             return False
         if not SubjectObjectAugmentator.is_consecutive_subsequence(tgt_dep_subgraph):
+            return False
+
+        # Should contain at least one NOUN property both in tgt and src
+        if not src_graph.get_nodes_with_property('postag', PostagType.NOUN.name):
+            return False
+        if not tgt_graph.get_nodes_with_property('postag', PostagType.NOUN.name):
             return False
 
         # Roots of the subgraphs to be swapped have the same POS tag
