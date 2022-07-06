@@ -3,7 +3,7 @@ import unittest
 import networkx as nx
 
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.utils.types.postag_types import Postag
+from hu_nmt.data_augmentator.utils.types.postag import Postag
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 

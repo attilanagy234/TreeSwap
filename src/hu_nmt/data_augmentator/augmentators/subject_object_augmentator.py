@@ -10,7 +10,7 @@ from tqdm import tqdm
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
-from hu_nmt.data_augmentator.utils.types.postag_types import Postag
+from hu_nmt.data_augmentator.utils.types.postag import Postag
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.filters.filter import Filter
 
@@ -30,7 +30,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
                  output_format: str = 'tsv',
                  save_original: bool = False,
                  separate_augmentation: bool = False,
-                 filter_consecutive_subsequence: bool = True,
+                 filter_nsub_and_obj_have_same_ancestor: bool = True,
                  filter_same_pos_tag: bool = True,
                  filter_for_noun_tags: bool = False):
         super().__init__()
@@ -56,7 +56,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self.output_format = output_format
         self.save_original = save_original
         self.separate_augmentation = separate_augmentation
-        self.filter_consecutive_subsequence = filter_consecutive_subsequence
+        self.filter_nsub_and_obj_have_same_ancestor = filter_nsub_and_obj_have_same_ancestor
         self.filter_same_pos_tag = filter_same_pos_tag
         self.filter_for_noun_tags = filter_for_noun_tags
         self.error_cnt = 0
@@ -431,8 +431,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         tgt_obj_edge = tgt_obj_edges[0]
 
         # nsubj and obj edges have the same ancestor (predicate)
-        if src_nsubj_edge.source_node != src_obj_edge.source_node or tgt_nsubj_edge.source_node != tgt_obj_edge.source_node:
-            return False
+        if self.filter_nsub_and_obj_have_same_ancestor:
+            if src_nsubj_edge.source_node != src_obj_edge.source_node or tgt_nsubj_edge.source_node != tgt_obj_edge.source_node:
+                return False
 
         return True
 
@@ -459,11 +460,10 @@ class SubjectObjectAugmentator(AugmentatorBase):
         tgt_dep_subgraph = tgt_graph.get_subtree_node_ids(dep_tgt)
 
         # Subtree is consecutive
-        if self.filter_consecutive_subsequence:
-            if not SubjectObjectAugmentator.is_consecutive_subsequence(src_dep_subgraph):
-                return False
-            if not SubjectObjectAugmentator.is_consecutive_subsequence(tgt_dep_subgraph):
-                return False
+        if not SubjectObjectAugmentator.is_consecutive_subsequence(src_dep_subgraph):
+            return False
+        if not SubjectObjectAugmentator.is_consecutive_subsequence(tgt_dep_subgraph):
+            return False
 
         if self.filter_for_noun_tags:
             src_dep_subtree = DependencyGraphWrapper(src_graph.get_subtree(dep_src))
