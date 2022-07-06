@@ -3,7 +3,7 @@ import unittest
 import networkx as nx
 
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.utils.types.postag_types import PostagType
+from hu_nmt.data_augmentator.utils.types.postag_types import Postag
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 
@@ -258,11 +258,11 @@ class SubjectObjectAugmentatorFilteringTests(unittest.TestCase):
 
     def test_eligible_for_both_aug_no_NOUN_in_src(self):
         src_graph = nx.DiGraph()
-        src_graph.add_node("Deemed_1", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("universities_2", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("charge_3", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("huge_4", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("fees_5", postag=PostagType.VERB.name, lemma='')
+        src_graph.add_node("Deemed_1", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("universities_2", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("charge_3", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("huge_4", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("fees_5", postag=Postag.VERB.name, lemma='')
         src_graph.add_edge('charge_3', 'universities_2', dep='nsubj')
         src_graph.add_edge('charge_3', 'fees_5', dep='obj')
         src_graph.add_edge('universities_2', 'Deemed_1', dep='compound')
@@ -270,11 +270,11 @@ class SubjectObjectAugmentatorFilteringTests(unittest.TestCase):
         src_graph_wrp = DependencyGraphWrapper(src_graph)
 
         trg_graph = nx.DiGraph()
-        trg_graph.add_node("Vélt_1", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("egyetemek_2", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("felszámolnak_3", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("hatalmas_4", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("összeget_5", postag=PostagType.NOUN.name, lemma='')
+        trg_graph.add_node("Vélt_1", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("egyetemek_2", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("felszámolnak_3", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("hatalmas_4", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("összeget_5", postag=Postag.NOUN.name, lemma='')
         trg_graph.add_edge('felszámolnak_3', 'egyetemek_2', dep='nsubj')
         trg_graph.add_edge('felszámolnak_3', 'összeget_5', dep='obj')
         trg_graph.add_edge('egyetemek_2', 'Vélt_1', dep='compound')
@@ -286,11 +286,11 @@ class SubjectObjectAugmentatorFilteringTests(unittest.TestCase):
 
     def test_eligible_for_both_aug_no_NOUN_in_trg(self):
         src_graph = nx.DiGraph()
-        src_graph.add_node("Deemed_1", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("universities_2", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("charge_3", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("huge_4", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("fees_5", postag=PostagType.NOUN.name, lemma='')
+        src_graph.add_node("Deemed_1", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("universities_2", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("charge_3", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("huge_4", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("fees_5", postag=Postag.NOUN.name, lemma='')
         src_graph.add_edge('charge_3', 'universities_2', dep='nsubj')
         src_graph.add_edge('charge_3', 'fees_5', dep='obj')
         src_graph.add_edge('universities_2', 'Deemed_1', dep='compound')
@@ -298,11 +298,11 @@ class SubjectObjectAugmentatorFilteringTests(unittest.TestCase):
         src_graph_wrp = DependencyGraphWrapper(src_graph)
 
         trg_graph = nx.DiGraph()
-        trg_graph.add_node("Vélt_1", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("egyetemek_2", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("felszámolnak_3", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("hatalmas_4", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("összeget_5", postag=PostagType.VERB.name, lemma='')
+        trg_graph.add_node("Vélt_1", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("egyetemek_2", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("felszámolnak_3", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("hatalmas_4", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("összeget_5", postag=Postag.VERB.name, lemma='')
         trg_graph.add_edge('felszámolnak_3', 'egyetemek_2', dep='nsubj')
         trg_graph.add_edge('felszámolnak_3', 'összeget_5', dep='obj')
         trg_graph.add_edge('egyetemek_2', 'Vélt_1', dep='compound')
@@ -314,11 +314,11 @@ class SubjectObjectAugmentatorFilteringTests(unittest.TestCase):
 
     def test_eligible_for_both_aug_one_NOUN_in_both(self):
         src_graph = nx.DiGraph()
-        src_graph.add_node("Deemed_1", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("universities_2", postag=PostagType.NOUN.name, lemma='')
-        src_graph.add_node("charge_3", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("huge_4", postag=PostagType.VERB.name, lemma='')
-        src_graph.add_node("fees_5", postag=PostagType.NOUN.name, lemma='')
+        src_graph.add_node("Deemed_1", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("universities_2", postag=Postag.NOUN.name, lemma='')
+        src_graph.add_node("charge_3", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("huge_4", postag=Postag.VERB.name, lemma='')
+        src_graph.add_node("fees_5", postag=Postag.NOUN.name, lemma='')
         src_graph.add_edge('charge_3', 'universities_2', dep='nsubj')
         src_graph.add_edge('charge_3', 'fees_5', dep='obj')
         src_graph.add_edge('universities_2', 'Deemed_1', dep='compound')
@@ -326,11 +326,11 @@ class SubjectObjectAugmentatorFilteringTests(unittest.TestCase):
         src_graph_wrp = DependencyGraphWrapper(src_graph)
 
         trg_graph = nx.DiGraph()
-        trg_graph.add_node("Vélt_1", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("egyetemek_2", postag=PostagType.NOUN.name, lemma='')
-        trg_graph.add_node("felszámolnak_3", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("hatalmas_4", postag=PostagType.VERB.name, lemma='')
-        trg_graph.add_node("összeget_5", postag=PostagType.NOUN.name, lemma='')
+        trg_graph.add_node("Vélt_1", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("egyetemek_2", postag=Postag.NOUN.name, lemma='')
+        trg_graph.add_node("felszámolnak_3", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("hatalmas_4", postag=Postag.VERB.name, lemma='')
+        trg_graph.add_node("összeget_5", postag=Postag.NOUN.name, lemma='')
         trg_graph.add_edge('felszámolnak_3', 'egyetemek_2', dep='nsubj')
         trg_graph.add_edge('felszámolnak_3', 'összeget_5', dep='obj')
         trg_graph.add_edge('egyetemek_2', 'Vélt_1', dep='compound')

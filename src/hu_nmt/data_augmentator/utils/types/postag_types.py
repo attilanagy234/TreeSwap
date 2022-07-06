@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class PostagType(Enum):
+class Postag(Enum):
     NOUN = 'NOUN'
     VERB = 'VERB'
     PROPN = 'PROPN'

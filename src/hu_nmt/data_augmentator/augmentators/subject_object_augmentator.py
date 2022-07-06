@@ -10,7 +10,7 @@ from tqdm import tqdm
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
-from hu_nmt.data_augmentator.utils.types.postag_types import PostagType
+from hu_nmt.data_augmentator.utils.types.postag_types import Postag
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.filters.filter import Filter
 
@@ -469,11 +469,11 @@ class SubjectObjectAugmentator(AugmentatorBase):
             src_dep_subtree = DependencyGraphWrapper(src_graph.get_subtree(dep_src))
             tgt_dep_subtree = DependencyGraphWrapper(tgt_graph.get_subtree(dep_tgt))
             # Should contain at least one NOUN property both in tgt and src
-            if not (src_dep_subtree.get_nodes_with_property('postag', PostagType.NOUN.name)
-                    + src_dep_subtree.get_nodes_with_property('postag', PostagType.PROPN.name)):
+            if not (src_dep_subtree.get_nodes_with_property('postag', Postag.NOUN.name)
+                    + src_dep_subtree.get_nodes_with_property('postag', Postag.PROPN.name)):
                 return False
-            if not (tgt_dep_subtree.get_nodes_with_property('postag', PostagType.NOUN.name)
-                    + tgt_dep_subtree.get_nodes_with_property('postag', PostagType.PROPN.name)):
+            if not (tgt_dep_subtree.get_nodes_with_property('postag', Postag.NOUN.name)
+                    + tgt_dep_subtree.get_nodes_with_property('postag', Postag.PROPN.name)):
                 return False
 
         # Roots of the subgraphs to be swapped have the same POS tag
