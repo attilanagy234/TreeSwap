@@ -52,6 +52,9 @@ multi_train:
         augmentation_script: run_subject_object_augmentation.sh
         precompute_batch_size: 10000
         augmentation_ratio: 0.5
+        filter_same_ancestor: true
+        filter_same_pos_tag: true
+        filter_for_noun_tags: false
 
 #------------------------------------------------------------------------------
 # Script configs
