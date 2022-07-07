@@ -15,6 +15,7 @@ class DependencyParserFactory:
         'fr': lambda: StanzaDependencyParser(lang='fr', processors='tokenize, mwt, pos, lemma, depparse'),
         'hu': lambda: SpacyDependencyParser(lang='hu'),
     }
+    
     @classmethod
     def get_dependency_parser(cls, lang_code) -> DependencyParserBase:
         return cls.dep_parsers[lang_code]()

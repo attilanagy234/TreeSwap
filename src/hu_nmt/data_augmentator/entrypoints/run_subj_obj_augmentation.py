@@ -28,17 +28,20 @@ log = get_logger(__name__)
 @click.option('--output_format', default='basic', help='Supported output formats: basic (default), tsv')
 @click.option('--save_original/--dont_save_original', default=False)
 @click.option('--separate_augmentation', default=False)
+@click.option('--filter_same_ancestor', default=True)
+@click.option('--filter_same_pos_tag', default=True)
+@click.option('--filter_for_noun_tags', default=False)
 def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path,
          augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
-         filter_batch_size, output_format, save_original, separate_augmentation):
-    dep_parsers = {
-        'en': DependencyParserFactory.get_dependency_parser('en'),
-        'hu': SpacyDependencyParser(lang='hu')
-    }
+         filter_batch_size, output_format, save_original, separate_augmentation, filter_same_ancestor,
+         filter_same_pos_tag, filter_for_noun_tags):
 
-    src_dep_tree_generator = dep_parsers[src_language].read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
+    src_parser = DependencyParserFactory.get_dependency_parser(src_language)
+    tgt_parser = DependencyParserFactory.get_dependency_parser(tgt_language)
+
+    src_dep_tree_generator = src_parser.read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
     # log.info(f'Number of source sentences used for augmentation: {len(eng_wrappers)}')
-    tgt_dep_tree_generator = dep_parsers[tgt_language].read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
+    tgt_dep_tree_generator = tgt_parser.read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
     # log.info(f'Number of target sentences used for augmentation: {len(eng_wrappers)}')
 
     filters = []
@@ -47,7 +50,10 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
             BleuFilter(filter_quantile, src_model_path, tgt_model_path, sp_model_path, tgt_language, filter_batch_size))
     augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters,
                                            output_path=augmentation_output_path, output_format=output_format,
-                                           save_original=save_original, separate_augmentation=separate_augmentation)
+                                           save_original=save_original, separate_augmentation=separate_augmentation,
+                                           filter_nsub_and_obj_have_same_ancestor=filter_same_ancestor,
+                                           filter_same_pos_tag=filter_same_pos_tag,
+                                           filter_for_noun_tags=filter_for_noun_tags)
 
     log.info('Reading parsed dependency trees')
     graph_cnt = 0
