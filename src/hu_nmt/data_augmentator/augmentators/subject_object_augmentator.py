@@ -10,6 +10,7 @@ from tqdm import tqdm
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
+from hu_nmt.data_augmentator.utils.types.postag import Postag
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.filters.filter import Filter
 
@@ -19,10 +20,19 @@ log.setLevel('DEBUG')
 
 class SubjectObjectAugmentator(AugmentatorBase):
 
-    def __init__(self, src_graphs: Optional[List[DependencyGraphWrapper]] = None,
+    def __init__(self,
+                 src_graphs: Optional[List[DependencyGraphWrapper]] = None,
                  tgt_graphs: Optional[List[DependencyGraphWrapper]] = None,
-                 augmented_data_ratio: float = 0.5, random_seed: int = 123, filters: List[Filter] = None, output_path: str = './augmentations',
-                 output_format: str = 'tsv', save_original: bool = False, separate_augmentation: bool = False):
+                 augmented_data_ratio: float = 0.5,
+                 random_seed: int = 123,
+                 filters: List[Filter] = None,
+                 output_path: str = './augmentations',
+                 output_format: str = 'tsv',
+                 save_original: bool = False,
+                 separate_augmentation: bool = False,
+                 filter_nsub_and_obj_have_same_ancestor: bool = True,
+                 filter_same_pos_tag: bool = True,
+                 filter_for_noun_tags: bool = False):
         super().__init__()
         if src_graphs and tgt_graphs and len(src_graphs) != len(tgt_graphs):
             raise ValueError('Length of sentences must be equal for both langugages')
@@ -46,6 +56,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self.output_format = output_format
         self.save_original = save_original
         self.separate_augmentation = separate_augmentation
+        self.filter_nsub_and_obj_have_same_ancestor = filter_nsub_and_obj_have_same_ancestor
+        self.filter_same_pos_tag = filter_same_pos_tag
+        self.filter_for_noun_tags = filter_for_noun_tags
         self.error_cnt = 0
 
         self._augmentation_candidate_translations: List[TranslationGraph] = []
@@ -365,10 +378,9 @@ class SubjectObjectAugmentator(AugmentatorBase):
         ids = [int(x.rpartition('_')[-1]) for x in node_ids]
         return min(ids), max(ids)
 
-    @staticmethod
-    def find_candidates(src_graphs: List[DependencyGraphWrapper], tgt_graphs: List[DependencyGraphWrapper],
-                        with_progress_bar: bool = False, separate_augmentation: bool = False) -> Dict[
-        str, List[TranslationGraph]]:
+    def find_candidates(self, src_graphs: List[DependencyGraphWrapper], tgt_graphs: List[DependencyGraphWrapper],
+                        with_progress_bar: bool = False, separate_augmentation: bool = False) \
+            -> Dict[str, List[TranslationGraph]]:
         candidates = {'obj': [], 'nsubj': [], 'both': []}
 
         if with_progress_bar:
@@ -377,14 +389,14 @@ class SubjectObjectAugmentator(AugmentatorBase):
             iterable = zip(src_graphs, tgt_graphs)
         if separate_augmentation:
             for src_graph, tgt_graph in iterable:
-                if SubjectObjectAugmentator.is_eligible_for_augmentation(src_graph, tgt_graph, 'obj'):
+                if self.is_eligible_for_augmentation(src_graph, tgt_graph, 'obj'):
                     candidates['obj'].append(TranslationGraph(src_graph, tgt_graph))
-                if SubjectObjectAugmentator.is_eligible_for_augmentation(src_graph, tgt_graph, 'nsubj'):
+                if self.is_eligible_for_augmentation(src_graph, tgt_graph, 'nsubj'):
                     candidates['nsubj'].append(TranslationGraph(src_graph, tgt_graph))
             return candidates
         else:
             for src_graph, tgt_graph in iterable:
-                if SubjectObjectAugmentator.is_eligible_for_both_augmentation(src_graph, tgt_graph):
+                if self.is_eligible_for_both_augmentation(src_graph, tgt_graph):
                     candidates['both'].append(TranslationGraph(src_graph, tgt_graph))
             return candidates
 
@@ -395,16 +407,15 @@ class SubjectObjectAugmentator(AugmentatorBase):
         for k in self._candidate_translations.keys():
             self._candidate_translations[k].extend(new_candidates[k])
 
-    @staticmethod
-    def is_eligible_for_both_augmentation(src_graph: DependencyGraphWrapper, tgt_graph: DependencyGraphWrapper) -> bool:
+    def is_eligible_for_both_augmentation(self, src_graph: DependencyGraphWrapper, tgt_graph: DependencyGraphWrapper) -> bool:
         """
         Tests if a sentence (graph) pair is eligible for augmentation
         Conditions checked both for nsubj and obj edges
         """
 
         # Should contain one nsubj and one obj in both languages
-        if not SubjectObjectAugmentator.is_eligible_for_augmentation(src_graph, tgt_graph, 'obj') or \
-                not SubjectObjectAugmentator.is_eligible_for_augmentation(src_graph, tgt_graph, 'nsubj'):
+        if not self.is_eligible_for_augmentation(src_graph, tgt_graph, 'obj') or \
+                not self.is_eligible_for_augmentation(src_graph, tgt_graph, 'nsubj'):
             return False
 
         src_nsubj_edges = src_graph.get_edges_with_property('dep', 'nsubj')
@@ -420,13 +431,13 @@ class SubjectObjectAugmentator(AugmentatorBase):
         tgt_obj_edge = tgt_obj_edges[0]
 
         # nsubj and obj edges have the same ancestor (predicate)
-        if src_nsubj_edge.source_node != src_obj_edge.source_node or tgt_nsubj_edge.source_node != tgt_obj_edge.source_node:
-            return False
+        if self.filter_nsub_and_obj_have_same_ancestor:
+            if src_nsubj_edge.source_node != src_obj_edge.source_node or tgt_nsubj_edge.source_node != tgt_obj_edge.source_node:
+                return False
 
         return True
 
-    @staticmethod
-    def is_eligible_for_augmentation(src_graph: DependencyGraphWrapper, tgt_graph: DependencyGraphWrapper,
+    def is_eligible_for_augmentation(self, src_graph: DependencyGraphWrapper, tgt_graph: DependencyGraphWrapper,
                                      dep: str) -> bool:
         """
         Tests if a sentence (graph) pair is eligible for augmentation
@@ -454,11 +465,23 @@ class SubjectObjectAugmentator(AugmentatorBase):
         if not SubjectObjectAugmentator.is_consecutive_subsequence(tgt_dep_subgraph):
             return False
 
+        if self.filter_for_noun_tags:
+            src_dep_subtree = DependencyGraphWrapper(src_graph.get_subtree(dep_src))
+            tgt_dep_subtree = DependencyGraphWrapper(tgt_graph.get_subtree(dep_tgt))
+            # Should contain at least one NOUN property both in tgt and src
+            if not (src_dep_subtree.get_nodes_with_property('postag', Postag.NOUN.name)
+                    + src_dep_subtree.get_nodes_with_property('postag', Postag.PROPN.name)):
+                return False
+            if not (tgt_dep_subtree.get_nodes_with_property('postag', Postag.NOUN.name)
+                    + tgt_dep_subtree.get_nodes_with_property('postag', Postag.PROPN.name)):
+                return False
+
         # Roots of the subgraphs to be swapped have the same POS tag
-        src_dep_subtree_root_postag = src_graph.get_node_property(src_dep_edge.target_node, 'postag')
-        tgt_dep_subtree_root_postag = tgt_graph.get_node_property(tgt_dep_edge.target_node, 'postag')
-        if src_dep_subtree_root_postag != tgt_dep_subtree_root_postag:
-            return False
+        if self.filter_same_pos_tag:
+            src_dep_subtree_root_postag = src_graph.get_node_property(src_dep_edge.target_node, 'postag')
+            tgt_dep_subtree_root_postag = tgt_graph.get_node_property(tgt_dep_edge.target_node, 'postag')
+            if src_dep_subtree_root_postag != tgt_dep_subtree_root_postag:
+                return False
 
         return True
 
