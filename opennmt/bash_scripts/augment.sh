@@ -18,6 +18,9 @@ translate_model=$(readlink -f $(yq -r .translate_model config.yaml))
 reverse_translate_model=$(readlink -f $(yq -r .reverse_translate_model config.yaml))
 src_subword_model=$(readlink -f $(yq -r .src_subword_model config.yaml))
 augmented_folder_prefix=$(yq -r .multi_train.augmentation.augmented_folder_prefix config.yaml)
+$filter_same_ancestor=$(yq -r .multi_train.augmentation.$filter_same_ancestor config.yaml)
+$filter_same_pos_tag=$(yq -r .multi_train.augmentation.$filter_same_pos_tag config.yaml)
+$filter_for_noun_tags=$(yq -r .multi_train.augmentation.$filter_for_noun_tags config.yaml)
 
 absolute_augmentation_dir=$(readlink -f $augmentation_dir)
 
@@ -107,7 +110,10 @@ if [ ! -d  $absolute_augmentation_dir/$augmented_folder_prefix-$augmentation_rat
     --src_model_path=$translate_model \
     --tgt_model_path=$reverse_translate_model \
     --sp_model_path=$src_subword_model \
-    --filter_batch_size=512
+    --filter_batch_size=512 \
+    --filter_same_ancestor=$filter_same_ancestor \
+    --filter_same_pos_tag=$filter_same_pos_tag \
+    --filter_for_noun_tags=$filter_for_noun_tags
 
     popd
 fi

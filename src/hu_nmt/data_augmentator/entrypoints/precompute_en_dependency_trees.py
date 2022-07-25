@@ -1,6 +1,7 @@
 import click
+
+from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
 from hu_nmt.data_augmentator.utils.logger import get_logger
-from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
 
 log = get_logger(__name__)
 
@@ -10,7 +11,7 @@ log = get_logger(__name__)
 @click.argument('dep_tree_output_path')
 @click.argument('file_batch_size')
 def main(data_input_path, dep_tree_output_path, file_batch_size):
-    eng_dep_parser = StanzaDependencyParser(lang='en')
+    eng_dep_parser = DependencyParserFactory.get_dependency_parser('en')
     eng_dep_parser.file_to_serialized_dep_graph_files(data_input_path, dep_tree_output_path, int(file_batch_size))
 
 

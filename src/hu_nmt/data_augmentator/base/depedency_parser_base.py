@@ -2,10 +2,9 @@ import os
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from math import floor
-from typing import List, Iterator, Generator
+from math import floor, ceil
+from typing import List, Iterator, Generator, Callable
 import multiprocessing as mp
-
 import networkx as nx
 import psutil
 from tqdm import tqdm
@@ -30,14 +29,32 @@ class NodeRelationship:
     source_morph: str
 
 
+Pipeline = Callable[[str], object]
+
+
+@dataclass
+class SentenceProcessUnit:
+    pipeline: Pipeline
+    sentence: str
+
+
+@dataclass
+class SentenceProcessBatch:
+    pipeline_constructor: Callable[[], Pipeline]
+    sentences: List[str]
+
+
 class DependencyParserBase(ABC):
     """
     Base class for language-specific dependency parsers
     """
 
-    def __init__(self, nlp_pipeline, use_multiprocessing: bool):
-        self.nlp_pipeline = nlp_pipeline
+    def __init__(self, nlp_pipeline_constructor: Callable[[], Pipeline], use_multiprocessing: bool):
+        self.nlp_pipeline_constructor: Callable[[], Pipeline] = nlp_pipeline_constructor
+        self.nlp_pipeline = self.nlp_pipeline_constructor()
         self.use_multiprocessing = use_multiprocessing
+        if self.use_multiprocessing:
+            log.info('Using multiprocessing')
 
     def sentence_to_graph_wrapper(self, sentence) -> DependencyGraphWrapper:
         graph = self.sentence_to_dep_parse_tree(sentence)
@@ -54,13 +71,14 @@ class DependencyParserBase(ABC):
 
     @staticmethod
     @abstractmethod
-    def _sentence_pipeline_pair_to_node_relationship_list(pair):
-        """
-        Args:
-            pair: tuple[pipeline, sentence]
-        """
+    def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit) -> List[NodeRelationship]:
         raise NotImplementedError
-        # return DependencyParserBase.sentence_to_node_relationship_list(pair[0], pair[1])
+
+    @staticmethod
+    @abstractmethod
+    def _sentence_process_batch_to_node_relationship_list(process_batch: SentenceProcessBatch) \
+            -> List[List[NodeRelationship]]:
+        raise NotImplementedError
 
     @staticmethod
     def read_parsed_dep_trees_from_files(data_dir: str, per_file: bool = False) -> Generator[nx.DiGraph, None, None]:
@@ -112,7 +130,20 @@ class DependencyParserBase(ABC):
             for line in file:
                 yield line.strip()
 
-    def sentences_to_serialized_dep_graph_files(self, sentences_iter: Iterator[str], output_dir: str, file_batch_size: int):
+    @staticmethod
+    def create_mini_batches(number_of_small_batches: int, batch: List) -> List[List]:
+        batch_size = len(batch)
+        items_per_small_batch = ceil(batch_size / number_of_small_batches)
+        small_batch_list = []
+        for i in range(0, batch_size, items_per_small_batch):
+            small_batch_list.append(batch[i:i + items_per_small_batch])
+
+        small_batch_list.extend([[] for _ in range(number_of_small_batches - len(small_batch_list))])
+
+        return small_batch_list
+
+    def sentences_to_serialized_dep_graph_files(self, sentences_iter: Iterator[str], output_dir: str,
+                                                file_batch_size: int):
         """
         Args:
             sentences_iter: iterator for the sentences to process
@@ -131,7 +162,7 @@ class DependencyParserBase(ABC):
                 log.info(f'Reading batch {file_idx}')
                 try:
                     for _ in range(file_batch_size):
-                        batch_of_sentences.append((self.nlp_pipeline, next(sentences_iter)))
+                        batch_of_sentences.append(next(sentences_iter))
                 except StopIteration:
                     have_more_sentences_to_process = False
                     if len(batch_of_sentences) == 0:
@@ -143,22 +174,35 @@ class DependencyParserBase(ABC):
                         process = psutil.Process(os.getpid())
                         process_used_bytes = process.memory_info().rss
                         available_bytes = psutil.virtual_memory().available
-                        log.info(f'There could be {available_bytes / process_used_bytes} processes spawned to fill up the available memory')
+                        log.info(f'There could be {available_bytes / process_used_bytes} processes spawned '
+                                 f'to fill up the available memory')
                         process_count = min(max(floor(available_bytes / process_used_bytes), 1), mp.cpu_count())
                         log.info(f'Decided to use {process_count} processes based on available memory')
                         first_run = False
 
+                    # create mini batches and package them with pipeline constructors
+                    mini_batches_of_sentences = self.create_mini_batches(process_count, batch_of_sentences)
+                    process_batches = [SentenceProcessBatch(self.nlp_pipeline_constructor, mini_batch)
+                                       for mini_batch in mini_batches_of_sentences]
+
                     # map to processes
                     log.info('Mapping sentences to processes')
-                    proc_pool = mp.Pool(process_count)
-                    list_of_dep_rel_lists = proc_pool.imap(self._sentence_pipeline_pair_to_node_relationship_list,
-                                                           batch_of_sentences,
-                                                           chunksize=int(len(batch_of_sentences)/process_count))
+                    proc_pool = mp.get_context('spawn').Pool(process_count)
+                    list_of_results = proc_pool.map(self._sentence_process_batch_to_node_relationship_list,
+                                                    process_batches,
+                                                    chunksize=max(int(len(batch_of_sentences) / process_count), 1))
                     proc_pool.close()
                     proc_pool.join()
+
+                    # unpack results
+                    log.info('Unpacking results')
+                    list_of_dep_rel_lists = []
+                    for result in list_of_results:
+                        list_of_dep_rel_lists.extend(result)
                 else:
-                    list_of_dep_rel_lists = map(self._sentence_pipeline_pair_to_node_relationship_list,
-                                                batch_of_sentences)
+                    process_units = [SentenceProcessUnit(self.nlp_pipeline, sentence)
+                                     for sentence in batch_of_sentences]
+                    list_of_dep_rel_lists = map(self._sentence_process_unit_to_node_relationship_list, process_units)
 
                 # dump to file
                 self.write_dep_graphs_to_file(output_dir, file_idx, list_of_dep_rel_lists)

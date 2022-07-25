@@ -5,8 +5,8 @@ from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyG
 
 @dataclass
 class TranslationGraph:
-    hun: DependencyGraphWrapper
-    eng: DependencyGraphWrapper
+    src: DependencyGraphWrapper
+    tgt: DependencyGraphWrapper
 
     def to_list(self):
-        return [self.hun, self.eng]
+        return [self.src, self.tgt]

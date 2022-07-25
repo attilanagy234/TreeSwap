@@ -3,6 +3,7 @@ from tqdm import tqdm
 
 from hu_nmt.data_augmentator.augmentators.graph_based_augmentator import GraphBasedAugmentator
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
+from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
 from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
 from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
 from hu_nmt.data_augmentator.utils.logger import get_logger
@@ -29,25 +30,35 @@ log = get_logger(__name__)
 @click.option('--output_format', default='basic', help='Supported output formats: basic (default), tsv')
 @click.option('--save_original/--dont_save_original', default=False)
 @click.option('--separate_augmentation', default=False)
+@click.option('--filter_same_ancestor', default=True)
+@click.option('--filter_same_pos_tag', default=True)
+@click.option('--filter_for_noun_tags', default=False)
 @click.option('--augmentation_type', default='base')
 @click.option('--threshold', default=0.5)
-def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path, augmented_data_ratio,
-         use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path, filter_batch_size, output_format,
-         save_original, separate_augmentation, augmentation_type, threshold):
-    dep_parsers = {
-        'en': StanzaDependencyParser(lang='en'),
-        'hu': SpacyDependencyParser(lang='hu')
-    }
+def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path,
+         augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
+         filter_batch_size, output_format, save_original, separate_augmentation, filter_same_ancestor,
+         filter_same_pos_tag, filter_for_noun_tags, augmentation_type, threshold):
 
-    eng_dep_tree_generator = dep_parsers[src_language].read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
-    # log.info(f'Number of English sentences used for augmentation: {len(eng_wrappers)}')
-    hun_dep_tree_generator = dep_parsers[tgt_language].read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
-    # log.info(f'Number of Hungarian sentences used for augmentation: {len(eng_wrappers)}')
+    src_parser = DependencyParserFactory.get_dependency_parser(src_language)
+    tgt_parser = DependencyParserFactory.get_dependency_parser(tgt_language)
+
+    src_dep_tree_generator = src_parser.read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
+    # log.info(f'Number of source sentences used for augmentation: {len(eng_wrappers)}')
+    tgt_dep_tree_generator = tgt_parser.read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
+    # log.info(f'Number of target sentences used for augmentation: {len(eng_wrappers)}')
 
     filters = []
     if use_filters:
         filters.append(
             BleuFilter(filter_quantile, src_model_path, tgt_model_path, sp_model_path, tgt_language, filter_batch_size))
+    augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters,
+                                           output_path=augmentation_output_path, output_format=output_format,
+                                           save_original=save_original, separate_augmentation=separate_augmentation,
+                                           filter_nsub_and_obj_have_same_ancestor=filter_same_ancestor,
+                                           filter_same_pos_tag=filter_same_pos_tag,
+                                           filter_for_noun_tags=filter_for_noun_tags)
+
 
     if augmentation_type == 'ged' or augmentation_type == 'edge_mapper':
         augmentator = GraphBasedAugmentator(src_language, tgt_language, threshold, None, None, augmented_data_ratio,
@@ -62,15 +73,15 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
     log.info('Reading parsed dependency trees')
     graph_cnt = 0
     with tqdm() as pbar:
-        for eng_dep_tree_batch, hun_dep_tree_batch in zip(eng_dep_tree_generator, hun_dep_tree_generator):
-            eng_wrapper_batch = [DependencyGraphWrapper(tree) for tree in eng_dep_tree_batch]
-            hun_wrapper_batch = [DependencyGraphWrapper(tree) for tree in hun_dep_tree_batch]
+        for src_dep_tree_batch, tgt_dep_tree_batch in zip(src_dep_tree_generator, tgt_dep_tree_generator):
+            src_wrapper_batch = [DependencyGraphWrapper(tree) for tree in src_dep_tree_batch]
+            tgt_wrapper_batch = [DependencyGraphWrapper(tree) for tree in tgt_dep_tree_batch]
 
-            graph_cnt += len(eng_wrapper_batch)
+            graph_cnt += len(src_wrapper_batch)
 
-            augmentator.add_augmentable_candidates(hun_wrapper_batch, eng_wrapper_batch)
+            augmentator.add_augmentable_candidates(tgt_wrapper_batch, src_wrapper_batch)
 
-            pbar.update(len(eng_wrapper_batch))
+            pbar.update(len(src_wrapper_batch))
 
     log.info(f'Have parsed {graph_cnt} sentence graphs')
 
