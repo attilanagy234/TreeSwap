@@ -66,8 +66,12 @@ class GED(GraphSimilarityBase):
                                    node_subst_cost=self._node_subst_cost, node_del_cost=self._node_del_or_add,
                                    node_ins_cost=self._node_del_or_add, edge_subst_cost=self._edge_subs_cost,
                                    edge_del_cost=self._edge_del_or_add, edge_ins_cost=self._edge_del_or_add,
-                                   roots=('root_0', 'root_0'), upper_bound=None,
+                                   roots=(self._get_root(graph1), self._get_root(graph2)), upper_bound=None,
                                    timeout=self.timeout)
+
+    def _get_root(self, graph):
+        node = [n for n, d in graph.in_degree() if d == 0][0]
+        return node
 
     def get_normalized_distance(self, graph1, graph2):
         dist = self.get_ged(graph1, graph2)
@@ -81,8 +85,18 @@ class GED(GraphSimilarityBase):
         return self.get_normalized_distance(src_graph, tgt_graph)
 
     def get_similarity_from_graphs(self, graph1, graph2):
-        dist = self.get_ged(graph1, graph2)
-        max_dist = len(graph1.nodes) * 2 - 2 + 2 * len(graph2.nodes) - 2
+        init = 0
+        if graph1.nodes[self._get_root(graph1)]['postag'] != graph2.nodes[self._get_root(graph2)]['postag']:
+            graph1.nodes[self._get_root(graph1)]['postag'] = graph2.nodes[self._get_root(graph2)]['postag']
+            init += 1
+
+        dist = self.get_ged(graph1, graph2) + init
+        max_dist = len(graph1.nodes) * 2 - 1 + 2 * len(graph2.nodes) - 1
+        if dist is None:
+            print(f'{graph1.nodes} - {graph2.nodes}')
+            print(f'{graph1.edges} - {graph2.edges}')
+            print()
+            return 0
         return float(max_dist - dist) / float(max_dist)
 
     def get_similarity_from_sentences(self, src_sent, tgt_sent):

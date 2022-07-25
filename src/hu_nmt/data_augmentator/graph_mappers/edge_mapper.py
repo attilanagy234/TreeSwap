@@ -43,8 +43,6 @@ class EdgeMapper(GraphSimilarityBase):
                         g2_edges.remove(min_routes[0])
                     else:
                         max_children = self._get_max_children((s1, d1, data1), max_cands, g1, g2)
-                        if len(max_children) > 1:
-                            print('AAAAAAAAAAAAAAAAAA')
                         mapping[(s1, d1)] = (max_children[0][0], max_children[0][1])
                         g2_edges.remove(max_children[0])
         return mapping
@@ -86,7 +84,7 @@ class EdgeMapper(GraphSimilarityBase):
 
     def _get_max_cand_by_route(self, edge, cands, g1, g2):
         (s1, d1, data1) = edge
-        node_route1 = nx.shortest_path(g1, 'root_0', s1)
+        node_route1 = nx.shortest_path(g1, self._get_root(g1), s1)
         route1 = []
 
         for i in range(len(node_route1) - 1):
@@ -97,7 +95,7 @@ class EdgeMapper(GraphSimilarityBase):
         min_edges = []
 
         for (s2, d2, data2) in cands:
-            node_route2 = nx.shortest_path(g2, 'root_0', s2)
+            node_route2 = nx.shortest_path(g2, self._get_root(g2), s2)
             route2 = []
             for i in range(len(node_route2) - 1):
                 dep = g2.edges[node_route2[i], node_route2[i + 1]]['dep']
@@ -110,6 +108,10 @@ class EdgeMapper(GraphSimilarityBase):
                 min_dist = dist
                 min_edges = [(s2, d2, data2)]
         return min_edges
+
+    def _get_root(self, graph):
+        node = [n for n, d in graph.in_degree() if d == 0][0]
+        return node
 
     def _get_max_children(self, edge, cands, g1, g2):
         (s1, d1, data1) = edge
@@ -152,6 +154,8 @@ class EdgeMapper(GraphSimilarityBase):
         edges1 = len(g1.edges)
         edges2 = len(g2.edges)
         intersect = len(mapping)
+        if edges1 == 0 and edges2 == 0:
+            return 1
         return (intersect) / (edges1 + edges2 - intersect)
 
     def get_jaccard_index(self, g1, g2):
