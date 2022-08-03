@@ -1,5 +1,6 @@
 from typing import Tuple, List, Set, Optional
 
+import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
@@ -30,14 +31,14 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
             GraphBasedAugmentator.similarity = EdgeMapper()
 
     @staticmethod
-    def sample_item_pairs(items: List, sample_count: int):
+    def sample_item_pairs(items: List, sample_count: int, dep: str = 'both'):
         sampled_index_pairs: Set[Tuple[int, int]] = set()
         pbar = tqdm(total=sample_count)
         size = 0
         while len(sampled_index_pairs) < sample_count:
             (x, y) = np.random.choice(len(items), 2, replace=False)
-            if GraphBasedAugmentator._is_similar(items[x].hun, items[y].hun) and \
-                    GraphBasedAugmentator._is_similar(items[x].eng, items[y].eng):
+            if GraphBasedAugmentator._is_similar(items[x].hun, items[y].hun, dep) and \
+                    GraphBasedAugmentator._is_similar(items[x].eng, items[y].eng, dep):
                 sampled_index_pairs.add((x, y))
                 change = len(sampled_index_pairs) - size
                 pbar.update(change)
@@ -46,6 +47,17 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         return [(items[x], items[y]) for x, y in sampled_index_pairs]
 
     @staticmethod
-    def _is_similar(src_graph, tgt_graph):
-        return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_graph.graph, tgt_graph.graph) >= \
+    def _is_similar(src_graph, tgt_graph, dep):
+        src_subgraph = GraphBasedAugmentator._get_subsentence(src_graph, dep)
+        tgt_subgraph = GraphBasedAugmentator._get_subsentence(tgt_graph, dep)
+        return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_subgraph.graph, tgt_subgraph.graph) >= \
                GraphBasedAugmentator.threshold
+
+    @staticmethod
+    def _get_subsentence(wrapper: DependencyGraphWrapper, dep: str):
+        edges_with_type = wrapper.get_edges_with_property('dep', dep)
+        edges_with_type = edges_with_type[0]
+        top_node_of_tree = edges_with_type.target_node
+        node_ids = wrapper.get_subtree_node_ids(top_node_of_tree)
+        subgraph = nx.DiGraph(wrapper.graph.subgraph(node_ids))
+        return subgraph

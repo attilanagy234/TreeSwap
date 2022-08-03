@@ -146,7 +146,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
         self.dump_augmented_sentences_to_files()
 
     @staticmethod
-    def sample_item_pairs(items: List, sample_count: int):
+    def sample_item_pairs(items: List, sample_count: int, dep: str = 'both'):
         sampled_index_pairs: set[Tuple[int, int]] = set()
         while len(sampled_index_pairs) < sample_count:
             random_index_pair = np.random.choice(len(items), 2, replace=False)
