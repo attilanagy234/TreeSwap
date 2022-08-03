@@ -21,12 +21,10 @@ class NodeRelationship:
     target_key: str
     target_postag: str
     target_lemma: str
-    target_morph: str
     target_deprel: str
     source_key: str
     source_postag: str
     source_lemma: str
-    source_morph: str
 
 
 Pipeline = Callable[[str], object]
