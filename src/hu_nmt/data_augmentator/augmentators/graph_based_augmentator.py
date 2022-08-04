@@ -47,14 +47,14 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         return [(items[x], items[y]) for x, y in sampled_index_pairs]
 
     @staticmethod
-    def _is_similar(src_graph, tgt_graph, dep):
-        src_subgraph = GraphBasedAugmentator._get_subsentence(src_graph, dep)
-        tgt_subgraph = GraphBasedAugmentator._get_subsentence(tgt_graph, dep)
+    def _is_similar(src_graph: DependencyGraphWrapper, tgt_graph: DependencyGraphWrapper, dep):
+        src_subgraph = GraphBasedAugmentator._get_subgraph(src_graph, dep)
+        tgt_subgraph = GraphBasedAugmentator._get_subgraph(tgt_graph, dep)
         return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_subgraph.graph, tgt_subgraph.graph) >= \
-               GraphBasedAugmentator.threshold
+            GraphBasedAugmentator.threshold
 
     @staticmethod
-    def _get_subsentence(wrapper: DependencyGraphWrapper, dep: str):
+    def _get_subgraph(wrapper: DependencyGraphWrapper, dep: str) -> nx.DiGraph:
         edges_with_type = wrapper.get_edges_with_property('dep', dep)
         edges_with_type = edges_with_type[0]
         top_node_of_tree = edges_with_type.target_node
