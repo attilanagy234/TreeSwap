@@ -1,9 +1,16 @@
-import networkx as nx
 from collections import defaultdict, Counter
-import nltk
 from typing import List
 
+import networkx as nx
+import nltk
+
 from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase, Edge, Node
+
+"""
+EdgeMapper creates a mapping between the edges
+and calculates a Jaccard index using the mapping
+as the intersection.
+"""
 
 
 class EdgeMapper(GraphSimilarityBase):
@@ -27,22 +34,26 @@ class EdgeMapper(GraphSimilarityBase):
         g2_edges = list(sorted(g2.edges(data=True), key=lambda x: -x[2]['weight']))
 
         for i, (s1, d1, data1) in enumerate(g1_edges):
+            # edges with the same dependency label
             cands = list(filter(lambda x: x[2]['dep'] == data1['dep'], g2_edges))
             if len(cands) == 1:
                 mapping[(s1, d1)] = (cands[0][0], cands[0][1])
                 g2_edges.remove(cands[0])
             elif len(cands) > 1:
-                max_cands = self.get_max_cands((s1, d1, data1), cands, g1, g2)
+                # edges with the most similar node labels
+                max_cands = self.get_cands_by_nodes((s1, d1, data1), cands, g1, g2)
                 if len(max_cands) == 1:
                     mapping[(s1, d1)] = (max_cands[0][0], max_cands[0][1])
                     g2_edges.remove(max_cands[0])
                 else:
-                    min_routes = self._get_max_cand_by_route((s1, d1, data1), max_cands, g1, g2)
+                    # edges with the most similar root-edge routes
+                    min_routes = self._get_cands_by_route((s1, d1, data1), max_cands, g1, g2)
                     if len(min_routes) == 1:
                         mapping[(s1, d1)] = (min_routes[0][0], min_routes[0][1])
                         g2_edges.remove(min_routes[0])
                     else:
-                        max_children = self._get_max_children((s1, d1, data1), max_cands, g1, g2)
+                        # edges with the most similar children
+                        max_children = self._get_cands_by_children((s1, d1, data1), min_routes, g1, g2)
                         mapping[(s1, d1)] = (max_children[0][0], max_children[0][1])
                         g2_edges.remove(max_children[0])
         return mapping
@@ -55,10 +66,11 @@ class EdgeMapper(GraphSimilarityBase):
 
     def adjust_deps(self, graph: nx.DiGraph) -> nx.DiGraph:
         for (n1, n2, data) in graph.edges(data=True):
+            # use only the main dependency type
             data['dep'] = data['dep'].split(':')[0].lower()
         return graph
 
-    def get_max_cands(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
+    def get_cands_by_nodes(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
         (s1, d1, data1) = edge
         s1_pos = g1.nodes[s1]['postag']
         d1_pos = g1.nodes[d1]['postag']
@@ -78,7 +90,7 @@ class EdgeMapper(GraphSimilarityBase):
         return max_edges
 
     # most similar root-edge route based on the Levenshtein-distance
-    def _get_max_cand_by_route(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
+    def _get_cands_by_route(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
         (s1, d1, data1) = edge
         node_route1 = nx.shortest_path(g1, self._get_root(g1), s1)
         route1 = []
@@ -105,7 +117,7 @@ class EdgeMapper(GraphSimilarityBase):
                 min_edges = [(s2, d2, data2)]
         return min_edges
 
-    def _get_max_children(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
+    def _get_cands_by_children(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
         (s1, t1, data1) = edge
 
         # check target node's children
@@ -153,9 +165,3 @@ class EdgeMapper(GraphSimilarityBase):
 
     def get_similarity_from_graphs(self, g1: nx.DiGraph, g2: nx.DiGraph):
         return self.get_jaccard_index(g1, g2)
-
-
-
-
-
-

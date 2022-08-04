@@ -1,13 +1,21 @@
+from typing import Dict
+
 import networkx as nx
 from networkx import graph_edit_distance
-from typing import Dict
 
 from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
 from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
 
+"""
+GED uses graph edit distance, with normalization
+represent a similarity between 0 and 1:
+sim = ( d_max - ged(g1, g2) ) / d_max
+d_max: the maximum distance (deletes the source graph
+and add the target graph)
+"""
+
 
 class GED(GraphSimilarityBase):
-
     _src_dep_parser = None
     _tgt_dep_parser = None
 
@@ -80,6 +88,9 @@ class GED(GraphSimilarityBase):
             init_distance += 1
 
         dist = self.get_ged(graph1, graph2) + init_distance
+        # distance of deleting source graph and adding target graph
+        # delete: n - 1 edges + n nodes
+        # add: n - 1 edges + n nodes
         max_dist = len(graph1.nodes) * 2 - 1 + 2 * len(graph2.nodes) - 1
         return float(max_dist - dist) / float(max_dist)
 
@@ -88,5 +99,3 @@ class GED(GraphSimilarityBase):
         tgt_graph = self.tgt_dep_parser.sentence_to_dep_parse_tree(tgt_sent)
 
         return self.get_similarity_from_graphs(src_graph, tgt_graph)
-
-

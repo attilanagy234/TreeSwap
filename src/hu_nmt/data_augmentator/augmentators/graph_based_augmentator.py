@@ -6,9 +6,9 @@ from tqdm import tqdm
 
 from filtering import Filter
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
 from hu_nmt.data_augmentator.graph_mappers.edge_mapper import EdgeMapper
 from hu_nmt.data_augmentator.graph_mappers.ged import GED
+from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 
@@ -51,9 +51,10 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         src_subgraph = GraphBasedAugmentator._get_subgraph(src_graph, dep)
         tgt_subgraph = GraphBasedAugmentator._get_subgraph(tgt_graph, dep)
         return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_subgraph.graph, tgt_subgraph.graph) >= \
-            GraphBasedAugmentator.threshold
+               GraphBasedAugmentator.threshold
 
     @staticmethod
+    # it has only 1 obj or nsubj edge due to previous constraints
     def _get_subgraph(wrapper: DependencyGraphWrapper, dep: str) -> nx.DiGraph:
         edges_with_type = wrapper.get_edges_with_property('dep', dep)
         edges_with_type = edges_with_type[0]
