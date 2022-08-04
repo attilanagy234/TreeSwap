@@ -1,4 +1,6 @@
+import networkx as nx
 from networkx import graph_edit_distance
+from typing import Dict
 
 from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
 from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
@@ -31,37 +33,37 @@ class GED(GraphSimilarityBase):
             self._tgt_dep_parser = DependencyParserFactory.get_dependency_parser(self.tgt_lang_code)
         return self._tgt_dep_parser
 
-    def _node_match(self, n1, n2):
+    def _node_match(self, n1: Dict[str, str], n2: Dict[str, str]):
         return n1['postag'] == n2['postag']
 
-    def _edge_match(self, e1, e2):
+    def _edge_match(self, e1: Dict[str, str], e2: Dict[str, str]):
         return e1['dep'].split(':')[0].lower() == e2['dep'].split(':')[0].lower()
 
-    def _node_del_or_add(self, n):
+    def _node_del_or_add(self, n: Dict[str, str]):
         if n['postag'] == 'PUNCT':
             return 0
         else:
             return self.node_cost
 
-    def _edge_del_or_add(self, n):
+    def _edge_del_or_add(self, n: Dict[str, str]):
         if n['dep'] == 'punct':
             return 0
         else:
             return self.edge_cost
 
-    def _node_subst_cost(self, n1, n2):
+    def _node_subst_cost(self, n1: Dict[str, str], n2: Dict[str, str]):
         if self._node_match(n1, n2):
             return 0
         else:
             return self.node_subt
 
-    def _edge_subs_cost(self, e1, e2):
+    def _edge_subs_cost(self, e1: Dict[str, str], e2: Dict[str, str]):
         if self._edge_match(e1, e2):
             return 0
         else:
             return self.edge_subt
 
-    def get_ged(self, graph1, graph2):
+    def get_ged(self, graph1: nx.DiGraph, graph2: nx.DiGraph):
         return graph_edit_distance(graph1, graph2, self._node_match, self._edge_match,
                                    node_subst_cost=self._node_subst_cost, node_del_cost=self._node_del_or_add,
                                    node_ins_cost=self._node_del_or_add, edge_subst_cost=self._edge_subs_cost,
@@ -69,11 +71,7 @@ class GED(GraphSimilarityBase):
                                    roots=(self._get_root(graph1), self._get_root(graph2)), upper_bound=None,
                                    timeout=self.timeout)
 
-    def _get_root(self, graph):
-        node = [n for n, d in graph.in_degree() if d == 0][0]
-        return node
-
-    def get_similarity_from_graphs(self, graph1, graph2):
+    def get_similarity_from_graphs(self, graph1: nx.DiGraph, graph2: nx.DiGraph):
         init_distance = 0
 
         # if the root pos tags are not the same
@@ -85,7 +83,7 @@ class GED(GraphSimilarityBase):
         max_dist = len(graph1.nodes) * 2 - 1 + 2 * len(graph2.nodes) - 1
         return float(max_dist - dist) / float(max_dist)
 
-    def get_similarity_from_sentences(self, src_sent, tgt_sent):
+    def get_similarity_from_sentences(self, src_sent: str, tgt_sent: str):
         src_graph = self.src_dep_parser.sentence_to_dep_parse_tree(src_sent)
         tgt_graph = self.tgt_dep_parser.sentence_to_dep_parse_tree(tgt_sent)
 
