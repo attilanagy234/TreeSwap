@@ -40,6 +40,15 @@ jobs:
         working-directory: ./src
         run: poetry run python -c "import huspacy; huspacy.download('hu_core_news_trf')"
         if: steps.cache.outputs.cache-hit != 'true'
+      - name: Cache fasttext model
+        uses: actions/cache@v3
+        id: cache-fasttext
+        with:
+          path: /tmp/lid.176.bin
+          key: fasttext
+      - name: Install fasttext model
+        run: wget -O /tmp/lid.176.bin https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin
+        if: steps.cache-fasttext.outputs.cache-hit != 'true'
       - name: Cache stanza models
         uses: actions/cache@v3
         id: cache-stanza

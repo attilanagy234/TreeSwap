@@ -19,6 +19,7 @@ psutil = "^5.8.0"
 fasttext = "0.9.2"
 huspacy = "0.4.3"
 sacrebleu = "^2.0.0"
+sacremoses = "^0.0.53"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.2"
