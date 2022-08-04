@@ -1,10 +1,10 @@
 from typing import Dict
 
-import networkx as nx
 from networkx import graph_edit_distance
 
 from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
 from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
+from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 """
 GED uses graph edit distance, with normalization
@@ -71,31 +71,31 @@ class GED(GraphSimilarityBase):
         else:
             return self.edge_subt
 
-    def get_ged(self, graph1: nx.DiGraph, graph2: nx.DiGraph):
-        return graph_edit_distance(graph1, graph2, self._node_match, self._edge_match,
+    def get_ged(self, graph1: DependencyGraphWrapper, graph2: DependencyGraphWrapper):
+        return graph_edit_distance(graph1.graph, graph2.graph, self._node_match, self._edge_match,
                                    node_subst_cost=self._node_subst_cost, node_del_cost=self._node_del_or_add,
                                    node_ins_cost=self._node_del_or_add, edge_subst_cost=self._edge_subs_cost,
                                    edge_del_cost=self._edge_del_or_add, edge_ins_cost=self._edge_del_or_add,
-                                   roots=(self._get_root(graph1), self._get_root(graph2)), upper_bound=None,
+                                   roots=(graph1.get_root(), graph2.get_root()), upper_bound=None,
                                    timeout=self.timeout)
 
-    def get_similarity_from_graphs(self, graph1: nx.DiGraph, graph2: nx.DiGraph):
+    def get_similarity_from_graphs(self, graph1: DependencyGraphWrapper, graph2: DependencyGraphWrapper):
         init_distance = 0
 
         # if the root pos tags are not the same
-        if graph1.nodes[self._get_root(graph1)]['postag'] != graph2.nodes[self._get_root(graph2)]['postag']:
-            graph1.nodes[self._get_root(graph1)]['postag'] = graph2.nodes[self._get_root(graph2)]['postag']
+        if graph1.graph.nodes[graph1.get_root()]['postag'] != graph2.graph.nodes[graph2.get_root()]['postag']:
+            graph1.graph.nodes[graph1.get_root()]['postag'] = graph2.graph.nodes[graph2.get_root()]['postag']
             init_distance += 1
 
         dist = self.get_ged(graph1, graph2) + init_distance
         # distance of deleting source graph and adding target graph
         # delete: n - 1 edges + n nodes
         # add: n - 1 edges + n nodes
-        max_dist = len(graph1.nodes) * 2 - 1 + 2 * len(graph2.nodes) - 1
+        max_dist = len(graph1.graph.nodes) * 2 - 1 + 2 * len(graph2.graph.nodes) - 1
         return float(max_dist - dist) / float(max_dist)
 
     def get_similarity_from_sentences(self, src_sent: str, tgt_sent: str):
-        src_graph = self.src_dep_parser.sentence_to_dep_parse_tree(src_sent)
-        tgt_graph = self.tgt_dep_parser.sentence_to_dep_parse_tree(tgt_sent)
+        src_graph = self.src_dep_parser.sentence_to_graph_wrapper(src_sent)
+        tgt_graph = self.tgt_dep_parser.sentence_to_graph_wrapper(tgt_sent)
 
         return self.get_similarity_from_graphs(src_graph, tgt_graph)
