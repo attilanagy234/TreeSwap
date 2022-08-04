@@ -9,7 +9,7 @@ class GED(GraphSimilarityBase):
     _src_dep_parser = None
     _tgt_dep_parser = None
 
-    def __init__(self, src_lang_code, tgt_lang_code, node_cost=1, edge_cost=1, node_subt=2, edge_subt=2, timeout=10):
+    def __init__(self, src_lang_code, tgt_lang_code, node_cost=1, edge_cost=1, node_subt=2, edge_subt=2, timeout=5):
         self.src_lang_code = src_lang_code
         self.tgt_lang_code = tgt_lang_code
 
@@ -73,36 +73,22 @@ class GED(GraphSimilarityBase):
         node = [n for n, d in graph.in_degree() if d == 0][0]
         return node
 
-    def get_normalized_distance(self, graph1, graph2):
-        dist = self.get_ged(graph1, graph2)
-        max_dist = len(graph1.nodes) * 2 - 2 + 2 * len(graph2.nodes) - 2
-        return float(max_dist - dist) / float(max_dist)
-
-    def get_normalized_distance_from_sentences(self, src_sent, tgt_sent):
-        src_graph = self.src_dep_parser.sentence_to_dep_parse_tree(src_sent)
-        tgt_graph = self.tgt_dep_parser.sentence_to_dep_parse_tree(tgt_sent)
-
-        return self.get_normalized_distance(src_graph, tgt_graph)
-
     def get_similarity_from_graphs(self, graph1, graph2):
-        init = 0
+        init_distance = 0
+
+        # if the root pos tags are not the same
         if graph1.nodes[self._get_root(graph1)]['postag'] != graph2.nodes[self._get_root(graph2)]['postag']:
             graph1.nodes[self._get_root(graph1)]['postag'] = graph2.nodes[self._get_root(graph2)]['postag']
-            init += 1
+            init_distance += 1
 
-        dist = self.get_ged(graph1, graph2) + init
+        dist = self.get_ged(graph1, graph2) + init_distance
         max_dist = len(graph1.nodes) * 2 - 1 + 2 * len(graph2.nodes) - 1
-        if dist is None:
-            print(f'{graph1.nodes} - {graph2.nodes}')
-            print(f'{graph1.edges} - {graph2.edges}')
-            print()
-            return 0
         return float(max_dist - dist) / float(max_dist)
 
     def get_similarity_from_sentences(self, src_sent, tgt_sent):
         src_graph = self.src_dep_parser.sentence_to_dep_parse_tree(src_sent)
         tgt_graph = self.tgt_dep_parser.sentence_to_dep_parse_tree(tgt_sent)
 
-        return self.get_normalized_distance(src_graph, tgt_graph)
+        return self.get_similarity_from_graphs(src_graph, tgt_graph)
 
 
