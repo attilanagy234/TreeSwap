@@ -4,7 +4,7 @@ import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
-from filtering import Filter
+from hu_nmt.data_augmentator.filters.filter import Filter
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
 from hu_nmt.data_augmentator.graph_mappers.edge_mapper import EdgeMapper
 from hu_nmt.data_augmentator.utils.logger import get_logger
@@ -18,14 +18,28 @@ log.setLevel('DEBUG')
 
 class GraphBasedAugmentator(SubjectObjectAugmentator):
     similarity: GraphSimilarityBase
-    threshold = 0.5
+    threshold: int
 
-    def __init__(self, src_lang_code, tgt_lang_code, threshold, eng_graphs: Optional[List[DependencyGraphWrapper]],
-                 hun_graphs: Optional[List[DependencyGraphWrapper]], augmented_data_ratio: float, random_seed: int,
-                 filters: List[Filter], output_path: str, output_format: str, save_original: bool = False,
-                 separate_augmentation: bool = False, similarity_type=''):
+    def __init__(self,
+                 src_lang_code: str,
+                 tgt_lang_code: str,
+                 threshold: int = 0.5,
+                 eng_graphs: Optional[List[DependencyGraphWrapper]] = None,
+                 hun_graphs: Optional[List[DependencyGraphWrapper]] = None,
+                 augmented_data_ratio: float = 0.5,
+                 random_seed: int = 123,
+                 filters: List[Filter] = None,
+                 output_path: str = './augmentations',
+                 output_format: str = 'tsv',
+                 save_original: bool = False,
+                 separate_augmentation: bool = False,
+                 similarity_type: str = '',
+                 filter_nsub_and_obj_have_same_ancestor: bool = True,
+                 filter_same_pos_tag: bool = True,
+                 filter_for_noun_tags: bool = False):
         super().__init__(eng_graphs, hun_graphs, augmented_data_ratio, random_seed, filters, output_path, output_format,
-                         save_original, separate_augmentation)
+                         save_original, separate_augmentation, filter_nsub_and_obj_have_same_ancestor,
+                         filter_same_pos_tag, filter_for_noun_tags)
 
         GraphBasedAugmentator.threshold = threshold
 

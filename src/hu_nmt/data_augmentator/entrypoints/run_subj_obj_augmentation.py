@@ -4,11 +4,9 @@ from tqdm import tqdm
 from hu_nmt.data_augmentator.augmentators.graph_based_augmentator import GraphBasedAugmentator
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
 from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
-from hu_nmt.data_augmentator.dependency_parsers.stanza_dependency_parser import StanzaDependencyParser
-from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
+from hu_nmt.data_augmentator.filters.bleu_filter import BleuFilter
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from hu_nmt.data_augmentator.filters.bleu_filter import BleuFilter
 
 log = get_logger(__name__)
 
@@ -39,7 +37,6 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
          augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
          filter_batch_size, output_format, save_original, separate_augmentation, filter_same_ancestor,
          filter_same_pos_tag, filter_for_noun_tags, augmentation_type, threshold):
-
     src_parser = DependencyParserFactory.get_dependency_parser(src_language)
     tgt_parser = DependencyParserFactory.get_dependency_parser(tgt_language)
 
@@ -52,24 +49,26 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
     if use_filters:
         filters.append(
             BleuFilter(filter_quantile, src_model_path, tgt_model_path, sp_model_path, tgt_language, filter_batch_size))
-    augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters,
-                                           output_path=augmentation_output_path, output_format=output_format,
-                                           save_original=save_original, separate_augmentation=separate_augmentation,
-                                           filter_nsub_and_obj_have_same_ancestor=filter_same_ancestor,
-                                           filter_same_pos_tag=filter_same_pos_tag,
-                                           filter_for_noun_tags=filter_for_noun_tags)
-
 
     if augmentation_type == 'ged' or augmentation_type == 'edge_mapper':
         augmentator = GraphBasedAugmentator(src_language, tgt_language, threshold, None, None, augmented_data_ratio,
                                             random_seed=15, filters=filters, output_path=augmentation_output_path,
                                             output_format=output_format, save_original=save_original,
                                             separate_augmentation=separate_augmentation,
-                                            similarity_type=augmentation_type)
-    else:
+                                            similarity_type=augmentation_type,
+                                            filter_nsub_and_obj_have_same_ancestor=filter_same_ancestor,
+                                            filter_same_pos_tag=filter_same_pos_tag,
+                                            filter_for_noun_tags=filter_for_noun_tags)
+    elif augmentation_type == 'base':
         augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters,
                                                output_path=augmentation_output_path, output_format=output_format,
-                                               save_original=save_original, separate_augmentation=separate_augmentation)
+                                               save_original=save_original, separate_augmentation=separate_augmentation,
+                                               filter_nsub_and_obj_have_same_ancestor=filter_same_ancestor,
+                                               filter_same_pos_tag=filter_same_pos_tag,
+                                               filter_for_noun_tags=filter_for_noun_tags)
+    else:
+        raise ValueError(
+            f'Augmentation type must be one of ("ged", "edge_mapper", "base") but found: {augmentation_type}')
     log.info('Reading parsed dependency trees')
     graph_cnt = 0
     with tqdm() as pbar:
