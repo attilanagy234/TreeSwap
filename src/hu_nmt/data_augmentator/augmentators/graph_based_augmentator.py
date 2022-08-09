@@ -7,9 +7,13 @@ from tqdm import tqdm
 from filtering import Filter
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
 from hu_nmt.data_augmentator.graph_mappers.edge_mapper import EdgeMapper
+from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.graph_mappers.ged import GED
 from hu_nmt.data_augmentator.graph_mappers.graph_similarity_base import GraphSimilarityBase
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
+
+log = get_logger(__name__)
+log.setLevel('DEBUG')
 
 
 class GraphBasedAugmentator(SubjectObjectAugmentator):
@@ -35,6 +39,7 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         sampled_index_pairs: Set[Tuple[int, int]] = set()
         pbar = tqdm(total=sample_count)
         size = 0
+        failed = 0
         while len(sampled_index_pairs) < sample_count:
             (x, y) = np.random.choice(len(items), 2, replace=False)
             if GraphBasedAugmentator._is_similar(items[x].hun, items[y].hun, dep) and \
@@ -43,6 +48,13 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
                 change = len(sampled_index_pairs) - size
                 pbar.update(change)
                 size = len(sampled_index_pairs)
+            else:
+                failed += 1
+                if failed >= sample_count:
+                    log.warning(f'Reached {sample_count} failed sentence pairs, decreasing the treshold from '
+                                f'{GraphBasedAugmentator.threshold} to {GraphBasedAugmentator.threshold * 0.95}.')
+                    GraphBasedAugmentator.threshold *= 0.95
+                    failed = 0
 
         return [(items[x], items[y]) for x, y in sampled_index_pairs]
 
