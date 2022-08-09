@@ -27,6 +27,10 @@ class EdgeMapper(GraphSimilarityBase):
         self.dep_weights['advmod'] = 2
 
     def map_edges(self, g1: DependencyGraphWrapper, g2: DependencyGraphWrapper):
+        """
+        maps the edges of g1 to the most similar edge in g2 based on
+        edge label, node label, root-edge route, children
+        """
         g1 = DependencyGraphWrapper(self.add_weight(g1.graph))
         g2 = DependencyGraphWrapper(self.add_weight(g2.graph))
         mapping = {}
@@ -42,7 +46,7 @@ class EdgeMapper(GraphSimilarityBase):
                 g2_edges.remove(cands[0])
             elif len(cands) > 1:
                 # edges with the most similar node labels
-                max_cands = self._get_cands_by_nodes((s1, d1, data1), cands, g1.graph, g2.graph)
+                max_cands = self._get_cands_by_node_labels((s1, d1, data1), cands, g1.graph, g2.graph)
                 if len(max_cands) == 1:
                     mapping[(s1, d1)] = (max_cands[0][0], max_cands[0][1])
                     g2_edges.remove(max_cands[0])
@@ -53,7 +57,7 @@ class EdgeMapper(GraphSimilarityBase):
                         mapping[(s1, d1)] = (min_routes[0][0], min_routes[0][1])
                         g2_edges.remove(min_routes[0])
                     else:
-                        # edges with the most similar children
+                        # edges with the most similar children (source's and target's children)
                         max_children = self._get_cands_by_children((s1, d1, data1), min_routes, g1.graph, g2.graph)
                         mapping[(s1, d1)] = (max_children[0][0], max_children[0][1])
                         g2_edges.remove(max_children[0])
@@ -71,7 +75,8 @@ class EdgeMapper(GraphSimilarityBase):
             data['dep'] = data['dep'].split(':')[0].lower()
         return graph
 
-    def _get_cands_by_nodes(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
+    def _get_cands_by_node_labels(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph):
+        """Returns edges with the most similar node labels"""
         (s1, d1, data1) = edge
         s1_pos = g1.nodes[s1]['postag']
         d1_pos = g1.nodes[d1]['postag']
@@ -90,9 +95,9 @@ class EdgeMapper(GraphSimilarityBase):
                 max_score = score
         return max_edges
 
-    # most similar root-edge route based on the Levenshtein-distance
     def _get_cands_by_route(self, edge: Edge, cands: List[Edge], g1: DependencyGraphWrapper,
                             g2: DependencyGraphWrapper) -> List[Edge]:
+        """most similar root-edge route based on the Levenshtein-distance"""
         (s1, d1, data1) = edge
         node_route1 = nx.shortest_path(g1, g1.get_root(), s1)
         edge_route1 = self._get_edge_route_from_nodes(g1.graph, node_route1)
@@ -124,6 +129,7 @@ class EdgeMapper(GraphSimilarityBase):
         return edge_route
 
     def _get_cands_by_children(self, edge: Edge, cands: List[Edge], g1: nx.DiGraph, g2: nx.DiGraph) -> List[Edge]:
+        """Returns edges with most similar children of the source and target node"""
         (s1, t1, data1) = edge
 
         # check target node's children
@@ -138,6 +144,7 @@ class EdgeMapper(GraphSimilarityBase):
 
     def _get_edges_with_max_children(self, n1: Node, node_type: str, cands: List[Edge], g1: nx.DiGraph,
                                      g2: nx.DiGraph) -> List[Edge]:
+        """Returns edges with most similar children of n1"""
         children1 = [e[2]['dep'] for e in g1.out_edges(n1, data=True)]
         counter1 = Counter(children1)
         max_edges = []
