@@ -12,7 +12,7 @@ class PreprocessorTest(unittest.TestCase):
         source_data_path = test_resources_base_path / 'hu-en' / 'hu.tsv'
         target_data_path = test_resources_base_path / 'hu-en' / 'en.tsv'
         config_path = test_resources_base_path / 'configs' / 'preprocessor_test_config.yaml'
-        cls.preprocessor = Preprocessor(str(source_data_path), str(target_data_path), str(config_path), '', '')
+        cls.preprocessor = Preprocessor(str(source_data_path), str(target_data_path), str(config_path), '', '', '/tmp/lid.176.bin')
 
     def test_is_correct_language_true(self):
         source_sentence = 'Ez egy magyar mondat.'
