@@ -1,0 +1,7 @@
+preprocessor:
+  total_wordcount_min: 0
+  total_wordcount_max: 80
+  wordcount_diff: 7
+  wordcount_ratio_threshold: 1.2
+  source_language: hu
+  target_language: en

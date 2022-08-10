@@ -42,6 +42,11 @@ cd src/hu_nmt
 poetry install
 ```
 
+### Download model for language detection (used in preprocessing)
+```bash
+wget -O /tmp/lid.176.bin https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin
+```
+
 All installed dependencies are written to a **poetry.lock** file.
 
 
