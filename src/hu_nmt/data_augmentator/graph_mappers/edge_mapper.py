@@ -18,8 +18,7 @@ class EdgeMapper(GraphSimilarityBase):
     def __init__(self):
         self.dep_weights = defaultdict(lambda: 1)
 
-        self.dep_weights['nsubj'] = 3
-        self.dep_weights['obj'] = 3
+        # important dependency relations
         self.dep_weights['nmod'] = 2
         self.dep_weights['obl'] = 2
         self.dep_weights['case'] = 2
