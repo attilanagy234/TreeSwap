@@ -39,7 +39,7 @@ class StanzaDependencyParser(DependencyParserBase):
         word_dicts = [word.to_dict() for word in sent.words]
         for word in sent.words:
             token = word.to_dict()
-            target_key = f'{token["text"].lower()}_{token["id"]}'
+            target_key = f'{token["text"]}_{token["id"]}'
             target_postag = token['upos']
             target_lemma = token.get('lemma', target_key)
             target_deprel = token['deprel']
@@ -49,7 +49,7 @@ class StanzaDependencyParser(DependencyParserBase):
                 source_lemma = None
             else:
                 head = word_dicts[int(token['head']) - 1]
-                source_key = f'{head["text"].lower()}_{head["id"]}'
+                source_key = f'{head["text"]}_{head["id"]}'
                 source_postag = head['upos']
                 source_lemma = head.get('lemma', source_key)
 
