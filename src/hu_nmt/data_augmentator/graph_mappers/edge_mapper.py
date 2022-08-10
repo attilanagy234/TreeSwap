@@ -99,7 +99,7 @@ class EdgeMapper(GraphSimilarityBase):
                             g2: DependencyGraphWrapper) -> List[Edge]:
         """most similar root-edge route based on the Levenshtein-distance"""
         (s1, d1, data1) = edge
-        node_route1 = nx.shortest_path(g1, g1.get_root(), s1)
+        node_route1 = nx.shortest_path(g1.graph, g1.get_root(), s1)
         edge_route1 = self._get_edge_route_from_nodes(g1.graph, node_route1)
 
         min_dist = float('inf')
@@ -107,7 +107,7 @@ class EdgeMapper(GraphSimilarityBase):
 
         # find edges with minimal distance
         for (s2, d2, data2) in cands:
-            node_route2 = nx.shortest_path(g2, g2.get_root(), s2)
+            node_route2 = nx.shortest_path(g2.graph, g2.get_root(), s2)
             edge_route2 = self._get_edge_route_from_nodes(g2.graph, node_route2)
 
             dist = nltk.edit_distance(edge_route1, edge_route2)
@@ -123,7 +123,7 @@ class EdgeMapper(GraphSimilarityBase):
         edge_route = []
 
         for i in range(len(nodes) - 1):
-            dep = graph.graph.edges[nodes[i], nodes[i + 1]]['dep']
+            dep = graph.edges[nodes[i], nodes[i + 1]]['dep']
             edge_route.append(dep)
 
         return edge_route
