@@ -5,3 +5,4 @@ preprocessor:
   wordcount_ratio_threshold: 1.2
   source_language: hu
   target_language: en
+  langdetect_model_path: '/tmp/lid.176.bin'

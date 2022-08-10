@@ -1,0 +1,192 @@
+seed: 1234
+
+#------------------------------------------------------------------------------
+# Metadata
+
+_augmentation_description: "Simple training (with augmentation) example"
+
+#------------------------------------------------------------------------------
+# General config
+
+general:
+    # The post fix of the source files (eg. en -> file_name.en)
+    src_postfix: hu
+
+    # The post fix of the target files (eg. en -> file_name.en)
+    tgt_postfix: en
+
+
+#------------------------------------------------------------------------------
+# Multi train config
+
+# train multiple models at the same time with different data
+multi_train:
+    active: false
+
+    # prefix to use for the generated folders
+    # prefix: aug-0.5
+    prefix: base
+
+    # For each folder in this directory it launches a training adding all the files
+    # to the corpus
+    directory: ../../../../../data/Hunglish2/low-resource/training
+
+    # All the data files come from the folders in 'multi_train_dir'.
+    # If a file contains the word 'valid' it is used in the validation set.
+    bare: true
+
+    # Number of epochs to run in each training
+    epochs: 10
+
+    # Maximum number of tokens in a sentence
+    max_token_count: 32
+
+#------------------------------------------------------------------------------
+# Augmentation config
+# Parameters used by the augmentation script:
+# https://github.com/attilanagy234/syntax-augmentation-nmt/blob/main/opennmt/bash_scripts/augment.sh
+
+augmentation:
+    active: true
+    augmented_folder_prefix: test_prefix
+    # The directory field is set automatically when multi train is used
+    directory: ../../../../../data/Hunglish2/augmented_test
+    preprocessor:
+        total_wordcount_min: 0
+        total_wordcount_max: 32
+        wordcount_diff: 75
+        wordcount_ratio_threshold: 1.2
+        source_language: hu
+        target_language: en
+        langdetect_model_path: /home1/hu-nmt/patrick/opennmt/experiments/runs/simple_train_example/lid.176.bin
+    scripts_path: ../../../../src
+    preprocess_data_script: preprocess_data.sh
+    src_precompute_script: precompute_hungarian_dependency_trees.sh
+    tgt_precompute_script: precompute_english_dependency_trees.sh
+    augmentation_script: run_subject_object_augmentation.sh
+    precompute_batch_size: 10
+    augmentation_ratio: 0.05
+    filter_same_ancestor: true
+    filter_same_pos_tag: true
+    filter_for_noun_tags: false
+
+#------------------------------------------------------------------------------
+# Script configs
+# Parameters used in these files: https://github.com/attilanagy234/syntax-augmentation-nmt/tree/main/opennmt/bash_scripts
+
+# Where the utility scripts are located
+utils_path: ../../../utils
+
+# Model used for translation
+translate_model: run/model.pt
+
+# Pair options
+pair_n_lines: 50
+pair_output_path: run/pair_out.txt
+
+# Path to where all the history files are
+history_path: ../../history
+
+# Vocabulary size of the source language
+# (when using shared vocab this is also the size that is used)
+src_vocab_size: 32000
+
+# Type of the subword model (used by sentencepiece)
+subword_model_type: unigram
+
+#------------------------------------------------------------------------------
+# Data and vocab config
+# Parameters from: https://opennmt.net/OpenNMT-py/options/build_vocab.html
+
+# Vocab
+save_data: ../../../../../data/Hunglish2/combined-32-simple/vocabs_test
+src_vocab: ../../../../../data/Hunglish2/combined-32-simple/vocabs_test/vocab.huen
+share_vocab: true
+vocab_size_multiple: 1
+src_words_min_frequency: 0
+tgt_words_min_frequency: 0
+
+# Corpus opts
+transforms: [sentencepiece]
+data:
+    hunglish:
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.en
+        transforms: [sentencepiece]
+        weight: 1
+    valid:
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid-10.hu
+        path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid-10.en
+        transforms: [sentencepiece]
+
+# Sentencepiece opts
+src_subword_model: ../../../../../data/Hunglish2/combined-32-simple/sp_models_test/spm_huen.model
+src_subword_nbest: 1
+src_subword_alpha: 0.0
+tgt_subword_nbest: 1
+tgt_subword_alpha: 0.0
+
+#------------------------------------------------------------------------------
+# Train config
+# Paremeters from: https://opennmt.net/OpenNMT-py/options/train.html
+
+# Train on a single GPU
+world_size: 1
+gpu_ranks: [0]
+
+# Batching
+batch_type: tokens  # diff
+batch_size: 4096  # diff
+# batch_size: 64
+# valid_batch_size: 64
+# queue_size: 40
+accum_count: [4]
+
+# General opts
+save_model: run/model
+keep_checkpoint: -1
+save_checkpoint_steps: 5000
+average_decay: 0.0005
+report_every: 100
+train_steps: 1000
+valid_steps: 250
+single_pass: False
+early_stopping: 4
+early_stopping_criteria: ppl
+
+# Optimization
+model_dtype: "fp32"
+optim: "adam"  # used sparseadam in the legacy
+learning_rate: 2
+warmup_steps: 8000
+decay_method: "noam"
+adam_beta2: 0.998
+max_grad_norm: 2
+label_smoothing: 0.1
+param_init: 0
+param_init_glorot: true
+normalization: "tokens"
+max_generator_batches: 32  # diff
+
+# Model
+encoder_type: transformer
+decoder_type: transformer
+enc_layers: 6
+dec_layers: 6
+heads: 8
+rnn_size: 512
+word_vec_size: 512
+transformer_ff: 2048
+dropout_steps: [0]
+dropout: [0.1]
+attention_dropout: [0.1]
+share_decoder_embeddings: true  # plus
+share_embeddings: true  # plus
+position_encoding: true  # diff
+
+# Logging
+log_file: run/output.logs
+tensorboard: true
+tensorboard_log_dir: run/tensorboard
+
+#------------------------------------------------------------------------------

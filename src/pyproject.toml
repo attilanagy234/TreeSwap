@@ -12,7 +12,6 @@ networkx= "2.5.1"
 matplotlib = "^3.2.2"
 pyyaml = "^5.4.1"
 ipython = "7.31.1"
-pygraphviz = "1.7"
 stanza = "1.4.0"
 click = "7.1.2"
 psutil = "^5.8.0"
@@ -22,6 +21,7 @@ sacrebleu = "^2.0.0"
 sacremoses = "^0.0.53"
 
 [tool.poetry.dev-dependencies]
+pygraphviz = "1.7"
 pytest = "^5.4.2"
 pytest-cov = "^2.8.1"
 
