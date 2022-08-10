@@ -1,10 +1,7 @@
+import pathlib
 import unittest
 
-import networkx as nx
-import pathlib
-
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
-from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
 from hu_nmt.data_augmentator.graph_mappers.edge_mapper import EdgeMapper
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
@@ -74,7 +71,8 @@ class EdgeMapperTest(unittest.TestCase):
         edge1_data = self.hun_graph.graph.edges[s, t]
         cands = list(filter(lambda x: x[2]['dep'] == edge1_data['dep'], self.eng_graph.graph.edges(data=True)))
 
-        edges = self.edge_mapper._get_edges_with_max_children(s, 'source', cands, self.hun_graph.graph, self.eng_graph.graph)
+        edges = self.edge_mapper._get_edges_with_max_children(s, 'source', cands, self.hun_graph.graph,
+                                                              self.eng_graph.graph)
 
         # assert
         expected = [('realized_4', 'suddenly_3', {'dep': 'advmod'})]
@@ -86,7 +84,8 @@ class EdgeMapperTest(unittest.TestCase):
         edge1_data = self.hun_graph.graph.edges[s, t]
         cands = list(filter(lambda x: x[2]['dep'] == edge1_data['dep'], self.eng_graph.graph.edges(data=True)))
 
-        edges = self.edge_mapper._get_edges_with_max_children(t, 'target', cands, self.hun_graph.graph, self.eng_graph.graph)
+        edges = self.edge_mapper._get_edges_with_max_children(t, 'target', cands, self.hun_graph.graph,
+                                                              self.eng_graph.graph)
 
         # assert
         self.assertIn(('flying_6', 'shire_9', {'dep': 'obl'}), edges)
@@ -94,7 +93,6 @@ class EdgeMapperTest(unittest.TestCase):
         self.assertEqual(len(edges), 2)
 
     def test_map_edges(self):
-
         mapping = self.edge_mapper.map_edges(self.hun_graph, self.eng_graph)
 
         self.assertEqual(len(mapping), 17)

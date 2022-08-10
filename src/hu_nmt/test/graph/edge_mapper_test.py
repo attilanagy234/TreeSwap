@@ -2,7 +2,6 @@ import unittest
 
 import networkx as nx
 
-from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
 from hu_nmt.data_augmentator.graph_mappers.edge_mapper import EdgeMapper
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
@@ -13,7 +12,6 @@ class EdgeMapperTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-
         cls.edge_mapper = EdgeMapper()
         cls.graph1 = nx.DiGraph()
         cls.graph1.add_node('1', postag='tag1')
@@ -40,7 +38,6 @@ class EdgeMapperTest(unittest.TestCase):
         cls.graph2.add_edge('b', 'd', dep='dep3')
         cls.graph2.add_edge('c', 'e', dep='dep4')
         cls.graph2.add_edge('c', 'f', dep='dep3')
-
 
         """
             graph1:
@@ -70,7 +67,6 @@ class EdgeMapperTest(unittest.TestCase):
                         d             e          f  
                      [tag4]        [tag5]      [tag6]
         """
-
 
     def test_get_cands_by_node_labels(self):
         edge1_data = self.graph1.edges['1', '2']
