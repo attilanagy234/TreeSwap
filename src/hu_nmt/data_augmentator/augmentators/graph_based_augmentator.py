@@ -80,9 +80,9 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
                GraphBasedAugmentator.threshold
 
     @staticmethod
-    # it has only 1 obj or nsubj edge due to previous constraints
     def _get_subgraph(wrapper: DependencyGraphWrapper, dep: str) -> nx.DiGraph:
         edges_with_type = wrapper.get_edges_with_property('dep', dep)
+        # it has only 1 obj or nsubj edge due to previous constraints
         edges_with_type = edges_with_type[0]
         top_node_of_tree = edges_with_type.target_node
         node_ids = wrapper.get_subtree_node_ids(top_node_of_tree)
