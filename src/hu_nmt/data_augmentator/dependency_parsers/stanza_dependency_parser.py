@@ -51,7 +51,7 @@ class StanzaDependencyParser(DependencyParserBase):
                 head = word_dicts[int(token['head']) - 1]
                 source_key = f'{head["text"].lower()}_{head["id"]}'
                 source_postag = head['upos']
-                target_lemma = head.get('lemma') if 'lemma' in head else source_key
+                source_lemma = head.get('lemma') if 'lemma' in head else source_key
 
             node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_deprel,
                                                            source_key, source_postag, source_lemma))
