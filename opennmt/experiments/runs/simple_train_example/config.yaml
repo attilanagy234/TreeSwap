@@ -51,6 +51,8 @@ augmentation:
     augmented_folder_prefix: test_prefix
     # The directory field is set automatically when multi train is used
     directory: ../../../../../data/Hunglish2/augmented_test
+    # the preprocessor part is used to create the preprocessor.yaml file used by the preprocessing script
+    # before augmentation
     preprocessor:
         total_wordcount_min: 0
         total_wordcount_max: 32
@@ -94,6 +96,11 @@ src_vocab_size: 32000
 # Type of the subword model (used by sentencepiece)
 subword_model_type: unigram
 
+# You can specify the below two lines if you would want to evaluate your results based on a test set instead of the
+# validation set
+# test_src: <path-to-test-src>
+# test_encoded_src: <path-to-encoded-test-src>
+
 #------------------------------------------------------------------------------
 # Data and vocab config
 # Parameters from: https://opennmt.net/OpenNMT-py/options/build_vocab.html
@@ -109,11 +116,13 @@ tgt_words_min_frequency: 0
 # Corpus opts
 transforms: [sentencepiece]
 data:
+    # the name of the dataset can be anything
     hunglish:
         path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.hu
         path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.en
         transforms: [sentencepiece]
         weight: 1
+    # the validation dataset must have the name "valid"!
     valid:
         path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid-10.hu
         path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-valid-10.en

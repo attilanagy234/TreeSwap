@@ -27,7 +27,7 @@ conda create --name my-env python=3.8.5
 conda activate my-env
 
 pip install -r requirements.txt
-conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2
+conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2 yq=2.13.0
 conda install libgcc
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/miniconda3/lib/
 
@@ -82,7 +82,7 @@ conda activate my-env
 Install the required packages:
 ```shell
 pip install -r requirements.txt
-conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2
+conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2 yq=2.13.0
 ```
 
 If you get the following error during vocabulary building:
