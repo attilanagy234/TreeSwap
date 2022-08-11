@@ -14,13 +14,13 @@ class Preprocessor:
     """
 
     def __init__(self, source_data_path: str, target_data_path: str, config_path: str, source_output_path: str,
-                 target_output_path: str, model_path: str):
+                 target_output_path: str):
         self._source_data_path = source_data_path
         self._target_data_path = target_data_path
         self._config = get_config_from_yaml(config_path)
         self._source_output_path = source_output_path
         self._target_output_path = target_output_path
-        self.langdetect = LanguageDetector(model_path)
+        self.langdetect = LanguageDetector(self._config.preprocessor.langdetect_model_path)
         self.moses_punct_normalizer_src = MosesPunctNormalizer(lang=self._config.preprocessor.source_language)
         self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
 

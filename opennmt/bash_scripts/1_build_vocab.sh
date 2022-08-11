@@ -9,7 +9,14 @@ share_vocab=$(yq -r .share_vocab config.yaml)
 src_vocab_size=$(yq -r .src_vocab_size config.yaml)
 src_model_name=$(yq -r .src_subword_model config.yaml | sed 's_\(.*\)\.model_\1_')
 
+src_model_file_name=$(basename $(yq -r .src_subword_model config.yaml) .model)
+src_model_path=$(yq -r .src_subword_model config.yaml | sed "s|\/$src_model_file_name\.model||")
+
 subword_model_type=$(yq -r .subword_model_type config.yaml)
+
+# create necessary paths
+echo "Making sure $src_model_path exists"
+mkdir -p $src_model_path
 
 if [ "$share_vocab" != "true" ];
 then
