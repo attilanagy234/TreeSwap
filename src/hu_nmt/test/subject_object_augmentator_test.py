@@ -213,7 +213,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         hun_res = augmentator.swap_predicates(hun_graph_wrappers[0], hun_graph_wrappers[1])
 
         # assert
-        desired_eng_res = ['i loves ice cream !', 'he like your huge ego .']  # TODO this is not the best
+        desired_eng_res = ['I loves ice cream !', 'He like your huge ego .']  # TODO this is not the best
         self.assertEqual(desired_eng_res, eng_res)
         desired_hun_res = ['Én szereti a fagyit !', 'Ő szeretem a nagy egód .']  # TODO this is not the best
         self.assertEqual(desired_hun_res, hun_res)
@@ -237,11 +237,11 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         hun_subj_res = augmentator.swap_subtrees(hun_graph_wrappers[0], hun_graph_wrappers[1], 'nsubj')
 
         # assert
-        desired_eng_obj_res = ['i like your huge ego !', 'he loves ice cream .']
+        desired_eng_obj_res = ['I like your huge ego !', 'He loves ice cream .']
         self.assertEqual(desired_eng_obj_res, eng_obj_res)
         desired_hun_obj_res = ['Én szeretem a nagy egód !', 'Ő szereti a fagyit .']
         self.assertEqual(desired_hun_obj_res, hun_obj_res)
-        desired_eng_subj_res = ['he like ice cream !', 'i loves your huge ego .']  # TODO this is not the best
+        desired_eng_subj_res = ['He like ice cream !', 'I loves your huge ego .']  # TODO this is not the best
         self.assertEqual(desired_eng_subj_res, eng_subj_res)
         desired_hun_subj_res = ['Ő szeretem a fagyit !', 'Én szereti a nagy egód .']  # TODO this is not the best
         self.assertEqual(desired_hun_subj_res, hun_subj_res)
@@ -270,7 +270,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         self.assertEqual(6, len(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma']['src']))
         self.assertEqual(6, len(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma']['tgt']))
         result = {'src': ['Én szeretem a bicikliket .', 'Én szeretem a fagyit .', 'Én szeretem a halakat .', 'Ők szerették a fagyit .', 'Én szeretem a halakat .', 'Ők szerették a bicikliket .'],
-                  'tgt': ['i like bikes', 'i like ice cream .', 'i like fish', 'they liked ice cream .', 'i like fish .', 'they liked bikes .']}
+                  'tgt': ['I like bikes', 'I like ice cream .', 'I like fish', 'They liked ice cream .', 'I like fish .', 'They liked bikes .']}
         self.assertEqual(result, augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma'])
 
     def test_augment_subtree_swapping_with_same_predicate_lemmas_less_sample_count(self):
@@ -302,7 +302,7 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
         self.assertEqual(3, len(translation_combinations))
         self.assertEqual(1, sample_count)
         result = {'src': ['Én szeretem a bicikliket .', 'Én szeretem a fagyit .'],
-                  'tgt': ['i like bikes', 'i like ice cream .']}
+                  'tgt': ['I like bikes', 'I like ice cream .']}
         self.assertEqual(result, augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma'])
         print(augmentator._augmented_sentence_pairs['obj_swapping_same_predicate_lemma'])
 
@@ -334,9 +334,9 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
         # assert
         obj_result1 = {'src': ['Sétáltattam egy csodát az utcán .', 'Én láttam a kutyámat .'],
-                  'tgt': ['i walked a miracle down the street .', 'have witnessed my dog .']}
+                  'tgt': ['I walked a miracle down the street .', 'Have witnessed my dog .']}
         obj_result2 = {'src': ['Én láttam a kutyámat .', 'Sétáltattam egy csodát az utcán .'],
-                   'tgt': ['have witnessed my dog .', 'i walked a miracle down the street .']}
+                   'tgt': ['Have witnessed my dog .', 'I walked a miracle down the street .']}
         self.assertIn(augmentator._augmented_sentence_pairs['obj_swapping'], [obj_result1, obj_result2])
 
     def test_swap_subject_subtrees(self):
@@ -367,9 +367,9 @@ class SubjectObjectAugmentatorTests(unittest.TestCase):
 
         # assert
         nsubj_result1 = {'src': ['A férfi tegnap sétáltam az erdőben .', 'Én túl sokat beszélt .'],
-                  'tgt': ['yesterday the man walked in the forest .', 'i talked too much .']}
+                  'tgt': ['Yesterday The man walked in the forest .', 'I talked too much .']}
         nsubj_result2 = {'src': ['Én túl sokat beszélt .', 'A férfi tegnap sétáltam az erdőben .'],
-                   'tgt': ['i talked too much .', 'yesterday the man walked in the forest .']}
+                   'tgt': ['I talked too much .', 'Yesterday The man walked in the forest .']}
         self.assertIn(augmentator._augmented_sentence_pairs['subj_swapping'], [nsubj_result1, nsubj_result2])
 
 

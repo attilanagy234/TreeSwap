@@ -21,7 +21,6 @@ huspacy = "0.4.3"
 sacrebleu = "^2.0.0"
 sacremoses = "^0.0.53"
 nltk = "3.7"
-scipy = {version = "^1.9.0", python = ">=3.8,<3.12"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.2"

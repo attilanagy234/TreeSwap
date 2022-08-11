@@ -29,7 +29,7 @@ class DependencyGraphWrapperTest(unittest.TestCase):
         actual_distances = {
             'root': 0,
             'took': 1,
-            'helen': 2,
+            'Helen': 2,
             'dog': 2,
             'walk': 2,
             '.': 2,
