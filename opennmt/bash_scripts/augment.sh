@@ -20,7 +20,7 @@ filter_same_ancestor=$(yq -r .augmentation.filter_same_ancestor config.yaml)
 filter_same_pos_tag=$(yq -r .augmentation.filter_same_pos_tag config.yaml)
 filter_for_noun_tags=$(yq -r .augmentation.filter_for_noun_tags config.yaml)
 
-absolute_augmentation_dir=$(readlink -f $augmentation_dir)
+absolute_augmentation_dir=$(readlink -f "$augmentation_dir")
 
 function preprocess_data_for_augmentation() {
     echo "Preprocessing data for augmentation"
@@ -48,79 +48,79 @@ function preprocess_data_for_augmentation() {
     echo "preprocessor: $preprocessor_json_content" | yq -y . > preprocess.yaml
     preprocess_yaml_path=$(readlink -f preprocess.yaml)
 
-    mkdir -p $absolute_augmentation_dir/augmentation_input_data
+    mkdir -p "$absolute_augmentation_dir"/augmentation_input_data
 
-    pushd $scripts_path
+    pushd "$scripts_path"
 
     echo 'Running preprocessing'
-    ./$preprocess_data_script \
-    $absolute_tmp_src_train_path \
-    $absolute_tmp_tgt_train_path \
-    $preprocess_yaml_path \
-    $absolute_augmentation_dir/augmentation_input_data/preprocessed.$src_postfix \
-    $absolute_augmentation_dir/augmentation_input_data/preprocessed.$tgt_postfix \
+    ./"$preprocess_data_script" \
+    "$absolute_tmp_src_train_path" \
+    "$absolute_tmp_tgt_train_path" \
+    "$preprocess_yaml_path" \
+    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$src_postfix" \
+    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$tgt_postfix"
     
 
     popd
 
-    rm $absolute_tmp_src_train_path
-    rm $absolute_tmp_tgt_train_path
+    rm "$absolute_tmp_src_train_path"
+    rm "$absolute_tmp_tgt_train_path"
 }
 
 function create_dependency_trees() {
     echo "Creating dependency trees"
 
-    mkdir $absolute_augmentation_dir/dependency_trees
-    mkdir $absolute_augmentation_dir/dependency_trees/$src_postfix
-    mkdir $absolute_augmentation_dir/dependency_trees/$tgt_postfix
+    mkdir "$absolute_augmentation_dir"/dependency_trees
+    mkdir "$absolute_augmentation_dir"/dependency_trees/"$src_postfix"
+    mkdir "$absolute_augmentation_dir"/dependency_trees/"$tgt_postfix"
 
-    pushd $scripts_path
+    pushd "$scripts_path"
 
     echo 'Running precompute on source'
-    ./$src_precompute_script \
-    $absolute_augmentation_dir/augmentation_input_data/preprocessed.$src_postfix \
-    $absolute_augmentation_dir/dependency_trees/$src_postfix \
-    $precompute_batch_size
+    ./"$src_precompute_script" \
+    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$src_postfix" \
+    "$absolute_augmentation_dir"/dependency_trees/"$src_postfix" \
+    "$precompute_batch_size"
 
     echo 'Running precompute on target'
-    ./$tgt_precompute_script \
-    $absolute_augmentation_dir/augmentation_input_data/preprocessed.$tgt_postfix \
-    $absolute_augmentation_dir/dependency_trees/$tgt_postfix \
-    $precompute_batch_size
+    ./"$tgt_precompute_script" \
+    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$tgt_postfix" \
+    "$absolute_augmentation_dir"/dependency_trees/"$tgt_postfix" \
+    "$precompute_batch_size"
 
     popd
 }
 
 function augment() {
     echo "Generating augmented sentences"
-    mkdir $absolute_augmentation_dir/$augmented_folder_prefix-$augmentation_ratio
+    mkdir "$absolute_augmentation_dir"/"$augmented_folder_prefix"-"$augmentation_ratio"
 
-    pushd $scripts_path
+    pushd "$scripts_path"
 
     echo 'Running augmentation'
-    ./$augmentation_script \
-    $src_postfix $tgt_postfix \
-    $absolute_augmentation_dir/dependency_trees/$src_postfix \
-    $absolute_augmentation_dir/dependency_trees/$tgt_postfix \
-    $absolute_augmentation_dir/$augmented_folder_prefix-$augmentation_ratio \
-    $augmentation_ratio \
-    --filter_same_ancestor=$filter_same_ancestor \
-    --filter_same_pos_tag=$filter_same_pos_tag \
-    --filter_for_noun_tags=$filter_for_noun_tags
+    ./"$augmentation_script" \
+    "$src_postfix" "$tgt_postfix" \
+    "$absolute_augmentation_dir"/dependency_trees/"$src_postfix" \
+    "$absolute_augmentation_dir"/dependency_trees/"$tgt_postfix" \
+    "$absolute_augmentation_dir"/"$augmented_folder_prefix"-"$augmentation_ratio" \
+    "$augmentation_ratio" \
+    --filter_same_ancestor="$filter_same_ancestor" \
+    --filter_same_pos_tag="$filter_same_pos_tag" \
+    --filter_for_noun_tags="$filter_for_noun_tags"
 
     popd
 }
 
 if [ "$augmentation_active" == "true" ]; then
-    if [ ! -d $absolute_augmentation_dir/augmentation_input_data ]; then
+    if [ ! -d "$absolute_augmentation_dir"/augmentation_input_data ]; then
         preprocess_data_for_augmentation
     fi
 
-    if [ ! -d $absolute_augmentation_dir/dependency_trees ]; then
+    if [ ! -d "$absolute_augmentation_dir"/dependency_trees ]; then
         create_dependency_trees
     fi
 
-    if [ ! -d  $absolute_augmentation_dir/$augmented_folder_prefix-$augmentation_ratio ]; then
+    if [ ! -d  "$absolute_augmentation_dir"/"$augmented_folder_prefix"-"$augmentation_ratio" ]; then
         augment
     fi
 else
