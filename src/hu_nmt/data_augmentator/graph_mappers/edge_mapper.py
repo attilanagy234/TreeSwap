@@ -41,6 +41,7 @@ class EdgeMapper(GraphSimilarityBase):
             # edges with the same dependency label
             cands = list(filter(lambda x: x[2]['dep'] == data1['dep'], g2_edges))
             if len(cands) == 1:
+                # map the only candidate's source and target node
                 mapping[(s1, d1)] = (cands[0][0], cands[0][1])
                 g2_edges.remove(cands[0])
             elif len(cands) > 1:
