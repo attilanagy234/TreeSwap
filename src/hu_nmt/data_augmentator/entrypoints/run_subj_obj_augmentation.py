@@ -40,7 +40,7 @@ log = get_logger(__name__)
 def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path,
          augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
          filter_batch_size, output_format, save_original, separate_augmentation, filter_same_ancestor,
-         filter_same_pos_tag, filter_for_noun_tags, augmentation_type, threshold):
+         filter_same_pos_tag, filter_for_noun_tags, augmentation_type, similarity_threshold):
 
     src_dep_tree_generator = DependencyParserBase.read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
     # log.info(f'Number of source sentences used for augmentation: {len(eng_wrappers)}')
@@ -53,7 +53,7 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
             BleuFilter(filter_quantile, src_model_path, tgt_model_path, sp_model_path, tgt_language, filter_batch_size))
 
     if augmentation_type == 'ged' or augmentation_type == 'edge_mapper':
-        augmentator = GraphBasedAugmentator(src_language, tgt_language, threshold, None, None, augmented_data_ratio,
+        augmentator = GraphBasedAugmentator(src_language, tgt_language, similarity_threshold, None, None, augmented_data_ratio,
                                             random_seed=15, filters=filters, output_path=augmentation_output_path,
                                             output_format=output_format, save_original=save_original,
                                             separate_augmentation=separate_augmentation,
