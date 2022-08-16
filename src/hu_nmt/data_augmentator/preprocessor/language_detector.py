@@ -1,11 +1,9 @@
 import fasttext
 
-PRETRAINED_MODEL_PATH = '/tmp/lid.176.bin'
-
 
 class LanguageDetector:
-    def __init__(self):
-        self.model = fasttext.load_model(PRETRAINED_MODEL_PATH)
+    def __init__(self, model_path='/tmp/lid.176.bin'):
+        self.model = fasttext.load_model(model_path)
 
     def predict(self, text):
         # Extract ISO language code from model response

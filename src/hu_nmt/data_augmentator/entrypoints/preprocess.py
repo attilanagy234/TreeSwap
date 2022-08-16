@@ -19,9 +19,3 @@ def main(src_input_path, tgt_input_path, config_path, src_output_path, tgt_outpu
 
 if __name__ == '__main__':
     main()
-
-    # During local testing
-    # $1 /Users/attilanagy/Personal/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined/hunglish2-train.en
-    # $2 /Users/attilanagy/Personal/hu-nmt/data/ftp.mokk.bme.hu/Hunglish2/combined/hunglish2-train.hu
-    # $3 /Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/preprocessor/configs/preprocessor_config.yaml
-    # $4 /Users/attilanagy/Personal/hu-nmt/src/hu_nmt/data_augmentator/data/augmentation_input_data

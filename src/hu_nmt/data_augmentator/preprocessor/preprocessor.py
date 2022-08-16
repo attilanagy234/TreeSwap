@@ -20,8 +20,9 @@ class Preprocessor:
         self._config = get_config_from_yaml(config_path)
         self._source_output_path = source_output_path
         self._target_output_path = target_output_path
-        self.langdetect = LanguageDetector()
-        self.moses_punct_normalizer = MosesPunctNormalizer()
+        self.langdetect = LanguageDetector(self._config.preprocessor.langdetect_model_path)
+        self.moses_punct_normalizer_src = MosesPunctNormalizer(lang=self._config.preprocessor.source_language)
+        self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
 
     def preprocess(self):
         log.info('Starting preprocessing...')
@@ -34,7 +35,10 @@ class Preprocessor:
             for i, (source_line, target_line) in enumerate(zip(source_file, target_file)):
                 source_sentence, target_sentence = source_line.strip(), target_line.strip()
                 source_sentence = self.clean_sentence(source_sentence)
+                source_sentence = self.moses_punct_normalizer_src.normalize(source_sentence)
+
                 target_sentence = self.clean_sentence(target_sentence)
+                target_sentence = self.moses_punct_normalizer_src.normalize(target_sentence)
                 if self.is_good_length(source_sentence, target_sentence) and self.is_correct_language(source_sentence,
                                                                                                       target_sentence):
                     source_output_file.write(source_sentence + '\n')
@@ -88,5 +92,4 @@ class Preprocessor:
 
             if sentence.startswith('-'):
                 sentence = sentence[1:]
-        sentence = self.moses_punct_normalizer.normalize(sentence)
         return sentence
