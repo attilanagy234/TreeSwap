@@ -54,6 +54,10 @@ class DependencyParserBase(ABC):
         if self.use_multiprocessing:
             log.info('Using multiprocessing')
 
+    def sentence_to_graph_wrapper(self, sentence) -> DependencyGraphWrapper:
+        graph = self.sentence_to_dep_parse_tree(sentence)
+        return DependencyGraphWrapper(graph)
+
     @abstractmethod
     def sentence_to_dep_parse_tree(self, sentence):
         raise NotImplementedError

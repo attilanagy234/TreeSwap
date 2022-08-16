@@ -19,6 +19,9 @@ augmented_folder_prefix=$(yq -r .augmentation.augmented_folder_prefix config.yam
 filter_same_ancestor=$(yq -r .augmentation.filter_same_ancestor config.yaml)
 filter_same_pos_tag=$(yq -r .augmentation.filter_same_pos_tag config.yaml)
 filter_for_noun_tags=$(yq -r .augmentation.filter_for_noun_tags config.yaml)
+augmentation_type=$(yq -r .augmentation.augmentation_type config.yaml)
+similarity_threshold=$(yq -r .augmentation.similarity_threshold config.yaml)
+separate_augmentation=$(yq -r .augmentation.separate_augmentation config.yaml)
 
 absolute_augmentation_dir=$(readlink -f "$augmentation_dir")
 
@@ -106,7 +109,10 @@ function augment() {
     "$augmentation_ratio" \
     --filter_same_ancestor="$filter_same_ancestor" \
     --filter_same_pos_tag="$filter_same_pos_tag" \
-    --filter_for_noun_tags="$filter_for_noun_tags"
+    --filter_for_noun_tags="$filter_for_noun_tags" \
+    --separate_augmentation="$separate_augmentation" \
+    --augmentation_type="$augmentation_type" \
+    --similarity_threshold="$similarity_threshold"
 
     popd
 }

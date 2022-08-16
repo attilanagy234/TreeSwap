@@ -61,7 +61,8 @@ class SpacyDependencyParser(DependencyParserBase):
                 source_postag = token.head.pos_
                 source_lemma = token.head.lemma_
 
-            node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_deprel, source_key, source_postag, source_lemma))
+            node_relationship_list.append(NodeRelationship(target_key, target_postag, target_lemma, target_deprel,
+                                                           source_key, source_postag, source_lemma))
 
         return node_relationship_list
 

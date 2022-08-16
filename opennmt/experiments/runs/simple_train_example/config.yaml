@@ -71,6 +71,9 @@ augmentation:
     filter_same_ancestor: true
     filter_same_pos_tag: true
     filter_for_noun_tags: false
+    separate_augmentation: false
+    augmentation_type: base
+    similarity_threshold: 0.4
 
 #------------------------------------------------------------------------------
 # Script configs
