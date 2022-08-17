@@ -201,10 +201,10 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
         if self.separate_augmentation:
             object_translation_pairs = self.sample_item_pairs(self._candidate_translations['obj'],
-                                                              pre_filter_sample_cnt)
+                                                              pre_filter_sample_cnt, 'obj')
 
             subject_translation_pairs = self.sample_item_pairs(self._candidate_translations['nsubj'],
-                                                               pre_filter_sample_cnt)
+                                                               pre_filter_sample_cnt, 'nsubj')
         else:
             object_translation_pairs = self.sample_item_pairs(self._candidate_translations["both"],
                                                               pre_filter_sample_cnt)

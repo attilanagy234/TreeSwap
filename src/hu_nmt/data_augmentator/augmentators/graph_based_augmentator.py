@@ -56,8 +56,8 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         failed = 0
         while len(sampled_index_pairs) < sample_count:
             (x, y) = np.random.choice(len(items), 2, replace=False)
-            if GraphBasedAugmentator._is_similar(items[x].hun, items[y].hun, dep) and \
-                    GraphBasedAugmentator._is_similar(items[x].eng, items[y].eng, dep):
+            if GraphBasedAugmentator._is_similar(items[x].src, items[x].tgt, dep) and \
+                    GraphBasedAugmentator._is_similar(items[y].src, items[y].tgt, dep):
                 sampled_index_pairs.add((x, y))
                 change = len(sampled_index_pairs) - size
                 pbar.update(change)
@@ -76,15 +76,15 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
     def _is_similar(src_graph: DependencyGraphWrapper, tgt_graph: DependencyGraphWrapper, dep):
         src_subgraph = GraphBasedAugmentator._get_subgraph(src_graph, dep)
         tgt_subgraph = GraphBasedAugmentator._get_subgraph(tgt_graph, dep)
-        return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_subgraph.graph, tgt_subgraph.graph) >= \
+        return GraphBasedAugmentator.similarity.get_similarity_from_graphs(src_subgraph, tgt_subgraph) >= \
                GraphBasedAugmentator.threshold
 
     @staticmethod
-    def _get_subgraph(wrapper: DependencyGraphWrapper, dep: str) -> nx.DiGraph:
+    def _get_subgraph(wrapper: DependencyGraphWrapper, dep: str) -> DependencyGraphWrapper:
         edges_with_type = wrapper.get_edges_with_property('dep', dep)
         # it has only 1 obj or nsubj edge due to previous constraints
         edges_with_type = edges_with_type[0]
         top_node_of_tree = edges_with_type.target_node
         node_ids = wrapper.get_subtree_node_ids(top_node_of_tree)
         subgraph = nx.DiGraph(wrapper.graph.subgraph(node_ids))
-        return subgraph
+        return DependencyGraphWrapper(subgraph)

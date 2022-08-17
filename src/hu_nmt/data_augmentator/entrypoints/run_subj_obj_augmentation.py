@@ -36,7 +36,7 @@ log = get_logger(__name__)
 @click.option('--filter_same_pos_tag', default=True)
 @click.option('--filter_for_noun_tags', default=False)
 @click.option('--augmentation_type', default='base', type=click.Choice(['base', 'ged', 'edge_mapper']))
-@click.option('--threshold', default=0.5)
+@click.option('--similarity_threshold', default=0.5)
 def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path,
          augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
          filter_batch_size, output_format, save_original, separate_augmentation, filter_same_ancestor,
@@ -80,7 +80,7 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
 
             graph_cnt += len(src_wrapper_batch)
 
-            augmentator.add_augmentable_candidates(tgt_wrapper_batch, src_wrapper_batch)
+            augmentator.add_augmentable_candidates(src_wrapper_batch, tgt_wrapper_batch)
 
             pbar.update(len(src_wrapper_batch))
 
