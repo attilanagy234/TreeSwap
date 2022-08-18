@@ -56,3 +56,20 @@ class SpacyDependencyParserTest(unittest.TestCase):
         self.assertTrue(filecmp.cmp(str(expected_dir / '1.tsv'), str(output_dir / '1.tsv')))
         self.assertTrue(filecmp.cmp(str(expected_dir / '2.tsv'), str(output_dir / '2.tsv')))
         self.assertTrue(filecmp.cmp(str(expected_dir / '3.tsv'), str(output_dir / '3.tsv')))
+
+    def test_sentence_count(self):
+        sentence = 'Ez egy mondat: ez még ugyanaz. Ez egy másik!'
+        doc = self.hun_dep_parser.tokenize(sentence)
+
+        count = self.hun_dep_parser.count_sentences(doc)
+
+        self.assertEqual(count, 2)
+
+    def test_word_count(self):
+        sentence = 'Ez egy mondat: ez még ugyanaz. Ez egy másik! Ez itt egy felsorolás: 1, 2, 3?'
+        doc = self.hun_dep_parser.tokenize(sentence)
+
+        count = self.hun_dep_parser.count_words(doc)
+
+        self.assertEqual(count, 16)
+
