@@ -4,6 +4,7 @@ from typing import List
 import huspacy
 import networkx as nx
 import spacy
+from spacy.tokens.doc import Doc
 
 from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship, \
     SentenceProcessUnit, SentenceProcessBatch
@@ -20,7 +21,7 @@ class SpacyDependencyParser(DependencyParserBase):
             try:
                 nlp_pipeline_constructor = partial(huspacy.load, 'hu_core_news_trf')
             except OSError as e:
-                log.info(f'Could not load {lang} model:',e)
+                log.info(f'Could not load {lang} model:', e)
                 log.info('Downloading model')
                 huspacy.download('hu_core_news_trf')
                 log.info('Retrying model loading')
@@ -79,6 +80,12 @@ class SpacyDependencyParser(DependencyParserBase):
             dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
+
+    def count_sentences(self, doc: Doc) -> int:
+        return len(list(doc.sents))
+
+    def count_words(self, doc: Doc) -> int:
+        return len([token for token in doc if not token.is_punct])
 
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit):

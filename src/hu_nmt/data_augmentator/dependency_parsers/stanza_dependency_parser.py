@@ -74,6 +74,12 @@ class StanzaDependencyParser(DependencyParserBase):
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
 
+    def count_sentences(self, doc) -> int:
+        return len(doc.sentences)
+
+    def count_words(self, doc) -> int:
+        return len([token for sent in doc.sentences for token in sent.words if token.pos != 'PUNCT'])
+
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit) -> List[NodeRelationship]:
         return StanzaDependencyParser.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
