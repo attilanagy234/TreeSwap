@@ -5,7 +5,7 @@ import filecmp
 import networkx as nx
 import pytest
 
-from hu_nmt.data_augmentator.dependency_parsers.spacy_dependency_parser import SpacyDependencyParser
+from hu_nmt.data_augmentator.dependency_parsers.spacy_nlp_pipeline import SpacyNlpPipeline
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 
 dirname = os.path.dirname(__file__)
@@ -15,7 +15,7 @@ class SpacyDependencyParserTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.hun_dep_parser = SpacyDependencyParser(lang='hu')
+        cls.hun_dep_parser = SpacyNlpPipeline(lang='hu')
 
     def test_sentence_to_dep_parse_tree_hu(self):
         hun_sentence = 'Péter elvitte a kutyát sétálni az erdőbe.'
@@ -25,7 +25,7 @@ class SpacyDependencyParserTest(unittest.TestCase):
 
     @pytest.mark.skipif(os.getenv('CICD') == 'true', reason='Do not run test in CI/CD build.')
     def test_sentence_to_dep_parse_tree_de(self):
-        de_dep_parser = SpacyDependencyParser(lang='de')
+        de_dep_parser = SpacyNlpPipeline(lang='de')
         de_sentence = 'Ich liebe lange Spaziergänge in den Bergen.'
         dep_graph = de_dep_parser.sentence_to_dep_parse_tree(de_sentence)
         if not isinstance(dep_graph, nx.DiGraph):
@@ -33,7 +33,7 @@ class SpacyDependencyParserTest(unittest.TestCase):
 
     @pytest.mark.skipif(os.getenv('CICD') == 'true', reason='Do not run test in CI/CD build.')
     def test_sentence_to_dep_parse_tree_fr(self):
-        de_dep_parser = SpacyDependencyParser(lang='fr')
+        de_dep_parser = SpacyNlpPipeline(lang='fr')
         de_sentence = "J'ai 20 ans."
         dep_graph = de_dep_parser.sentence_to_dep_parse_tree(de_sentence)
         if not isinstance(dep_graph, nx.DiGraph):

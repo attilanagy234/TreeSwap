@@ -3,12 +3,12 @@ from tqdm import tqdm
 
 from hu_nmt.data_augmentator.augmentators.graph_based_augmentator import GraphBasedAugmentator
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
+from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 from hu_nmt.data_augmentator.filters.bleu_filter import BleuFilter
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 from hu_nmt.data_augmentator.filters.bleu_filter import BleuFilter
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
 
 log = get_logger(__name__)
 
@@ -42,9 +42,9 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
          filter_batch_size, output_format, save_original, separate_augmentation, filter_same_ancestor,
          filter_same_pos_tag, filter_for_noun_tags, augmentation_type, similarity_threshold):
 
-    src_dep_tree_generator = DependencyParserBase.read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
+    src_dep_tree_generator = NlpPipelineBase.read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
     # log.info(f'Number of source sentences used for augmentation: {len(eng_wrappers)}')
-    tgt_dep_tree_generator = DependencyParserBase.read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
+    tgt_dep_tree_generator = NlpPipelineBase.read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
     # log.info(f'Number of target sentences used for augmentation: {len(eng_wrappers)}')
 
     filters = []

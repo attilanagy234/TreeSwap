@@ -4,8 +4,8 @@ import unittest
 from typing import Iterator
 from unittest.mock import patch
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
-from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
+from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 
 
 class EmptyLineCountMismatch(Exception):
@@ -36,13 +36,13 @@ class DependencyParserBaseTests(unittest.TestCase):
     @patch('stanza.Pipeline')
     def test_multiprocessing_trigger_not_triggered(self, _):
         os.environ['USE_MULTIPROCESSING'] = 'False'
-        parser = DependencyParserFactory.get_dependency_parser('en')
+        parser = NlpPipelineFactory.get_dependency_parser('en')
         self.assertFalse(parser.use_multiprocessing)
 
     @patch('stanza.Pipeline')
     def test_multiprocessing_trigger_triggered(self, _):
         os.environ['USE_MULTIPROCESSING'] = 'True'
-        parser = DependencyParserFactory.get_dependency_parser('en')
+        parser = NlpPipelineFactory.get_dependency_parser('en')
         self.assertTrue(parser.use_multiprocessing)
 
     def test_sentences_to_serialized_dep_graph_files(self):
@@ -60,7 +60,7 @@ class DependencyParserBaseTests(unittest.TestCase):
             sentences = en_input_file.readlines()
 
         # action
-        en_dep_parser = DependencyParserFactory.get_dependency_parser('en')
+        en_dep_parser = NlpPipelineFactory.get_dependency_parser('en')
         en_dep_parser.sentences_to_serialized_dep_graph_files(iter(sentences), str(en_output_path), batch_size)
 
         # assert
@@ -83,7 +83,7 @@ class DependencyParserBaseTests(unittest.TestCase):
         batch = [1, 2, 3, 4, 5]
 
         # action
-        small_batches = DependencyParserBase.create_mini_batches(number_of_small_batches, batch)
+        small_batches = NlpPipelineBase.create_mini_batches(number_of_small_batches, batch)
 
         # assert
         self.assertEqual(number_of_small_batches, len(small_batches))
@@ -96,7 +96,7 @@ class DependencyParserBaseTests(unittest.TestCase):
         batch = [1, 2, 3, 4, 5]
 
         # action
-        small_batches = DependencyParserBase.create_mini_batches(number_of_mini_batches, batch)
+        small_batches = NlpPipelineBase.create_mini_batches(number_of_mini_batches, batch)
 
         # assert
         self.assertEqual(number_of_mini_batches, len(small_batches))

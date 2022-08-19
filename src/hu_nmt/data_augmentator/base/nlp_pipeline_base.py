@@ -42,7 +42,7 @@ class SentenceProcessBatch:
     sentences: List[str]
 
 
-class DependencyParserBase(ABC):
+class NlpPipelineBase(ABC):
     """
     Base class for language-specific dependency parsers
     """

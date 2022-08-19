@@ -6,7 +6,7 @@ import networkx as nx
 import spacy
 from spacy.tokens.doc import Doc
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship, \
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase, NodeRelationship, \
     SentenceProcessUnit, SentenceProcessBatch
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
@@ -15,7 +15,7 @@ log = get_logger(__name__)
 ROOT_KEY = 'root_0'
 
 
-class SpacyDependencyParser(DependencyParserBase):
+class SpacyNlpPipeline(NlpPipelineBase):
     def __init__(self, lang):
         if lang == 'hu':
             try:
@@ -89,11 +89,11 @@ class SpacyDependencyParser(DependencyParserBase):
 
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit):
-        return SpacyDependencyParser.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
+        return SpacyNlpPipeline.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
 
     @staticmethod
     def _sentence_process_batch_to_node_relationship_list(process_batch: SentenceProcessBatch) \
             -> List[List[NodeRelationship]]:
         pipeline = process_batch.pipeline_constructor()
-        return [SpacyDependencyParser.sentence_to_node_relationship_list(pipeline, sentence)
+        return [SpacyNlpPipeline.sentence_to_node_relationship_list(pipeline, sentence)
                 for sentence in process_batch.sentences]

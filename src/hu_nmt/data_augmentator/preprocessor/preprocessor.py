@@ -1,6 +1,6 @@
 from sacremoses import MosesPunctNormalizer
 
-from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
+from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 from hu_nmt.data_augmentator.preprocessor.language_detector import LanguageDetector
 from hu_nmt.data_augmentator.utils.data_helpers import get_config_from_yaml
 from hu_nmt.data_augmentator.utils.logger import get_logger
@@ -24,8 +24,8 @@ class Preprocessor:
         self.langdetect = LanguageDetector(self._config.preprocessor.langdetect_model_path)
         self.moses_punct_normalizer_src = MosesPunctNormalizer(lang=self._config.preprocessor.source_language)
         self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
-        self.source_tokenizer = DependencyParserFactory.get_tokenizer(self._config.preprocessor.source_language)
-        self.target_tokenizer = DependencyParserFactory.get_tokenizer(self._config.preprocessor.target_language)
+        self.source_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.source_language)
+        self.target_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.target_language)
 
     def preprocess(self):
         log.info('Starting preprocessing...')

@@ -1,12 +1,12 @@
 import unittest
 
-from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
+from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 
 
 class StanzaDependencyParserTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.eng_tokenizer = DependencyParserFactory.get_tokenizer('en')
+        cls.eng_tokenizer = NlpPipelineFactory.get_tokenizer('en')
 
     def test_sentence_count(self):
         sentence = 'This is a sentence: it\'s still the same. This is another! Is this a list: 1, 2, 3?'
