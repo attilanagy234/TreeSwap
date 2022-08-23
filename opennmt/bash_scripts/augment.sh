@@ -9,8 +9,7 @@ all_non_valid_tgt_paths=$(for dataset in $(yq ".data | keys" config.yaml | grep 
 scripts_path=$(yq -r .augmentation.scripts_path config.yaml)
 preprocess_data_script=$(yq -r .augmentation.preprocess_data_script config.yaml)
 
-src_precompute_script=$(yq -r .augmentation.src_precompute_script config.yaml)
-tgt_precompute_script=$(yq -r .augmentation.tgt_precompute_script config.yaml)
+precompute_script=$(yq -r .augmentation.precompute_script config.yaml)
 precompute_batch_size=$(yq -r .augmentation.precompute_batch_size config.yaml)
 
 augmentation_script=$(yq -r .augmentation.augmentation_script config.yaml)
@@ -80,13 +79,15 @@ function create_dependency_trees() {
     pushd "$scripts_path"
 
     echo 'Running precompute on source'
-    ./"$src_precompute_script" \
+    ./"$precompute_script" \
+    "$src_postfix" \
     "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$src_postfix" \
     "$absolute_augmentation_dir"/dependency_trees/"$src_postfix" \
     "$precompute_batch_size"
 
     echo 'Running precompute on target'
-    ./"$tgt_precompute_script" \
+    ./"$precompute_script" \
+    "$tgt_postfix" \
     "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$tgt_postfix" \
     "$absolute_augmentation_dir"/dependency_trees/"$tgt_postfix" \
     "$precompute_batch_size"
