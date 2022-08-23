@@ -2,8 +2,10 @@ import os
 import pathlib
 from functools import partial
 from typing import List
+
 import networkx as nx
 import stanza
+from stanza.pipeline.core import DownloadMethod
 
 from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase, NodeRelationship, \
     SentenceProcessUnit, SentenceProcessBatch
@@ -16,7 +18,8 @@ ROOT_KEY = 'root_0'
 
 class StanzaNlpPipeline(NlpPipelineBase):
     def __init__(self, lang, processors):
-        nlp_pipeline_constructor = partial(stanza.Pipeline, lang=lang, processors=processors)
+        nlp_pipeline_constructor = partial(stanza.Pipeline, lang=lang, processors=processors,
+                                           download_method=DownloadMethod.REUSE_RESOURCES)
         if not pathlib.Path(f'{os.getenv("HOME")}/stanza_resources/{lang}').resolve().exists():
             stanza.download(lang=lang, processors=processors)
 
