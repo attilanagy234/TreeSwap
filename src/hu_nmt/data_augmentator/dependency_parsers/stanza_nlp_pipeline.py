@@ -77,7 +77,7 @@ class StanzaNlpPipeline(NlpPipelineBase):
     def count_sentences(self, doc) -> int:
         return len(doc.sentences)
 
-    def count_words(self, doc) -> int:
+    def count_tokens(self, doc) -> int:
         return len([token for sent in doc.sentences for token in sent.words if token.pos != 'PUNCT'])
 
     @staticmethod

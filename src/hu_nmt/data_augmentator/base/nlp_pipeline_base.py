@@ -67,7 +67,7 @@ class NlpPipelineBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def count_words(self, sentence) -> int:
+    def count_tokens(self, sentence) -> int:
         raise NotImplementedError
 
     @staticmethod

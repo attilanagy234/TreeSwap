@@ -65,11 +65,11 @@ class SpacyDependencyParserTest(unittest.TestCase):
 
         self.assertEqual(count, 2)
 
-    def test_word_count(self):
+    def test_token_count(self):
         sentence = 'Ez egy mondat: ez még ugyanaz. Ez egy másik! Ez itt egy felsorolás: 1, 2, 3?'
         doc = self.hun_dep_parser.tokenize(sentence)
 
-        count = self.hun_dep_parser.count_words(doc)
+        count = self.hun_dep_parser.count_tokens(doc)
 
         self.assertEqual(count, 16)
 

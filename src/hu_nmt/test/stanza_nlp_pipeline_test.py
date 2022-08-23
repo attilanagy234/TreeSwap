@@ -16,11 +16,11 @@ class StanzaDependencyParserTest(unittest.TestCase):
 
         self.assertEqual(count, 3)
 
-    def test_word_count(self):
+    def test_token_count(self):
         sentence = 'This is a sentence: it\'s still the same. This is another! Is this a list: 1, 2, 3?'
         doc = self.eng_tokenizer.tokenize(sentence)
 
-        count = self.eng_tokenizer.count_words(doc)
+        count = self.eng_tokenizer.count_tokens(doc)
 
         self.assertEqual(count, 19)
 

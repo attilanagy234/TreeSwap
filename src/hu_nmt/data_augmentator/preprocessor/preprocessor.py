@@ -56,8 +56,8 @@ class Preprocessor:
     def is_good_length(self, source_sentence, target_sentence) -> bool:
         source_doc = self.source_tokenizer.tokenize(source_sentence)
         target_doc = self.target_tokenizer.tokenize(target_sentence)
-        source_word_count = self.source_tokenizer.count_words(source_doc)
-        target_word_count = self.target_tokenizer.count_words(target_doc)
+        source_word_count = self.source_tokenizer.count_tokens(source_doc)
+        target_word_count = self.target_tokenizer.count_tokens(target_doc)
 
         return self._is_good_word_count(source_word_count) and self._is_good_word_count(target_word_count) and \
             self._is_good_ratio(source_word_count, target_word_count) and self._contains_one_sentence(source_doc,

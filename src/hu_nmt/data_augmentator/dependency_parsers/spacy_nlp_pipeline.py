@@ -84,7 +84,7 @@ class SpacyNlpPipeline(NlpPipelineBase):
     def count_sentences(self, doc: Doc) -> int:
         return len(list(doc.sents))
 
-    def count_words(self, doc: Doc) -> int:
+    def count_tokens(self, doc: Doc) -> int:
         return len([token for token in doc if not token.is_punct])
 
     @staticmethod
