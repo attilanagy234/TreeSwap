@@ -1,7 +1,7 @@
 import pathlib
 import unittest
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
 from hu_nmt.data_augmentator.graph_mappers.edge_mapper import EdgeMapper
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
@@ -13,7 +13,7 @@ class EdgeMapperTest(unittest.TestCase):
         cls.edge_mapper = EdgeMapper()
 
         test_resource_dir = pathlib.Path(__file__).parent.parent.resolve() / 'resources' / 'graph_test'
-        graphs = next(DependencyParserBase.read_parsed_dep_trees_from_files(data_dir=test_resource_dir, per_file=True))
+        graphs = next(NlpPipelineBase.read_parsed_dep_trees_from_files(data_dir=test_resource_dir, per_file=True))
 
         cls.hun_graph = DependencyGraphWrapper(cls.edge_mapper.adjust_deps(graphs[0]))
         cls.eng_graph = DependencyGraphWrapper(cls.edge_mapper.adjust_deps(graphs[1]))

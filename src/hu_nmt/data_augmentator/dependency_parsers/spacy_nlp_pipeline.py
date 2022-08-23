@@ -4,8 +4,9 @@ from typing import List
 import huspacy
 import networkx as nx
 import spacy
+from spacy.tokens.doc import Doc
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship, \
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase, NodeRelationship, \
     SentenceProcessUnit, SentenceProcessBatch
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
@@ -14,13 +15,13 @@ log = get_logger(__name__)
 ROOT_KEY = 'root_0'
 
 
-class SpacyDependencyParser(DependencyParserBase):
+class SpacyNlpPipeline(NlpPipelineBase):
     def __init__(self, lang):
         if lang == 'hu':
             try:
                 nlp_pipeline_constructor = partial(huspacy.load, 'hu_core_news_trf')
             except OSError as e:
-                log.info(f'Could not load {lang} model:',e)
+                log.info(f'Could not load {lang} model:', e)
                 log.info('Downloading model')
                 huspacy.download('hu_core_news_trf')
                 log.info('Retrying model loading')
@@ -80,13 +81,19 @@ class SpacyDependencyParser(DependencyParserBase):
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
 
+    def count_sentences(self, doc: Doc) -> int:
+        return len(list(doc.sents))
+
+    def count_tokens(self, doc: Doc) -> int:
+        return len([token for token in doc if not token.is_punct])
+
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit):
-        return SpacyDependencyParser.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
+        return SpacyNlpPipeline.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
 
     @staticmethod
     def _sentence_process_batch_to_node_relationship_list(process_batch: SentenceProcessBatch) \
             -> List[List[NodeRelationship]]:
         pipeline = process_batch.pipeline_constructor()
-        return [SpacyDependencyParser.sentence_to_node_relationship_list(pipeline, sentence)
+        return [SpacyNlpPipeline.sentence_to_node_relationship_list(pipeline, sentence)
                 for sentence in process_batch.sentences]

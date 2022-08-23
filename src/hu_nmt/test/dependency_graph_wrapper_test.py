@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from hu_nmt.data_augmentator.dependency_parsers.dependency_parser_factory import DependencyParserFactory
+from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 dirname = os.path.dirname(__file__)
@@ -12,7 +12,7 @@ class DependencyGraphWrapperTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         sentence = 'Helen took her dog for a walk in the woods.'
-        cls.eng_dep_parser = DependencyParserFactory.get_dependency_parser('en')
+        cls.eng_dep_parser = NlpPipelineFactory.get_dependency_parser('en')
         graph = cls.eng_dep_parser.sentence_to_dep_parse_tree(sentence)
         cls.dep_graph_wrapper = DependencyGraphWrapper(graph)
 

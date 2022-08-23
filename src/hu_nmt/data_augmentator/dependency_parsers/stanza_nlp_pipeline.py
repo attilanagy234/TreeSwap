@@ -5,7 +5,7 @@ from typing import List
 import networkx as nx
 import stanza
 
-from hu_nmt.data_augmentator.base.depedency_parser_base import DependencyParserBase, NodeRelationship, \
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase, NodeRelationship, \
     SentenceProcessUnit, SentenceProcessBatch
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
@@ -14,7 +14,7 @@ log = get_logger(__name__)
 ROOT_KEY = 'root_0'
 
 
-class StanzaDependencyParser(DependencyParserBase):
+class StanzaNlpPipeline(NlpPipelineBase):
     def __init__(self, lang, processors):
         nlp_pipeline_constructor = partial(stanza.Pipeline, lang=lang, processors=processors)
         if not pathlib.Path(f'{os.getenv("HOME")}/stanza_resources/{lang}').resolve().exists():
@@ -74,9 +74,15 @@ class StanzaDependencyParser(DependencyParserBase):
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
         return dep_graph
 
+    def count_sentences(self, doc) -> int:
+        return len(doc.sentences)
+
+    def count_tokens(self, doc) -> int:
+        return len([token for sent in doc.sentences for token in sent.words if token.pos != 'PUNCT'])
+
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit) -> List[NodeRelationship]:
-        return StanzaDependencyParser.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
+        return StanzaNlpPipeline.sentence_to_node_relationship_list(process_unit.pipeline, process_unit.sentence)
 
     @staticmethod
     def _sentence_process_batch_to_node_relationship_list(process_batch: SentenceProcessBatch) \
@@ -84,5 +90,5 @@ class StanzaDependencyParser(DependencyParserBase):
         log.info('Creating pipeline in process')
         pipeline = process_batch.pipeline_constructor()
         log.info('Processing sentences in process')
-        return [StanzaDependencyParser.sentence_to_node_relationship_list(pipeline, sentence)
+        return [StanzaNlpPipeline.sentence_to_node_relationship_list(pipeline, sentence)
                 for sentence in process_batch.sentences]

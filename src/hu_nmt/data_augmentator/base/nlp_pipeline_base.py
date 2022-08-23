@@ -42,7 +42,7 @@ class SentenceProcessBatch:
     sentences: List[str]
 
 
-class DependencyParserBase(ABC):
+class NlpPipelineBase(ABC):
     """
     Base class for language-specific dependency parsers
     """
@@ -62,6 +62,14 @@ class DependencyParserBase(ABC):
     def sentence_to_dep_parse_tree(self, sentence):
         raise NotImplementedError
 
+    @abstractmethod
+    def count_sentences(self, sentence) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def count_tokens(self, sentence) -> int:
+        raise NotImplementedError
+
     @staticmethod
     @abstractmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
@@ -77,6 +85,9 @@ class DependencyParserBase(ABC):
     def _sentence_process_batch_to_node_relationship_list(process_batch: SentenceProcessBatch) \
             -> List[List[NodeRelationship]]:
         raise NotImplementedError
+
+    def tokenize(self, sentence: str):
+        return self.nlp_pipeline(sentence)
 
     @staticmethod
     def read_parsed_dep_trees_from_files(data_dir: str, per_file: bool = False) -> Generator[nx.DiGraph, None, None]:

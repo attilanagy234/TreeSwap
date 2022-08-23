@@ -1,5 +1,6 @@
 from sacremoses import MosesPunctNormalizer
 
+from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 from hu_nmt.data_augmentator.preprocessor.language_detector import LanguageDetector
 from hu_nmt.data_augmentator.utils.data_helpers import get_config_from_yaml
 from hu_nmt.data_augmentator.utils.logger import get_logger
@@ -23,6 +24,8 @@ class Preprocessor:
         self.langdetect = LanguageDetector(self._config.preprocessor.langdetect_model_path)
         self.moses_punct_normalizer_src = MosesPunctNormalizer(lang=self._config.preprocessor.source_language)
         self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
+        self.source_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.source_language)
+        self.target_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.target_language)
 
     def preprocess(self):
         log.info('Starting preprocessing...')
@@ -39,6 +42,7 @@ class Preprocessor:
 
                 target_sentence = self.clean_sentence(target_sentence)
                 target_sentence = self.moses_punct_normalizer_src.normalize(target_sentence)
+
                 if self.is_good_length(source_sentence, target_sentence) and self.is_correct_language(source_sentence,
                                                                                                       target_sentence):
                     source_output_file.write(source_sentence + '\n')
@@ -49,46 +53,55 @@ class Preprocessor:
         log.info(
             f'Finished processing sentences. Number of sentences before and after: {i + 1} -> {number_of_lines_saved_to_file}')
 
-    def is_good_length(self, source_sentence: str, target_sentence: str) -> bool:
-        source_len = len(source_sentence.split())
-        target_len = len(target_sentence.split())
+    def is_good_length(self, source_sentence, target_sentence) -> bool:
+        source_doc = self.source_tokenizer.tokenize(source_sentence)
+        target_doc = self.target_tokenizer.tokenize(target_sentence)
+        source_word_count = self.source_tokenizer.count_tokens(source_doc)
+        target_word_count = self.target_tokenizer.count_tokens(target_doc)
 
-        return (source_len > self._config.preprocessor.total_wordcount_min) and \
-               (source_len < self._config.preprocessor.total_wordcount_max) and \
-               (target_len > self._config.preprocessor.total_wordcount_min) and \
-               (target_len < self._config.preprocessor.total_wordcount_max) and \
-               (
-                       (abs(source_len - target_len) < self._config.preprocessor.wordcount_diff) or
-                       (
-                               (source_len / target_len < self._config.preprocessor.wordcount_ratio_threshold) and
-                               (target_len / source_len < self._config.preprocessor.wordcount_ratio_threshold)
-                       )
-               )
+        return self._is_good_word_count(source_word_count) and self._is_good_word_count(target_word_count) and \
+            self._is_good_ratio(source_word_count, target_word_count) and self._contains_one_sentence(source_doc,
+                                                                                                      target_doc)
 
     def is_correct_language(self, source_sentence, target_sentence) -> bool:
         return (self.langdetect.predict(source_sentence) == self._config.preprocessor.source_language) and \
                (self.langdetect.predict(target_sentence) == self._config.preprocessor.target_language)
+
+    def _contains_one_sentence(self, source_doc, target_doc) -> bool:
+        source_sentence_count = self.source_tokenizer.count_sentences(source_doc)
+        target_sentence_count = self.target_tokenizer.count_sentences(target_doc)
+        return source_sentence_count == target_sentence_count == 1
+
+    def _is_good_word_count(self, length):
+        return (length > self._config.preprocessor.total_wordcount_min) and \
+               (length < self._config.preprocessor.total_wordcount_max)
+
+    def _is_good_ratio(self, source_len, target_len):
+        return (abs(source_len - target_len) < self._config.preprocessor.wordcount_diff) or \
+               (
+                       (source_len / target_len < self._config.preprocessor.wordcount_ratio_threshold) and
+                       (target_len / source_len < self._config.preprocessor.wordcount_ratio_threshold)
+               )
 
     def clean_sentence(self, sentence):
         sentence = sentence.replace('\xad', '-')  # replace soft hyphens with normal hyphens
         copy = ""
         while copy != sentence:
             copy = sentence
-            if sentence.startswith('"') and sentence.endswith(
-                    '"'):  # lots of sentences start and end with unnecessary double quotes
+            # lots of sentences start and end with unnecessary double quotes
+            if sentence.startswith('"') and sentence.endswith('"'):
                 sentence = sentence[1:-1]
             if sentence.startswith("'") and sentence.endswith("'"):
                 sentence = sentence[1:-1]
             if sentence.startswith("`") and sentence.endswith("`"):
                 sentence = sentence[1:-1]
 
-            if sentence.strip().count("'") == 1 and (
-                    sentence.strip().startswith("'") or sentence.strip().endswith("'")):
-                sentence.replace("'", "")
-            if sentence.count('"') == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
-                sentence.replace('"', "")
+            if sentence.count("'") == 1 and (sentence.strip().startswith("'") or sentence.strip().endswith("'")):
+                sentence = sentence.replace("'", "")
+            if sentence.count('"') == 1 and (sentence.strip().startswith('"') or sentence.strip().endswith('"')):
+                sentence = sentence.replace('"', "")
             if sentence.count('`') == 1 and (sentence.strip().startswith("`") or sentence.strip().endswith("`")):
-                sentence.replace('`', "")
+                sentence = sentence.replace('`', "")
 
             if sentence.startswith('-'):
                 sentence = sentence[1:]
