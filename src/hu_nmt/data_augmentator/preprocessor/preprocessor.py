@@ -21,11 +21,11 @@ class Preprocessor:
         self._config = get_config_from_yaml(config_path)
         self._source_output_path = source_output_path
         self._target_output_path = target_output_path
-        self.langdetect = LanguageDetector(self._config.augmentation.preprocessor.langdetect_model_path)
-        self.moses_punct_normalizer_src = MosesPunctNormalizer(lang=self._config.augmentation.preprocessor.source_language)
-        self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.augmentation.preprocessor.target_language)
-        self.source_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.augmentation.preprocessor.source_language)
-        self.target_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.augmentation.preprocessor.target_language)
+        self.langdetect = LanguageDetector(self._config.preprocessor.langdetect_model_path)
+        self.moses_punct_normalizer_src = MosesPunctNormalizer(lang=self._config.preprocessor.source_language)
+        self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
+        self.source_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.source_language)
+        self.target_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.target_language)
 
     def preprocess(self):
         log.info('Starting preprocessing...')
@@ -64,22 +64,23 @@ class Preprocessor:
                                                                                                       target_doc)
 
     def is_correct_language(self, source_sentence, target_sentence) -> bool:
-        return (self.langdetect.predict(source_sentence) == self._config.augmentation.preprocessor.source_language) and \
-               (self.langdetect.predict(target_sentence) == self._config.augmentation.preprocessor.target_language)
+        return (self.langdetect.predict(source_sentence) == self._config.preprocessor.source_language) and \
+               (self.langdetect.predict(target_sentence) == self._config.preprocessor.target_language)
+
     def _contains_one_sentence(self, source_doc, target_doc) -> bool:
         source_sentence_count = self.source_tokenizer.count_sentences(source_doc)
         target_sentence_count = self.target_tokenizer.count_sentences(target_doc)
         return source_sentence_count == target_sentence_count == 1
 
     def _is_good_word_count(self, length):
-        return (length > self._config.augmentation.preprocessor.total_wordcount_min) and \
-               (length < self._config.augmentation.preprocessor.total_wordcount_max)
+        return (length > self._config.preprocessor.total_wordcount_min) and \
+               (length < self._config.preprocessor.total_wordcount_max)
 
     def _is_good_ratio(self, source_len, target_len):
-        return (abs(source_len - target_len) < self._config.augmentation.preprocessor.wordcount_diff) or \
+        return (abs(source_len - target_len) < self._config.preprocessor.wordcount_diff) or \
                (
-                       (source_len / target_len < self._config.augmentation.preprocessor.wordcount_ratio_threshold) and
-                       (target_len / source_len < self._config.augmentation.preprocessor.wordcount_ratio_threshold)
+                       (source_len / target_len < self._config.preprocessor.wordcount_ratio_threshold) and
+                       (target_len / source_len < self._config.preprocessor.wordcount_ratio_threshold)
                )
 
     def clean_sentence(self, sentence):
