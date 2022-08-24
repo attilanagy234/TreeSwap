@@ -4,6 +4,7 @@ from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpP
 from hu_nmt.data_augmentator.preprocessor.language_detector import LanguageDetector
 from hu_nmt.data_augmentator.utils.data_helpers import get_config_from_yaml
 from hu_nmt.data_augmentator.utils.logger import get_logger
+from tqdm import tqdm
 
 log = get_logger(__name__)
 
@@ -35,7 +36,7 @@ class Preprocessor:
                 open(self._source_output_path, 'w') as source_output_file, \
                 open(self._target_output_path, 'w') as target_output_file:
 
-            for i, (source_line, target_line) in enumerate(zip(source_file, target_file)):
+            for i, (source_line, target_line) in tqdm(enumerate(zip(source_file, target_file))):
                 source_sentence, target_sentence = source_line.strip(), target_line.strip()
                 source_sentence = self.clean_sentence(source_sentence)
                 source_sentence = self.moses_punct_normalizer_src.normalize(source_sentence)
