@@ -1,3 +1,5 @@
+import os.path
+
 from sacremoses import MosesPunctNormalizer
 
 from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
@@ -63,6 +65,9 @@ class Preprocessor:
         src_list_of_dep_rel_list = []
         tgt_list_of_dep_rel_list = []
 
+        src_dep_tree_output = os.path.join(output_dir, self._config.preprocessor.source_language)
+        tgt_dep_tree_output = os.path.join(output_dir, self._config.preprocessor.target_language)
+
         file_idx = 1
 
         with open(self._source_data_path) as source_file, \
@@ -97,8 +102,8 @@ class Preprocessor:
                     number_of_lines_saved_to_file += 1
 
                     if number_of_lines_saved_to_file % batch_size == 0:
-                        self.source_parser.write_dep_graphs_to_file(output_dir, file_idx, src_list_of_dep_rel_list)
-                        self.target_parser.write_dep_graphs_to_file(output_dir, file_idx, tgt_list_of_dep_rel_list)
+                        self.source_parser.write_dep_graphs_to_file(src_dep_tree_output, file_idx, src_list_of_dep_rel_list)
+                        self.target_parser.write_dep_graphs_to_file(tgt_dep_tree_output, file_idx, tgt_list_of_dep_rel_list)
 
         log.info(
             f'Finished processing sentences. Number of sentences before and after: {i + 1} -> {number_of_lines_saved_to_file}')
