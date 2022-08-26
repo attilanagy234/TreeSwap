@@ -58,9 +58,15 @@ class NlpPipelineBase(ABC):
         graph = self.sentence_to_dep_parse_tree(sentence)
         return DependencyGraphWrapper(graph)
 
-    @abstractmethod
     def sentence_to_dep_parse_tree(self, sentence):
-        raise NotImplementedError
+        """
+        Args:
+            sent: space separated string of the input sentence
+        Returns:
+            A directed (networkx) graph representation of the dependency tree
+        """
+        return self.node_relationship_list_to_dep_parse_tree(
+            self.sentence_to_node_relationship_list(self.nlp_pipeline, sentence))
 
     @abstractmethod
     def count_sentences(self, sentence) -> int:
@@ -73,6 +79,10 @@ class NlpPipelineBase(ABC):
     @staticmethod
     @abstractmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def node_relationship_list_to_dep_parse_tree(self, dep_rel_list: List[NodeRelationship]) -> nx.DiGraph:
         raise NotImplementedError
 
     @staticmethod

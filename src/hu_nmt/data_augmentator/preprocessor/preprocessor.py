@@ -27,6 +27,8 @@ class Preprocessor:
         self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
         self.source_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.source_language)
         self.target_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.target_language)
+        self.source_parser = NlpPipelineFactory.get_dependency_parser(self._config.preprocessor.source_language)
+        self.target_parser = NlpPipelineFactory.get_dependency_parser(self._config.preprocessor.target_language)
 
     def preprocess(self):
         log.info('Starting preprocessing...')
@@ -54,15 +56,62 @@ class Preprocessor:
         log.info(
             f'Finished processing sentences. Number of sentences before and after: {i + 1} -> {number_of_lines_saved_to_file}')
 
-    def is_good_length(self, source_sentence, target_sentence) -> bool:
-        source_doc = self.source_tokenizer.tokenize(source_sentence)
-        target_doc = self.target_tokenizer.tokenize(target_sentence)
+    def preprocess_and_precompute(self, output_dir, batch_size):
+        log.info('Starting preprocessing...')
+        number_of_lines_saved_to_file = 0
+
+        src_list_of_dep_rel_list = []
+        tgt_list_of_dep_rel_list = []
+
+        file_idx = 1
+
+        with open(self._source_data_path) as source_file, \
+                open(self._target_data_path) as target_file, \
+                open(self._source_output_path, 'w') as source_output_file, \
+                open(self._target_output_path, 'w') as target_output_file:
+
+            for i, (source_line, target_line) in tqdm(enumerate(zip(source_file, target_file))):
+                source_sentence, target_sentence = source_line.strip(), target_line.strip()
+                source_sentence = self.clean_sentence(source_sentence)
+                source_sentence = self.moses_punct_normalizer_src.normalize(source_sentence)
+
+                target_sentence = self.clean_sentence(target_sentence)
+                target_sentence = self.moses_punct_normalizer_src.normalize(target_sentence)
+
+                source_dep_rel_list = self.source_parser.sentence_to_node_relationship_list(
+                    self.source_parser, source_sentence)
+                target_dep_rel_list = self.target_parser.sentence_to_node_relationship_list(
+                    self.target_parser, target_sentence)
+
+                source_dep_tree = self.source_parser.node_relationship_list_to_dep_parse_tree(source_dep_rel_list)
+                target_dep_tree = self.target_parser.node_relationship_list_to_dep_parse_tree(target_dep_rel_list)
+
+                if self.is_good_length(source_dep_tree, target_dep_tree) and self.is_correct_language(source_sentence,
+                                                                                                      target_sentence):
+                    source_output_file.write(source_sentence + '\n')
+                    target_output_file.write(target_sentence + '\n')
+
+                    src_list_of_dep_rel_list.append(source_dep_rel_list)
+                    tgt_list_of_dep_rel_list.append(target_dep_rel_list)
+
+                    number_of_lines_saved_to_file += 1
+
+                    if number_of_lines_saved_to_file % batch_size == 0:
+                        self.source_parser.write_dep_graphs_to_file(output_dir, file_idx, src_list_of_dep_rel_list)
+                        self.target_parser.write_dep_graphs_to_file(output_dir, file_idx, tgt_list_of_dep_rel_list)
+
+        log.info(
+            f'Finished processing sentences. Number of sentences before and after: {i + 1} -> {number_of_lines_saved_to_file}')
+
+    def is_good_length(self, source_doc, target_doc) -> bool:
+        #source_doc = self.source_tokenizer.tokenize(source_sentence)
+        #target_doc = self.target_tokenizer.tokenize(target_sentence)
         source_word_count = self.source_tokenizer.count_tokens(source_doc)
         target_word_count = self.target_tokenizer.count_tokens(target_doc)
 
         return self._is_good_word_count(source_word_count) and self._is_good_word_count(target_word_count) and \
-            self._is_good_ratio(source_word_count, target_word_count) and self._contains_one_sentence(source_doc,
-                                                                                                      target_doc)
+               self._is_good_ratio(source_word_count, target_word_count) #and self._contains_one_sentence(source_doc,
+                                                                         #                                target_doc)
 
     def is_correct_language(self, source_sentence, target_sentence) -> bool:
         return (self.langdetect.predict(source_sentence) == self._config.preprocessor.source_language) and \

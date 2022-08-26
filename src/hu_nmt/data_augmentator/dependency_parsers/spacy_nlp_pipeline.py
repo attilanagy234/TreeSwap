@@ -67,15 +67,9 @@ class SpacyNlpPipeline(NlpPipelineBase):
 
         return node_relationship_list
 
-    def sentence_to_dep_parse_tree(self, sent):
-        """
-        Args:
-            sent: space separated string of the input sentence
-        Returns:
-            A directed (networkx) graph representation of the dependency tree
-        """
+    def node_relationship_list_to_dep_parse_tree(self, dep_rel_list: List[NodeRelationship]) -> nx.DiGraph:
         dep_graph = nx.DiGraph()
-        for node_rel in self.sentence_to_node_relationship_list(self.nlp_pipeline, sent):
+        for node_rel in dep_rel_list:
             dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
             dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
@@ -84,8 +78,11 @@ class SpacyNlpPipeline(NlpPipelineBase):
     def count_sentences(self, doc: Doc) -> int:
         return len(list(doc.sents))
 
-    def count_tokens(self, doc: Doc) -> int:
-        return len([token for token in doc if not token.is_punct])
+    #def count_tokens(self, doc: Doc) -> int:
+    #    return len([token for token in doc if not token.is_punct])
+
+    def count_tokens(self, graph) -> int:
+        return len([node for node, data in graph.nodes(data=True) if data['postag'] != 'PUNCT'])
 
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit):
