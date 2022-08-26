@@ -84,9 +84,9 @@ class Preprocessor:
                 target_sentence = self.moses_punct_normalizer_src.normalize(target_sentence)
 
                 source_dep_rel_list = self.source_parser.sentence_to_node_relationship_list(
-                    self.source_parser, source_sentence)
+                    self.source_parser.nlp_pipeline, source_sentence)
                 target_dep_rel_list = self.target_parser.sentence_to_node_relationship_list(
-                    self.target_parser, target_sentence)
+                    self.target_parser.nlp_pipeline, target_sentence)
 
                 source_dep_tree = self.source_parser.node_relationship_list_to_dep_parse_tree(source_dep_rel_list)
                 target_dep_tree = self.target_parser.node_relationship_list_to_dep_parse_tree(target_dep_rel_list)
