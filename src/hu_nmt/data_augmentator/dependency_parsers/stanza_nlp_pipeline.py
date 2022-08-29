@@ -64,7 +64,7 @@ class StanzaNlpPipeline(NlpPipelineBase):
     def node_relationship_list_to_dep_parse_tree(self, dep_rel_list: List[NodeRelationship]) -> nx.DiGraph:
         dep_graph = nx.DiGraph()
         # Add ROOT node
-        dep_graph.add_node(ROOT_KEY)
+        dep_graph.add_node(ROOT_KEY, postag='root')
         for node_rel in dep_rel_list:
             dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
             dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
