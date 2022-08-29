@@ -104,6 +104,7 @@ class Preprocessor:
                     if number_of_lines_saved_to_file % batch_size == 0:
                         self.source_parser.write_dep_graphs_to_file(src_dep_tree_output, file_idx, src_list_of_dep_rel_list)
                         self.target_parser.write_dep_graphs_to_file(tgt_dep_tree_output, file_idx, tgt_list_of_dep_rel_list)
+                        file_idx += 1
 
         log.info(
             f'Finished processing sentences. Number of sentences before and after: {i + 1} -> {number_of_lines_saved_to_file}')
