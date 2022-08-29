@@ -23,7 +23,7 @@ def main(src_lang_code, tgt_lang_code, src_input_path, tgt_input_path, dep_tree_
     tgt_output_path = os.path.join(preprocessed_output_path, f'preprocessed.{tgt_lang_code}')
 
     preprocessor = Preprocessor(src_input_path, tgt_input_path, config_path, src_output_path, tgt_output_path)
-    preprocessor.preprocess_and_precompute(dep_tree_output_path, file_batch_size)
+    preprocessor.preprocess_and_precompute(dep_tree_output_path, int(file_batch_size))
 
 
 if __name__ == '__main__':
