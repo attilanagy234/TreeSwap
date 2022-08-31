@@ -1,6 +1,5 @@
 from math import ceil
 from typing import List
-import multiprocessing as mp
 
 
 def create_mini_batches(number_of_small_batches: int, batch: List) -> List[List]:
@@ -13,4 +12,3 @@ def create_mini_batches(number_of_small_batches: int, batch: List) -> List[List]
     small_batch_list.extend([[] for _ in range(number_of_small_batches - len(small_batch_list))])
 
     return small_batch_list
-

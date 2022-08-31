@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
 from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
+from hu_nmt.data_augmentator.utils.preprocessing import create_mini_batches
 
 
 class EmptyLineCountMismatch(Exception):
@@ -83,7 +84,7 @@ class DependencyParserBaseTests(unittest.TestCase):
         batch = [1, 2, 3, 4, 5]
 
         # action
-        small_batches = NlpPipelineBase.create_mini_batches(number_of_small_batches, batch)
+        small_batches = create_mini_batches(number_of_small_batches, batch)
 
         # assert
         self.assertEqual(number_of_small_batches, len(small_batches))
@@ -96,7 +97,7 @@ class DependencyParserBaseTests(unittest.TestCase):
         batch = [1, 2, 3, 4, 5]
 
         # action
-        small_batches = NlpPipelineBase.create_mini_batches(number_of_mini_batches, batch)
+        small_batches = create_mini_batches(number_of_mini_batches, batch)
 
         # assert
         self.assertEqual(number_of_mini_batches, len(small_batches))
