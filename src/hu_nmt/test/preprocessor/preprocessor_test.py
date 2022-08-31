@@ -46,18 +46,6 @@ class PreprocessorTest(unittest.TestCase):
     def test_is_good_ratio_false(self):
         self.assertFalse(self.preprocessor._is_good_ratio(8, 16))
 
-    def test_is_good_length_true(self):
-        source_graph = self.preprocessor.source_parser.sentence_to_dep_parse_tree('Ez egy magyar mondat.')
-        target_graph = self.preprocessor.target_parser.sentence_to_dep_parse_tree('This is an English sentence.')
-
-        self.assertTrue(self.preprocessor.is_good_length(source_graph, target_graph))
-
-    def test_is_good_length_false(self):
-        source_graph = self.preprocessor.source_parser.sentence_to_dep_parse_tree('Ez egy magyar mondat. Ez egy másik.')
-        target_graph = self.preprocessor.target_parser.sentence_to_dep_parse_tree('This is an English sentence.')
-
-        self.assertFalse(self.preprocessor.is_good_length(source_graph, target_graph))
-
     def test_clean_sentence_remove_double_quotes(self):
         sentence = '"\'`Ez egy idézet`\'"'
 
