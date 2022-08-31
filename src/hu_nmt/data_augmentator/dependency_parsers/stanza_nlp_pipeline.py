@@ -74,10 +74,11 @@ class StanzaNlpPipeline(NlpPipelineBase):
     def count_sentences(self, doc) -> int:
         return len(doc.sentences)
 
-    #def count_tokens(self, doc) -> int:
-    #    return len([token for sent in doc.sentences for token in sent.words if token.pos != 'PUNCT'])
+    def count_tokens_from_doc(self, doc) -> int:
+        return len([token for sent in doc.sentences for token in sent.words if token.pos != 'PUNCT'])
 
-    def count_tokens(self, graph) -> int:
+    def count_tokens_from_graph(self, graph) -> int:
+        # root node does not count
         return len([node for node, data in graph.nodes(data=True) if data['postag'] != 'PUNCT']) - 1
 
     @staticmethod

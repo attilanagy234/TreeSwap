@@ -61,6 +61,8 @@ augmentation:
         source_language: hu
         target_language: en
         langdetect_model_path: /home1/hu-nmt/patrick/opennmt/experiments/runs/simple_train_example/lid.176.bin
+        use_multiprocessing: false
+        process_count: 4
     scripts_path: ../../../../src
     preprocess_data_script: preprocess_data.sh
     precompute_script: precompute_dependency_trees.sh

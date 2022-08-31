@@ -78,11 +78,12 @@ class SpacyNlpPipeline(NlpPipelineBase):
     def count_sentences(self, doc: Doc) -> int:
         return len(list(doc.sents))
 
-    #def count_tokens(self, doc: Doc) -> int:
-    #    return len([token for token in doc if not token.is_punct])
+    def count_tokens_from_doc(self, doc: Doc) -> int:
+        return len([token for token in doc if not token.is_punct])
 
-    def count_tokens(self, graph) -> int:
-        return len([node for node, data in graph.nodes(data=True) if data['postag'] != 'PUNCT'])
+    def count_tokens_from_graph(self, graph) -> int:
+        # root node does not count
+        return len([node for node, data in graph.nodes(data=True) if data['postag'] != 'PUNCT']) - 1
 
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit):

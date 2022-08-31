@@ -1,6 +1,7 @@
 import pathlib
 import unittest
 
+from hu_nmt.data_augmentator.preprocessor.language_detector import LanguageDetector
 from hu_nmt.data_augmentator.preprocessor.preprocessor import Preprocessor
 
 
@@ -13,6 +14,7 @@ class PreprocessorTest(unittest.TestCase):
         target_data_path = test_resources_base_path / 'hu-en' / 'en.tsv'
         config_path = test_resources_base_path / 'configs' / 'preprocessor_test_config.yaml'
         cls.preprocessor = Preprocessor(str(source_data_path), str(target_data_path), str(config_path), '', '')
+        cls.preprocessor._init_models()
 
     def test_is_correct_language_true(self):
         source_sentence = 'Ez egy magyar mondat.'
@@ -25,22 +27,6 @@ class PreprocessorTest(unittest.TestCase):
         target_sentence = 'This is an English sentence.'
 
         self.assertFalse(self.preprocessor.is_correct_language(source_sentence, target_sentence))
-
-    def test_contains_one_sentence_true(self):
-        source_sentence = 'Ez egy magyar mondat.'
-        target_sentence = 'This is an English sentence.'
-        source_doc = self.preprocessor.source_tokenizer.tokenize(source_sentence)
-        target_doc = self.preprocessor.target_tokenizer.tokenize(target_sentence)
-
-        self.assertTrue(self.preprocessor._contains_one_sentence(source_doc, target_doc))
-
-    def test_contains_one_sentence_false(self):
-        source_sentence = 'Ez egy magyar mondat. Ez is.'
-        target_sentence = 'This is an English sentence.'
-        source_doc = self.preprocessor.source_tokenizer.tokenize(source_sentence)
-        target_doc = self.preprocessor.target_tokenizer.tokenize(target_sentence)
-
-        self.assertFalse(self.preprocessor._contains_one_sentence(source_doc, target_doc))
 
     def test_is_good_word_count_less(self):
         self.assertFalse(self.preprocessor._is_good_word_count(-1))
@@ -61,16 +47,16 @@ class PreprocessorTest(unittest.TestCase):
         self.assertFalse(self.preprocessor._is_good_ratio(8, 16))
 
     def test_is_good_length_true(self):
-        source_sentence = 'Ez egy magyar mondat.'
-        target_sentence = 'This is an English sentence.'
+        source_graph = self.preprocessor.source_parser.sentence_to_dep_parse_tree('Ez egy magyar mondat.')
+        target_graph = self.preprocessor.target_parser.sentence_to_dep_parse_tree('This is an English sentence.')
 
-        self.assertTrue(self.preprocessor.is_good_length(source_sentence, target_sentence))
+        self.assertTrue(self.preprocessor.is_good_length(source_graph, target_graph))
 
     def test_is_good_length_false(self):
-        source_sentence = 'Ez egy magyar mondat. Ez egy másik.'
-        target_sentence = 'This is an English sentence.'
+        source_graph = self.preprocessor.source_parser.sentence_to_dep_parse_tree('Ez egy magyar mondat. Ez egy másik.')
+        target_graph = self.preprocessor.target_parser.sentence_to_dep_parse_tree('This is an English sentence.')
 
-        self.assertFalse(self.preprocessor.is_good_length(source_sentence, target_sentence))
+        self.assertFalse(self.preprocessor.is_good_length(source_graph, target_graph))
 
     def test_clean_sentence_remove_double_quotes(self):
         sentence = '"\'`Ez egy idézet`\'"'

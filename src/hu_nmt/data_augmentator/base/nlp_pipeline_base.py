@@ -73,7 +73,11 @@ class NlpPipelineBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def count_tokens(self, sentence) -> int:
+    def count_tokens_from_graph(self, sentence) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def count_tokens_from_doc(self, sentence) -> int:
         raise NotImplementedError
 
     @staticmethod
