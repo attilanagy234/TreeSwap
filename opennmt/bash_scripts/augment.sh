@@ -7,10 +7,7 @@ augmentation_dir=$(yq -r .augmentation.directory config.yaml)
 all_non_valid_src_paths=$(for dataset in $(yq ".data | keys" config.yaml | grep -v "valid" | grep ","); do dataset=$(echo $dataset | sed "s/\",*//g"); yq -r .data.$dataset.path_src config.yaml; done)
 all_non_valid_tgt_paths=$(for dataset in $(yq ".data | keys" config.yaml | grep -v "valid" | grep ","); do dataset=$(echo $dataset | sed "s/\",*//g"); yq -r .data.$dataset.path_tgt config.yaml; done)
 scripts_path=$(yq -r .augmentation.scripts_path config.yaml)
-preprocess_data_script=$(yq -r .augmentation.preprocess_data_script config.yaml)
-
-precompute_script=$(yq -r .augmentation.precompute_script config.yaml)
-precompute_batch_size=$(yq -r .augmentation.precompute_batch_size config.yaml)
+preprocess_and_precompute_script=$(yq -r .augmentation.preprocess_and_precompute_script config.yaml)
 
 augmentation_script=$(yq -r .augmentation.augmentation_script config.yaml)
 augmentation_ratio=$(yq -r .augmentation.augmentation_ratio config.yaml)
@@ -24,8 +21,8 @@ separate_augmentation=$(yq -r .augmentation.separate_augmentation config.yaml)
 
 absolute_augmentation_dir=$(readlink -f "$augmentation_dir")
 
-function preprocess_data_for_augmentation() {
-    echo "Preprocessing data for augmentation"
+function preprocess_and_precompute_data_for_augmentation() {
+    echo "Preprocessing data and precomputing dependency trees for augmentation"
 
     # Concat source training data
     tmp_src_train_file=tmp_src_train.txt
@@ -54,45 +51,20 @@ function preprocess_data_for_augmentation() {
 
     pushd "$scripts_path"
 
-    echo 'Running preprocessing'
-    ./"$preprocess_data_script" \
+    echo 'Running preprocessing and precompute'
+    ./"$preprocess_and_precompute_script" \
+    "$src_postfix" \
+    "$tgt_postfix" \
     "$absolute_tmp_src_train_path" \
     "$absolute_tmp_tgt_train_path" \
-    "$preprocess_yaml_path" \
-    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$src_postfix" \
-    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$tgt_postfix"
-    
+    "$absolute_augmentation_dir"/dependency_trees/ \
+    "$absolute_augmentation_dir"/augmentation_input_data/ \
+    "$preprocess_yaml_path"
 
     popd
 
     rm "$absolute_tmp_src_train_path"
     rm "$absolute_tmp_tgt_train_path"
-}
-
-function create_dependency_trees() {
-    echo "Creating dependency trees"
-
-    mkdir "$absolute_augmentation_dir"/dependency_trees
-    mkdir "$absolute_augmentation_dir"/dependency_trees/"$src_postfix"
-    mkdir "$absolute_augmentation_dir"/dependency_trees/"$tgt_postfix"
-
-    pushd "$scripts_path"
-
-    echo 'Running precompute on source'
-    ./"$precompute_script" \
-    "$src_postfix" \
-    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$src_postfix" \
-    "$absolute_augmentation_dir"/dependency_trees/"$src_postfix" \
-    "$precompute_batch_size"
-
-    echo 'Running precompute on target'
-    ./"$precompute_script" \
-    "$tgt_postfix" \
-    "$absolute_augmentation_dir"/augmentation_input_data/preprocessed."$tgt_postfix" \
-    "$absolute_augmentation_dir"/dependency_trees/"$tgt_postfix" \
-    "$precompute_batch_size"
-
-    popd
 }
 
 function augment() {
@@ -120,11 +92,7 @@ function augment() {
 
 if [ "$augmentation_active" == "true" ]; then
     if [ ! -d "$absolute_augmentation_dir"/augmentation_input_data ]; then
-        preprocess_data_for_augmentation
-    fi
-
-    if [ ! -d "$absolute_augmentation_dir"/dependency_trees ]; then
-        create_dependency_trees
+        preprocess_and_precompute_data_for_augmentation
     fi
 
     if [ ! -d  "$absolute_augmentation_dir"/"$augmented_folder_prefix"-"$augmentation_ratio" ]; then

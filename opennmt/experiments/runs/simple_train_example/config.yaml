@@ -63,11 +63,12 @@ augmentation:
         langdetect_model_path: /home1/hu-nmt/patrick/opennmt/experiments/runs/simple_train_example/lid.176.bin
         use_multiprocessing: false
         process_count: 4
+        batch_size: 10
     scripts_path: ../../../../src
+    preprocess_and_precompute_script: preprocess_and_precompute.sh
     preprocess_data_script: preprocess_data.sh
     precompute_script: precompute_dependency_trees.sh
     augmentation_script: run_subject_object_augmentation.sh
-    precompute_batch_size: 10
     augmentation_ratio: 0.05
     filter_same_ancestor: true
     filter_same_pos_tag: true
