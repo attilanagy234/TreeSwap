@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from hu_nmt.data_augmentator.utils.data_helpers import get_files_in_folder
 from hu_nmt.data_augmentator.utils.logger import get_logger
+from hu_nmt.data_augmentator.utils.preprocessing import create_mini_batches
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
 
 log = get_logger(__name__)
@@ -58,21 +59,35 @@ class NlpPipelineBase(ABC):
         graph = self.sentence_to_dep_parse_tree(sentence)
         return DependencyGraphWrapper(graph)
 
-    @abstractmethod
     def sentence_to_dep_parse_tree(self, sentence):
-        raise NotImplementedError
+        """
+        Args:
+            sentence: space separated string of the input sentence
+        Returns:
+            A directed (networkx) graph representation of the dependency tree
+        """
+        return self.node_relationship_list_to_dep_parse_tree(
+            self.sentence_to_node_relationship_list(self.nlp_pipeline, sentence))
 
     @abstractmethod
     def count_sentences(self, sentence) -> int:
         raise NotImplementedError
 
     @abstractmethod
-    def count_tokens(self, sentence) -> int:
+    def count_tokens_from_graph(self, sentence) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def count_tokens_from_doc(self, sentence) -> int:
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
     def sentence_to_node_relationship_list(nlp_pipeline, sent: str) -> List[NodeRelationship]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def node_relationship_list_to_dep_parse_tree(self, dep_rel_list: List[NodeRelationship]) -> nx.DiGraph:
         raise NotImplementedError
 
     @staticmethod
@@ -139,18 +154,6 @@ class NlpPipelineBase(ABC):
             for line in file:
                 yield line.strip()
 
-    @staticmethod
-    def create_mini_batches(number_of_small_batches: int, batch: List) -> List[List]:
-        batch_size = len(batch)
-        items_per_small_batch = ceil(batch_size / number_of_small_batches)
-        small_batch_list = []
-        for i in range(0, batch_size, items_per_small_batch):
-            small_batch_list.append(batch[i:i + items_per_small_batch])
-
-        small_batch_list.extend([[] for _ in range(number_of_small_batches - len(small_batch_list))])
-
-        return small_batch_list
-
     def sentences_to_serialized_dep_graph_files(self, sentences_iter: Iterator[str], output_dir: str,
                                                 file_batch_size: int):
         """
@@ -190,7 +193,7 @@ class NlpPipelineBase(ABC):
                         first_run = False
 
                     # create mini batches and package them with pipeline constructors
-                    mini_batches_of_sentences = self.create_mini_batches(process_count, batch_of_sentences)
+                    mini_batches_of_sentences = create_mini_batches(process_count, batch_of_sentences)
                     process_batches = [SentenceProcessBatch(self.nlp_pipeline_constructor, mini_batch)
                                        for mini_batch in mini_batches_of_sentences]
 

@@ -2,12 +2,15 @@ import os
 import pathlib
 from functools import partial
 from typing import List
+
 import networkx as nx
 import stanza
+from stanza.pipeline.core import DownloadMethod
 
 from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase, NodeRelationship, \
     SentenceProcessUnit, SentenceProcessBatch
 from hu_nmt.data_augmentator.utils.logger import get_logger
+from hu_nmt.data_augmentator.utils.types.postag import Postag
 
 log = get_logger(__name__)
 
@@ -16,7 +19,8 @@ ROOT_KEY = 'root_0'
 
 class StanzaNlpPipeline(NlpPipelineBase):
     def __init__(self, lang, processors):
-        nlp_pipeline_constructor = partial(stanza.Pipeline, lang=lang, processors=processors)
+        nlp_pipeline_constructor = partial(stanza.Pipeline, lang=lang, processors=processors,
+                                           download_method=DownloadMethod.REUSE_RESOURCES)
         if not pathlib.Path(f'{os.getenv("HOME")}/stanza_resources/{lang}').resolve().exists():
             stanza.download(lang=lang, processors=processors)
 
@@ -58,17 +62,11 @@ class StanzaNlpPipeline(NlpPipelineBase):
 
         return node_relationship_list
 
-    def sentence_to_dep_parse_tree(self, sent) -> nx.DiGraph:
-        """
-        Args:
-            sent: space separated string of the input sentence
-        Returns:
-            A directed (networkx) graph representation of the dependency tree
-        """
+    def node_relationship_list_to_dep_parse_tree(self, dep_rel_list: List[NodeRelationship]) -> nx.DiGraph:
         dep_graph = nx.DiGraph()
         # Add ROOT node
-        dep_graph.add_node(ROOT_KEY)
-        for node_rel in self.sentence_to_node_relationship_list(self.nlp_pipeline, sent):
+        dep_graph.add_node(ROOT_KEY, postag=None)
+        for node_rel in dep_rel_list:
             dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
             dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
             dep_graph.add_edge(node_rel.source_key, node_rel.target_key, dep=node_rel.target_deprel)
@@ -77,8 +75,12 @@ class StanzaNlpPipeline(NlpPipelineBase):
     def count_sentences(self, doc) -> int:
         return len(doc.sentences)
 
-    def count_tokens(self, doc) -> int:
-        return len([token for sent in doc.sentences for token in sent.words if token.pos != 'PUNCT'])
+    def count_tokens_from_doc(self, doc) -> int:
+        return len([token for sent in doc.sentences for token in sent.words if token.pos != Postag.PUNCT.name])
+
+    def count_tokens_from_graph(self, graph) -> int:
+        # root node does not count
+        return len([node for node, data in graph.nodes(data=True) if data['postag'] != Postag.PUNCT.name]) - 1
 
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit) -> List[NodeRelationship]:

@@ -1,0 +1,11 @@
+preprocessor:
+    total_wordcount_min: 0
+    total_wordcount_max: 32
+    wordcount_diff: 75
+    wordcount_ratio_threshold: 1.2
+    source_language: hu
+    target_language: en
+    langdetect_model_path: /tmp/lid.176.bin
+    batch_size: 3
+    use_multiprocessing: False
+    process_count: 2
