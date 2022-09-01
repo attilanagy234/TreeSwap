@@ -5,7 +5,7 @@ preprocessor:
     wordcount_ratio_threshold: 1.2
     source_language: hu
     target_language: en
-    langdetect_model_path: /home/dorka/lid.176.bin
+    langdetect_model_path: /tmp/lid.176.bin
     batch_size: 3
     use_multiprocessing: False
     process_count: 2
