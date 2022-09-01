@@ -1,10 +1,8 @@
 import os
 import pathlib
 import unittest
-from typing import Iterator
 from unittest.mock import patch
 
-from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
 from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 from hu_nmt.data_augmentator.utils.preprocessing import create_mini_batches
 
@@ -14,7 +12,6 @@ class EmptyLineCountMismatch(Exception):
 
 
 class DependencyParserBaseTests(unittest.TestCase):
-
     resources_path = pathlib.Path(__file__).parent.parent.resolve() / 'resources'
     hu_en_path = resources_path / 'hu-en'
 
@@ -103,7 +100,3 @@ class DependencyParserBaseTests(unittest.TestCase):
         self.assertEqual(number_of_mini_batches, len(small_batches))
         for i, size in enumerate([1, 1, 1, 1, 1, 0, 0]):
             self.assertEqual(size, len(small_batches[i]))
-
-
-
-
