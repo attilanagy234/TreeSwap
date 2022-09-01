@@ -10,6 +10,7 @@ from stanza.pipeline.core import DownloadMethod
 from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase, NodeRelationship, \
     SentenceProcessUnit, SentenceProcessBatch
 from hu_nmt.data_augmentator.utils.logger import get_logger
+from hu_nmt.data_augmentator.utils.types.postag import Postag
 
 log = get_logger(__name__)
 
@@ -64,7 +65,7 @@ class StanzaNlpPipeline(NlpPipelineBase):
     def node_relationship_list_to_dep_parse_tree(self, dep_rel_list: List[NodeRelationship]) -> nx.DiGraph:
         dep_graph = nx.DiGraph()
         # Add ROOT node
-        dep_graph.add_node(ROOT_KEY, postag='root')
+        dep_graph.add_node(ROOT_KEY, postag=None)
         for node_rel in dep_rel_list:
             dep_graph.add_node(node_rel.source_key, postag=node_rel.source_postag, lemma=node_rel.source_lemma)
             dep_graph.add_node(node_rel.target_key, postag=node_rel.target_postag, lemma=node_rel.target_lemma)
@@ -75,11 +76,11 @@ class StanzaNlpPipeline(NlpPipelineBase):
         return len(doc.sentences)
 
     def count_tokens_from_doc(self, doc) -> int:
-        return len([token for sent in doc.sentences for token in sent.words if token.pos != 'PUNCT'])
+        return len([token for sent in doc.sentences for token in sent.words if token.pos != Postag.PUNCT.name])
 
     def count_tokens_from_graph(self, graph) -> int:
         # root node does not count
-        return len([node for node, data in graph.nodes(data=True) if data['postag'] != 'PUNCT']) - 1
+        return len([node for node, data in graph.nodes(data=True) if data['postag'] != Postag.PUNCT.name]) - 1
 
     @staticmethod
     def _sentence_process_unit_to_node_relationship_list(process_unit: SentenceProcessUnit) -> List[NodeRelationship]:
