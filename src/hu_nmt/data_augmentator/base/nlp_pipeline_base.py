@@ -62,7 +62,7 @@ class NlpPipelineBase(ABC):
     def sentence_to_dep_parse_tree(self, sentence):
         """
         Args:
-            sent: space separated string of the input sentence
+            sentence: space separated string of the input sentence
         Returns:
             A directed (networkx) graph representation of the dependency tree
         """
