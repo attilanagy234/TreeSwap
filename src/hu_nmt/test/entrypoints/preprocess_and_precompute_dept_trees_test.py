@@ -1,13 +1,15 @@
+import os.path
 import pathlib
 import unittest
 
 from click.testing import CliRunner
 
 from hu_nmt.data_augmentator.entrypoints.preprocess_and_precompute_dep_trees import main
+from hu_nmt.data_augmentator.utils.logger import get_logger
 
+log = get_logger(__name__)
 
 class PrecomputeParallelDependencyTreesTests(unittest.TestCase):
-
     resources_path = pathlib.Path(__file__).parent.parent.resolve() / 'resources'
     preprocess_and_precompute = resources_path / 'preprocess_and_precompute'
 
@@ -20,6 +22,10 @@ class PrecomputeParallelDependencyTreesTests(unittest.TestCase):
         dep_tree_output_path = self.preprocess_and_precompute / 'output' / 'dep_trees'
         preprocessed_output_path = self.preprocess_and_precompute / 'output' / 'preprocessed'
         config_path = self.preprocess_and_precompute / 'config.yaml'
+        # remove previous outputs
+        for file in preprocessed_output_path.glob('**/*'):
+            if file.is_file():
+                os.remove(file)
 
         # action
         runner = CliRunner()
@@ -34,6 +40,8 @@ class PrecomputeParallelDependencyTreesTests(unittest.TestCase):
         ])
 
         # assert
+        if result.exit_code != 0:
+            log.warning(result.exception)
         self.assertEqual(0, result.exit_code)
         # check preprocessing
         files = [file for file in preprocessed_output_path.glob('**/*') if file.is_file()]
