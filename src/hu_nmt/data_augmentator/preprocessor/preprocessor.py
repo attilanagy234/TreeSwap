@@ -76,6 +76,10 @@ class Preprocessor:
         all_lines = 0
         file_idx = 1
 
+        preprocess_output_path = os.path.dirname(self._source_output_path)
+        if not os.path.exists(preprocess_output_path):
+            os.makedirs(preprocess_output_path)
+
         line_batch_generator = self._get_file_line_batch_generator(self._source_data_path, self._target_data_path,
                                                                    self._config.preprocessor.batch_size)
 
@@ -191,10 +195,10 @@ class Preprocessor:
         src_dep_tree_output = os.path.join(self._dep_tree_output_path, self._config.preprocessor.source_language)
         tgt_dep_tree_output = os.path.join(self._dep_tree_output_path, self._config.preprocessor.target_language)
 
-        with open(self._source_output_path, 'a') as source_output_file:
+        with open(self._source_output_path, 'a+') as source_output_file:
             source_output_file.write('\n'.join(src_sents) + '\n')
 
-        with open(self._target_output_path, 'a') as target_output_file:
+        with open(self._target_output_path, 'a+') as target_output_file:
             target_output_file.write('\n'.join(tgt_sents) + '\n')
 
         NlpPipelineBase.write_dep_graphs_to_file(src_dep_tree_output, file_idx,
