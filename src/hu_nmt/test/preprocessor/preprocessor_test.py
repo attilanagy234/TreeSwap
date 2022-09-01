@@ -15,10 +15,8 @@ class PreprocessorTest(unittest.TestCase):
         config_path = test_resources_base_path / 'configs' / 'preprocessor_test_config.yaml'
         cls.preprocessor = Preprocessor(str(source_data_path), str(target_data_path), str(config_path), '', '')
         cls.preprocessor._init_models()
-        cls.preprocessor.source_tokenizer = NlpPipelineFactory.get_tokenizer(
-            cls.preprocessor._config.preprocessor.source_language)
-        cls.preprocessor.target_tokenizer = NlpPipelineFactory.get_tokenizer(
-            cls.preprocessor._config.preprocessor.target_language)
+        cls.preprocessor.source_tokenizer = cls.preprocessor.source_parser
+        cls.preprocessor.target_tokenizer = cls.preprocessor.target_parser
 
     def test_is_correct_language_true(self):
         source_sentence = 'Ez egy magyar mondat.'
@@ -77,15 +75,15 @@ class PreprocessorTest(unittest.TestCase):
     def test_contains_one_sentence_true(self):
         source_sentence = 'Ez egy magyar mondat.'
         target_sentence = 'This is an English sentence.'
-        source_doc = self.preprocessor.source_tokenizer.tokenize(source_sentence)
-        target_doc = self.preprocessor.target_tokenizer.tokenize(target_sentence)
+        source_doc = self.preprocessor.source_parser.tokenize(source_sentence)
+        target_doc = self.preprocessor.target_parser.tokenize(target_sentence)
 
         self.assertTrue(self.preprocessor._contains_one_sentence(source_doc, target_doc))
 
     def test_contains_one_sentence_false(self):
         source_sentence = 'Ez egy magyar mondat. Ez is.'
         target_sentence = 'This is an English sentence.'
-        source_doc = self.preprocessor.source_tokenizer.tokenize(source_sentence)
-        target_doc = self.preprocessor.target_tokenizer.tokenize(target_sentence)
+        source_doc = self.preprocessor.source_parser.tokenize(source_sentence)
+        target_doc = self.preprocessor.target_parser.tokenize(target_sentence)
 
         self.assertFalse(self.preprocessor._contains_one_sentence(source_doc, target_doc))
