@@ -260,6 +260,8 @@ class Preprocessor:
 
     def _find_num_of_preprocessed_batches(self) -> int:
         src_dep_tree_output = os.path.join(self._dep_tree_output_path, self._config.preprocessor.source_language)
-        tsv_files = os.listdir(src_dep_tree_output)
-        max_tsv_number = max(map(lambda f: int(f.split('.')[0]), tsv_files), default=0)
-        return max_tsv_number
+        if os.path.exists(src_dep_tree_output):
+            tsv_files = os.listdir(src_dep_tree_output)
+            max_tsv_number = max(map(lambda f: int(f.split('.')[0]), tsv_files), default=0)
+            return max_tsv_number
+        return 0
