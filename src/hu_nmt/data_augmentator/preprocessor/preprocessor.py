@@ -31,6 +31,7 @@ class Preprocessor:
         self._dep_tree_output_path = dep_tree_output_path
         self.moses_punct_normalizer_src = MosesPunctNormalizer(lang=self._config.preprocessor.source_language)
         self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
+        self.skip_batches = 0
 
     def preprocess(self):
         # init tokenizers and lang detect model
@@ -72,9 +73,14 @@ class Preprocessor:
 
     def preprocess_and_precompute(self):
         log.info('Starting preprocessing...')
+
+        self.skip_batches = self._find_num_of_preprocessed_batches()
+        if self.skip_batches > 0:
+            log.info(f'Found previous run, skipping {self.skip_batches} batches and continuing preprocessing.')
+
         number_of_lines_saved_to_file = 0
         all_lines = 0
-        file_idx = 1
+        file_idx = self.skip_batches + 1
 
         preprocess_output_path = os.path.dirname(self._source_output_path)
         if not os.path.exists(preprocess_output_path):
@@ -92,9 +98,7 @@ class Preprocessor:
                 # map to processes
                 log.info('Mapping sentences to processes')
                 proc_pool = mp.get_context('spawn').Pool(process_count)
-                list_of_results = proc_pool.map(self._init_models_and_filter_batch,
-                                                process_batches,
-                                                chunksize=max(int(len(line_batch) / process_count), 1))
+                list_of_results = proc_pool.map(self._init_models_and_filter_batch, process_batches)
                 proc_pool.close()
                 proc_pool.join()
 
@@ -138,14 +142,14 @@ class Preprocessor:
         log.info(
             f'Finished processing sentences. Number of sentences before and after: {all_lines} -> {number_of_lines_saved_to_file}')
 
-    @staticmethod
-    def _get_file_line_batch_generator(src_file, tgt_file, batch_size):
+    def _get_file_line_batch_generator(self, src_file, tgt_file, batch_size):
         with open(src_file, 'r') as src, open(tgt_file, 'r') as tgt:
             src_iter = iter(lambda: tuple(islice(src, batch_size)), ())
             tgt_iter = iter(lambda: tuple(islice(tgt, batch_size)), ())
 
-            for src_lines, tgt_lines in zip(src_iter, tgt_iter):
-                yield list(zip(src_lines, tgt_lines))
+            for i, (src_lines, tgt_lines) in enumerate(zip(src_iter, tgt_iter)):
+                if i >= self.skip_batches:
+                    yield list(zip(src_lines, tgt_lines))
 
     def _init_models(self):
         self.source_parser = NlpPipelineFactory.get_dependency_parser(self._config.preprocessor.source_language)
@@ -171,23 +175,23 @@ class Preprocessor:
             target_sentence = self.clean_sentence(target_sentence)
             target_sentence = self.moses_punct_normalizer_src.normalize(target_sentence)
 
-            source_dep_rel_list = self.source_parser.sentence_to_node_relationship_list(
-                self.source_parser.nlp_pipeline, source_sentence)
-            target_dep_rel_list = self.target_parser.sentence_to_node_relationship_list(
-                self.target_parser.nlp_pipeline, target_sentence)
+            if self.is_correct_language(source_sentence, target_sentence) and source_sentence and target_sentence:
+                source_dep_rel_list = self.source_parser.sentence_to_node_relationship_list(
+                    self.source_parser.nlp_pipeline, source_sentence)
+                target_dep_rel_list = self.target_parser.sentence_to_node_relationship_list(
+                    self.target_parser.nlp_pipeline, target_sentence)
 
-            source_dep_tree = self.source_parser.node_relationship_list_to_dep_parse_tree(source_dep_rel_list)
-            target_dep_tree = self.target_parser.node_relationship_list_to_dep_parse_tree(target_dep_rel_list)
+                source_dep_tree = self.source_parser.node_relationship_list_to_dep_parse_tree(source_dep_rel_list)
+                target_dep_tree = self.target_parser.node_relationship_list_to_dep_parse_tree(target_dep_rel_list)
 
-            source_word_count = self.source_parser.count_tokens_from_graph(source_dep_tree)
-            target_word_count = self.target_parser.count_tokens_from_graph(target_dep_tree)
+                source_word_count = self.source_parser.count_tokens_from_graph(source_dep_tree)
+                target_word_count = self.target_parser.count_tokens_from_graph(target_dep_tree)
 
-            if self.is_good_length(source_word_count, target_word_count) and self.is_correct_language(source_sentence,
-                                                                                                      target_sentence):
-                preprocessed_sentences.append((source_sentence, target_sentence))
-                list_of_dep_rel_list.append((source_dep_rel_list, target_dep_rel_list))
+                if self.is_good_length(source_word_count, target_word_count):
+                    preprocessed_sentences.append((source_sentence, target_sentence))
+                    list_of_dep_rel_list.append((source_dep_rel_list, target_dep_rel_list))
 
-                number_of_lines_saved_to_file += 1
+                    number_of_lines_saved_to_file += 1
         return preprocessed_sentences, list_of_dep_rel_list
 
     def write_preprocessed_sentences_to_files(self, src_sents, tgt_sents, src_dep_rel_lists, tgt_dep_rel_lists,
@@ -253,3 +257,11 @@ class Preprocessor:
             if sentence.startswith('-'):
                 sentence = sentence[1:]
         return sentence
+
+    def _find_num_of_preprocessed_batches(self) -> int:
+        src_dep_tree_output = os.path.join(self._dep_tree_output_path, self._config.preprocessor.source_language)
+        if os.path.exists(src_dep_tree_output):
+            tsv_files = os.listdir(src_dep_tree_output)
+            max_tsv_number = max(map(lambda f: int(f.split('.')[0]), tsv_files), default=0)
+            return max_tsv_number
+        return 0

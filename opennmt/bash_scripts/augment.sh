@@ -91,9 +91,9 @@ function augment() {
 }
 
 if [ "$augmentation_active" == "true" ]; then
-    if [ ! -d "$absolute_augmentation_dir"/augmentation_input_data ]; then
-        preprocess_and_precompute_data_for_augmentation
-    fi
+    # continues preprocessing if it stopped earlier
+    # skip if it was successful earlier
+    preprocess_and_precompute_data_for_augmentation
 
     if [ ! -d  "$absolute_augmentation_dir"/"$augmented_folder_prefix"-"$augmentation_ratio" ]; then
         augment
