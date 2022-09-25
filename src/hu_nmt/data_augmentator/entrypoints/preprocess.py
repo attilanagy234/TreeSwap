@@ -14,7 +14,7 @@ log = get_logger(__name__)
 @click.argument('tgt_output_path')
 def main(src_input_path, tgt_input_path, config_path, src_output_path, tgt_output_path):
     preprocessor = Preprocessor(src_input_path, tgt_input_path, config_path, src_output_path, tgt_output_path)
-    preprocessor.preprocess()
+    preprocessor.preprocess_simple()
 
 
 if __name__ == '__main__':

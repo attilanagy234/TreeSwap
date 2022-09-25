@@ -33,10 +33,8 @@ class Preprocessor:
         self.moses_punct_normalizer_tgt = MosesPunctNormalizer(lang=self._config.preprocessor.target_language)
         self.skip_batches = 0
 
-    def preprocess(self):
-        # init tokenizers and lang detect model
-        self.source_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.source_language)
-        self.target_tokenizer = NlpPipelineFactory.get_tokenizer(self._config.preprocessor.target_language)
+    def preprocess_simple(self):
+        # init lang detect model
         self.langdetect = LanguageDetector(self._config.preprocessor.langdetect_model_path)
 
         log.info('Starting preprocessing...')
@@ -54,15 +52,11 @@ class Preprocessor:
                 target_sentence = self.clean_sentence(target_sentence)
                 target_sentence = self.moses_punct_normalizer_src.normalize(target_sentence)
 
-                source_doc = self.source_tokenizer.tokenize(source_sentence)
-                target_doc = self.target_tokenizer.tokenize(target_sentence)
-
-                src_word_count = self.source_tokenizer.count_tokens_from_doc(source_doc)
-                tgt_word_count = self.target_tokenizer.count_tokens_from_doc(target_doc)
+                src_word_count = len(source_sentence.split())
+                tgt_word_count = len(target_sentence.split())
 
                 if self.is_good_length(src_word_count, tgt_word_count) and \
-                        self.is_correct_language(source_sentence, target_sentence) and \
-                        self._contains_one_sentence(source_doc, target_doc):
+                        self.is_correct_language(source_sentence, target_sentence):
                     source_output_file.write(source_sentence + '\n')
                     target_output_file.write(target_sentence + '\n')
 
