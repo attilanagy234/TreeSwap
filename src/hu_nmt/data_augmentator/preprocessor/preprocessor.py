@@ -1,11 +1,13 @@
 import multiprocessing as mp
 import os.path
+from dataclasses import dataclass
 from itertools import islice
+from typing import List, Optional, Dict
 
 from sacremoses import MosesPunctNormalizer
 from tqdm import tqdm
 
-from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase, NodeRelationship
 from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
 from hu_nmt.data_augmentator.preprocessor.language_detector import LanguageDetector
 from hu_nmt.data_augmentator.utils.data_helpers import get_config_from_yaml
@@ -13,6 +15,15 @@ from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.preprocessing import create_mini_batches
 
 log = get_logger(__name__)
+
+
+@dataclass
+class ProcessResultBatch:
+    src_sents: List[str]
+    tgt_sents: List[str]
+    src_dep_rel_lists: List[List[NodeRelationship]]
+    tgt_dep_rel_lists: List[List[NodeRelationship]]
+    drop_out_stat: Optional[Dict] = None
 
 
 class Preprocessor:
@@ -96,45 +107,43 @@ class Preprocessor:
                 proc_pool.close()
                 proc_pool.join()
 
-                # unpack results
-                log.info('Unpacking results')
-                src_list_of_dep_rel_lists = []
-                tgt_list_of_dep_rel_lists = []
-                src_list_of_sentences = []
-                tgt_list_of_sentences = []
+                results = self._process_results(list_of_results)
 
-                for sents, dep_rel_lists in list_of_results:
-                    src_sents, tgt_sents = zip(*sents)
-                    src_dep_rel_lists, tgt_dep_rel_lists = zip(*dep_rel_lists)
-                    src_list_of_dep_rel_lists.extend(src_dep_rel_lists)
-                    tgt_list_of_dep_rel_lists.extend(tgt_dep_rel_lists)
-                    src_list_of_sentences.extend(src_sents)
-                    tgt_list_of_sentences.extend(tgt_sents)
-
-                self.write_preprocessed_sentences_to_files(src_list_of_sentences, tgt_list_of_sentences,
-                                                           src_list_of_dep_rel_lists, tgt_list_of_dep_rel_lists,
+                self.write_preprocessed_sentences_to_files(results,
                                                            file_idx)
 
                 file_idx += 1
-                number_of_lines_saved_to_file += len(src_list_of_sentences)
+                number_of_lines_saved_to_file += len(results.src_sents)
                 all_lines += len(line_batch)
 
         else:
             self._init_models()
             for line_batch in line_batch_generator:
-                sentences, dep_rel_lists = self._filter_batch(line_batch)
-                src_sents, tgt_sents = zip(*sentences)
-                src_dep_rel_lists, tgt_dep_rel_lists = zip(*dep_rel_lists)
+                result_batch = self._filter_batch(line_batch)
 
-                self.write_preprocessed_sentences_to_files(src_sents, tgt_sents,
-                                                           src_dep_rel_lists, tgt_dep_rel_lists,
-                                                           file_idx)
+                self.write_preprocessed_sentences_to_files(result_batch, file_idx)
                 file_idx += 1
-                number_of_lines_saved_to_file += len(src_sents)
+                number_of_lines_saved_to_file += len(result_batch.src_sents)
                 all_lines += len(line_batch)
 
         log.info(
             f'Finished processing sentences. Number of sentences before and after: {all_lines} -> {number_of_lines_saved_to_file}')
+
+    def _process_results(self, list_of_results: List[ProcessResultBatch]):
+        src_list_of_dep_rel_lists = []
+        tgt_list_of_dep_rel_lists = []
+        src_list_of_sentences = []
+        tgt_list_of_sentences = []
+
+        for result in list_of_results:
+            src_list_of_dep_rel_lists.extend(result.src_dep_rel_lists)
+            tgt_list_of_dep_rel_lists.extend(result.tgt_dep_rel_lists)
+            src_list_of_sentences.extend(result.src_sents)
+            tgt_list_of_sentences.extend(result.tgt_sents)
+
+        return ProcessResultBatch(src_sents=src_list_of_sentences, tgt_sents=tgt_list_of_sentences,
+                                  src_dep_rel_lists=src_list_of_dep_rel_lists,
+                                  tgt_dep_rel_lists=tgt_list_of_dep_rel_lists)
 
     def _get_file_line_batch_generator(self, src_file, tgt_file, batch_size):
         with open(src_file, 'r') as src, open(tgt_file, 'r') as tgt:
@@ -156,8 +165,10 @@ class Preprocessor:
         return self._filter_batch(process_batch)
 
     def _filter_batch(self, process_batch):
-        preprocessed_sentences = []
-        list_of_dep_rel_list = []
+        src_list_of_dep_rel_lists = []
+        tgt_list_of_dep_rel_lists = []
+        src_list_of_sentences = []
+        tgt_list_of_sentences = []
 
         number_of_lines_saved_to_file = 0
 
@@ -182,27 +193,31 @@ class Preprocessor:
                 target_word_count = self.target_parser.count_tokens_from_graph(target_dep_tree)
 
                 if self.is_good_length(source_word_count, target_word_count):
-                    preprocessed_sentences.append((source_sentence, target_sentence))
-                    list_of_dep_rel_list.append((source_dep_rel_list, target_dep_rel_list))
+                    src_list_of_sentences.append(source_sentence)
+                    tgt_list_of_sentences.append(target_sentence)
+                    src_list_of_dep_rel_lists.append(source_dep_rel_list)
+                    tgt_list_of_dep_rel_lists.append(target_dep_rel_list)
 
                     number_of_lines_saved_to_file += 1
-        return preprocessed_sentences, list_of_dep_rel_list
+        return ProcessResultBatch(src_sents=src_list_of_sentences, tgt_sents=tgt_list_of_sentences,
+                                  src_dep_rel_lists=src_list_of_dep_rel_lists,
+                                  tgt_dep_rel_lists=tgt_list_of_dep_rel_lists)
 
-    def write_preprocessed_sentences_to_files(self, src_sents, tgt_sents, src_dep_rel_lists, tgt_dep_rel_lists,
+    def write_preprocessed_sentences_to_files(self, result_batch: ProcessResultBatch,
                                               file_idx):
         src_dep_tree_output = os.path.join(self._dep_tree_output_path, self._config.preprocessor.source_language)
         tgt_dep_tree_output = os.path.join(self._dep_tree_output_path, self._config.preprocessor.target_language)
 
         with open(self._source_output_path, 'a+') as source_output_file:
-            source_output_file.write('\n'.join(src_sents) + '\n')
+            source_output_file.write('\n'.join(result_batch.src_sents) + '\n')
 
         with open(self._target_output_path, 'a+') as target_output_file:
-            target_output_file.write('\n'.join(tgt_sents) + '\n')
+            target_output_file.write('\n'.join(result_batch.tgt_sents) + '\n')
 
         NlpPipelineBase.write_dep_graphs_to_file(src_dep_tree_output, file_idx,
-                                                 src_dep_rel_lists)
+                                                 result_batch.src_dep_rel_lists)
         NlpPipelineBase.write_dep_graphs_to_file(tgt_dep_tree_output, file_idx,
-                                                 tgt_dep_rel_lists)
+                                                 result_batch.tgt_dep_rel_lists)
 
     def is_good_length(self, source_word_count, target_word_count) -> bool:
         return self._is_good_word_count(source_word_count) and self._is_good_word_count(target_word_count) and \
