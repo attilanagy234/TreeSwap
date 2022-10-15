@@ -9,10 +9,12 @@ class NlpPipelineFactory:
         'ja': lambda: StanzaNlpPipeline(lang='ja', processors='tokenize, pos, lemma, depparse'),
         'hr': lambda: StanzaNlpPipeline(lang='hr', processors='tokenize, pos, lemma, depparse'),
         'ru': lambda: StanzaNlpPipeline(lang='ru', processors='tokenize, pos, lemma, depparse'),
+        'vi': lambda: StanzaNlpPipeline(lang='vi', processors='tokenize, pos, lemma, depparse'),
         'cs': lambda: StanzaNlpPipeline(lang='cs', processors='tokenize, mwt, pos, lemma, depparse'),
         'de': lambda: StanzaNlpPipeline(lang='de', processors='tokenize, mwt, pos, lemma, depparse'),
         'uk': lambda: StanzaNlpPipeline(lang='uk', processors='tokenize, mwt, pos, lemma, depparse'),
         'fr': lambda: StanzaNlpPipeline(lang='fr', processors='tokenize, mwt, pos, lemma, depparse'),
+        'he': lambda: StanzaNlpPipeline(lang='he', processors='tokenize, mwt, pos, lemma, depparse'),
         'hu': lambda: SpacyNlpPipeline(lang='hu'),
     }
 
@@ -21,10 +23,12 @@ class NlpPipelineFactory:
         'ja': lambda: StanzaNlpPipeline(lang='ja', processors='tokenize, pos'),
         'hr': lambda: StanzaNlpPipeline(lang='hr', processors='tokenize, pos'),
         'ru': lambda: StanzaNlpPipeline(lang='ru', processors='tokenize, pos'),
+        'vi': lambda: StanzaNlpPipeline(lang='vi', processors='tokenize, pos'),
         'cs': lambda: StanzaNlpPipeline(lang='cs', processors='tokenize, mwt, pos'),
         'de': lambda: StanzaNlpPipeline(lang='de', processors='tokenize, mwt, pos'),
         'uk': lambda: StanzaNlpPipeline(lang='uk', processors='tokenize, mwt, pos'),
         'fr': lambda: StanzaNlpPipeline(lang='fr', processors='tokenize, mwt, pos'),
+        'he': lambda: StanzaNlpPipeline(lang='he', processors='tokenize, mwt, pos'),
         'hu': lambda: SpacyNlpPipeline(lang='hu'),
     }
     
