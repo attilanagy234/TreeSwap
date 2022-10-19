@@ -3,7 +3,7 @@ import os
 from collections import defaultdict
 from enum import Enum
 
-from hu_nmt.data_augmentator.preprocessor.preprocessor import Preprocessor
+from hu_nmt.data_augmentator.preprocessor.preprocessor import Preprocessor, ProcessResultBatch
 from hu_nmt.data_augmentator.utils.logger import get_logger
 
 log = get_logger(__name__)
@@ -24,6 +24,7 @@ class PreprocessorWithDropoutStat(Preprocessor):
     def __init__(self, source_data_path: str, target_data_path: str, config_path: str, source_output_path: str,
                  target_output_path: str, dep_tree_output_path: str = None):
         self.drop_out_stats = defaultdict(lambda: 0)
+        self.sents = []
         super().__init__(source_data_path, target_data_path, config_path, source_output_path, target_output_path,
                          dep_tree_output_path)
 
@@ -57,31 +58,45 @@ class PreprocessorWithDropoutStat(Preprocessor):
         log.info(
             f'Finished processing sentences. Number of sentences before and after: {all_lines} -> {number_of_lines_saved_to_file}')
 
-        with open('drop_out_stat.json', 'w') as f:
+        with open(os.path.join(self._dep_tree_output_path, 'drop_out_stat.json'), 'w') as f:
             json.dump(dict(self.drop_out_stats), f)
+
+    def write_preprocessed_sentences_to_files(self, result_batch: ProcessResultBatch,
+                                              file_idx):
+        super(PreprocessorWithDropoutStat, self).write_preprocessed_sentences_to_files(result_batch, file_idx)
+        with open(os.path.join(self._dep_tree_output_path, 'stat.txt'), 'a+') as target_output_file:
+            target_output_file.write('\n'.join(self.sents) + '\n')
+        self.sents = []
 
     def is_correct_language(self, source_sentence, target_sentence) -> bool:
         correct_src = self.langdetect.predict(source_sentence) == self._config.preprocessor.source_language
         correct_tgt = self.langdetect.predict(target_sentence) == self._config.preprocessor.target_language
         if not correct_src:
             self.drop_out_stats[str(DropOutType.WRONG_SRC_LANGUAGE)] += 1
+            self.sents.append(str(DropOutType.WRONG_SRC_LANGUAGE))
             return False
         elif not correct_tgt:
             self.drop_out_stats[str(DropOutType.WRONG_TGT_LANGUAGE)] += 1
+            self.sents.append(str(DropOutType.WRONG_TGT_LANGUAGE))
             return False
         return True
 
     def is_good_length(self, source_word_count, target_word_count) -> bool:
         src_good_word_count = self._is_good_word_count(source_word_count)
         tgt_good_word_count = self._is_good_word_count(target_word_count)
-        good_ratio = self._is_good_ratio(source_word_count, target_word_count)
 
         if not src_good_word_count:
             self.drop_out_stats[str(DropOutType.LONG_SRC_SENT)] += 1
+            self.sents.append(str(DropOutType.LONG_SRC_SENT))
             return False
         elif not tgt_good_word_count:
             self.drop_out_stats[str(DropOutType.LONG_TGT_SENT)] += 1
+            self.sents.append(str(DropOutType.LONG_TGT_SENT))
             return False
-        elif not good_ratio:
+        good_ratio = self._is_good_ratio(source_word_count, target_word_count)
+        if not good_ratio:
             self.drop_out_stats[str(DropOutType.WRONG_RATIO)] += 1
+            self.sents.append(str(DropOutType.WRONG_RATIO))
             return False
+        self.sents.append("OK")
+        return True
