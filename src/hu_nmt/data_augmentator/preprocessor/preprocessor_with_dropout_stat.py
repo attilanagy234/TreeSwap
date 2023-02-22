@@ -89,7 +89,6 @@ class PreprocessorWithDropoutStat(Preprocessor):
 
         if not src_good_word_count:
             self.drop_out_stats[str(DropOutType.LONG_SRC_SENT)] += 1
-            self.sents.append(str(DropOutType.LONG_SRC_SENT))
             self.sents.append(f'{DropOutType.LONG_SRC_SENT} - {source_word_count}')
             return False
         elif not tgt_good_word_count:
