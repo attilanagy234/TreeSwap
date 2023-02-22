@@ -75,19 +75,11 @@ class PreprocessorWithDropoutStat(Preprocessor):
         correct_tgt = tgt_code == self._config.preprocessor.target_language
         if not correct_src:
             self.drop_out_stats[str(DropOutType.WRONG_SRC_LANGUAGE)] += 1
-<<<<<<< HEAD
-            self.sents.append(str(DropOutType.WRONG_SRC_LANGUAGE))
-            return False
-        elif not correct_tgt:
-            self.drop_out_stats[str(DropOutType.WRONG_TGT_LANGUAGE)] += 1
-            self.sents.append(str(DropOutType.WRONG_TGT_LANGUAGE))
-=======
             self.sents.append(f'{DropOutType.WRONG_SRC_LANGUAGE} - {src_code}')
             return False
         elif not correct_tgt:
             self.drop_out_stats[str(DropOutType.WRONG_TGT_LANGUAGE)] += 1
             self.sents.append(f'{DropOutType.WRONG_SRC_LANGUAGE} - {tgt_code}')
->>>>>>> refs/remotes/origin/preprocess_with_dropout_stat
             return False
         return True
 
@@ -97,19 +89,11 @@ class PreprocessorWithDropoutStat(Preprocessor):
 
         if not src_good_word_count:
             self.drop_out_stats[str(DropOutType.LONG_SRC_SENT)] += 1
-            self.sents.append(str(DropOutType.LONG_SRC_SENT))
-<<<<<<< HEAD
-            return False
-        elif not tgt_good_word_count:
-            self.drop_out_stats[str(DropOutType.LONG_TGT_SENT)] += 1
-            self.sents.append(str(DropOutType.LONG_TGT_SENT))
-=======
             self.sents.append(f'{DropOutType.LONG_SRC_SENT} - {source_word_count}')
             return False
         elif not tgt_good_word_count:
             self.drop_out_stats[str(DropOutType.LONG_TGT_SENT)] += 1
             self.sents.append(f'{DropOutType.LONG_TGT_SENT} - {target_word_count}')
->>>>>>> refs/remotes/origin/preprocess_with_dropout_stat
             return False
         good_ratio = self._is_good_ratio(source_word_count, target_word_count)
         if not good_ratio:

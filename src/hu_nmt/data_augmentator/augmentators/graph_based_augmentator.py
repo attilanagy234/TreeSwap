@@ -44,7 +44,7 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
         GraphBasedAugmentator.threshold = threshold
 
         if similarity_type == 'ged':
-            GraphBasedAugmentator.similarity = GED(src_lang_code, tgt_lang_code)
+            GraphBasedAugmentator.similarity = GED()
         elif similarity_type == 'edge_mapper':
             GraphBasedAugmentator.similarity = EdgeMapper()
 
