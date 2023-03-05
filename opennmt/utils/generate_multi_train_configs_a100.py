@@ -37,7 +37,7 @@ def swap_source_target_data(config, dir_name_with_prefix, aug_method=None):
     dump_config_to_yaml(aug_method_dir_name, new_config, 'train_config.yaml')
 
 
-def create_config(config, src_postfix, tgt_postfix, iteration, ratio=0, graph_method='base', threshold=None):
+def create_config(config, src_postfix, tgt_postfix, ratio=0, graph_method='base', threshold=None):
     new_config = copy.deepcopy(config)
 
     if ratio > 0:
@@ -49,9 +49,9 @@ def create_config(config, src_postfix, tgt_postfix, iteration, ratio=0, graph_me
         new_config['augmentation']['augmentation_type'] = graph_method
         if threshold:
             new_config['augmentation']['similarity_threshold'] = threshold
-            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}-{threshold}-run-{iteration}'
+            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}-{threshold}'
         else:
-            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}-run-{iteration}'
+            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}'
 
         # save config to file
         update_relative_paths(new_config)
@@ -60,13 +60,13 @@ def create_config(config, src_postfix, tgt_postfix, iteration, ratio=0, graph_me
         for aug_method in config['multi_train']['aug_method']:
             aug_method_dir_name = os.path.join(dir_name_with_prefix, f'{aug_method}-{src_postfix}{tgt_postfix}')
 
-            augmented_dir = 'obj_swapping' if aug_method == 'object' else 'subj_swapping'
-            augmented_full_path = os.path.join(new_config['augmentation']['directory'],
-                                               f'{graph_method}-{threshold}-{ratio}', augmented_dir)
+            aug_method_dir = 'obj_swapping' if aug_method == 'object' else 'subj_swapping'
+            aug_dir = f'{graph_method}-{threshold}-{ratio}' if threshold else f'{graph_method}-{ratio}'
+            augmented_full_path = os.path.join(new_config['augmentation']['directory'], aug_dir, aug_method_dir)
 
             new_config['data']['aug'] = dict()
-            new_config['data']['aug']['path_src'] = os.path.join(augmented_full_path, f'{augmented_dir}.src')
-            new_config['data']['aug']['path_tgt'] = os.path.join(augmented_full_path, f'{augmented_dir}.tgt')
+            new_config['data']['aug']['path_src'] = os.path.join(augmented_full_path, f'{aug_method_dir}.src')
+            new_config['data']['aug']['path_tgt'] = os.path.join(augmented_full_path, f'{aug_method_dir}.tgt')
             new_config['data']['aug']['transforms'] = ['sentencepiece']
             new_config['data']['aug']['weight'] = ratio
 
@@ -77,10 +77,10 @@ def create_config(config, src_postfix, tgt_postfix, iteration, ratio=0, graph_me
                 swap_source_target_data(new_config, dir_name_with_prefix, aug_method)
 
     else:
-        dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-run-{iteration}'
+        dir_name_with_prefix = f'{src_postfix}{tgt_postfix}'
         dump_config_to_yaml(dir_name_with_prefix, new_config, 'train_config.yaml')
         if config['multi_train']['backwards']:
-            dir_name_with_prefix = f'{tgt_postfix}{src_postfix}-run-{iteration}'
+            dir_name_with_prefix = f'{tgt_postfix}{src_postfix}'
             swap_source_target_data(new_config, dir_name_with_prefix)
 
 
@@ -93,8 +93,7 @@ def generate_multi_train_configs(config_file_path: str):
         raise RuntimeError('multi_train.active is not set to true, aborting...')
 
     # check for mandatory fields
-    mandatory_fields = ['data_directory', 'backwards', 'aug_method', 'graph_method', 'similarity_threshold', 'repeat',
-                        'augmentation_ratio']
+    mandatory_fields = ['backwards', 'aug_method', 'graph_method', 'similarity_threshold', 'repeat', 'augmentation_ratio']
     for field in mandatory_fields:
         if field not in config['multi_train']:
             raise RuntimeError(f'multi_train.{field} field not set, aborting...')
@@ -102,18 +101,16 @@ def generate_multi_train_configs(config_file_path: str):
     source_postfix = config['general']['src_postfix']
     target_postfix = config['general']['tgt_postfix']
 
-    for iteration in range(config['multi_train']['repeat']):
-        for ratio in config['multi_train']['augmentation_ratio']:
-            if ratio == 0:
-                create_config(config, source_postfix, target_postfix, iteration)
-            else:
-                for graph_method in config['multi_train']['graph_method']:
-                    if graph_method == 'base':
-                        create_config(config, source_postfix, target_postfix, iteration, ratio, graph_method)
-                    else:
-                        for threshold in config['multi_train']['graph_method']:
-                            create_config(config, source_postfix, target_postfix, iteration, ratio, graph_method,
-                                          threshold)
+    for ratio in config['multi_train']['augmentation_ratio']:
+        if ratio == 0:
+            create_config(config, source_postfix, target_postfix)
+        else:
+            for graph_method in config['multi_train']['graph_method']:
+                if graph_method == 'base':
+                    create_config(config, source_postfix, target_postfix, ratio, graph_method)
+                else:
+                    for threshold in config['multi_train']['similarity_threshold']:
+                        create_config(config, source_postfix, target_postfix, ratio, graph_method, threshold)
 
 
 if __name__ == '__main__':

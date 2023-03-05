@@ -1,5 +1,8 @@
 seed: 1234
 
+test_src: /dir/test.hu
+test_tgt: /dir/test.en
+
 #------------------------------------------------------------------------------
 # Metadata
 
@@ -23,11 +26,10 @@ general:
 multi_train:
     active: true
 
-    # prefix to use for the generated folders
-    # prefix: aug-0.5
-    prefix: base
+    generate_configs: true
 
-    data_directory: ~/BME/nmt/multi_train_test
+    # directory where the preprocessed data wil be created
+    data_directory: data/iwslt/iwslt-en-de/
 
     backwards: true
 
