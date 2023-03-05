@@ -28,6 +28,8 @@ def swap_source_target_data(config, dir_name_with_prefix, aug_method=None):
         _, entry_value = entry
         entry_value['path_src'], entry_value['path_tgt'] = entry_value['path_tgt'], entry_value['path_src']
 
+    new_config["test_src"], new_config["test_tgt"] = new_config["test_tgt"], new_config["test_src"]
+
     src_postfix = config['general']['src_postfix']
     tgt_postfix = config['general']['tgt_postfix']
     if aug_method:
