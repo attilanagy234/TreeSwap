@@ -17,6 +17,7 @@ repeat=$(yq -r .multi_train.repeat config.yaml)
       do
           pushd $(dirname $config_file)
 
+          cp aug_config.yaml config.yaml
           $script_dir/augment.sh &
           sleep 0.5
           popd
@@ -33,6 +34,7 @@ repeat=$(yq -r .multi_train.repeat config.yaml)
            for i in $(seq 1 $repeat)
            do
              if [ ! -d  run-$i ]; then
+                cp train_config.yaml config.yaml
                 $script_dir/full_train.sh &
                 mv run run-$i
                 sleep 0.5
