@@ -44,7 +44,7 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, graph_method='base'
 
     if ratio > 0:
         new_config['augmentation']['directory'] = os.path.join(config['multi_train']['data_directory'], 'preprocessed')
-        new_config['augmentation']['augmented_folder_prefix'] = f'{graph_method}-{threshold}'
+        new_config['augmentation']['augmented_folder_prefix'] = f'{graph_method}-{threshold}' if threshold else f'{graph_method}'
         new_config['augmentation']['preprocessor']['source_language'] = src_postfix
         new_config['augmentation']['preprocessor']['target_language'] = tgt_postfix
         new_config['augmentation']['augmentation_ratio'] = ratio
