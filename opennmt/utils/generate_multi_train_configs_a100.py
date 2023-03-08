@@ -19,7 +19,7 @@ def dump_config_to_yaml(dir, config, file_name):
         os.mkdir(dir)
     with open(os.path.join(dir, file_name), 'w') as yaml_file:
         print(f'Creating yaml file {dir}/{file_name}')
-        yaml.dump(config, yaml_file, default_flow_style=False)
+        yaml.dump(config, yaml_file, default_flow_style=False, indent=4, sort_keys=False)
 
 
 def swap_source_target_data(config, dir_name_with_prefix, aug_method=None):
