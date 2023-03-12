@@ -39,7 +39,7 @@ def swap_source_target_data(config, dir_name_with_prefix, aug_method=None):
     dump_config_to_yaml(aug_method_dir_name, new_config, 'train_config.yaml')
 
 
-def create_config(config, src_postfix, tgt_postfix, ratio=0, graph_method='base', threshold=None):
+def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_method='base', threshold=None):
     new_config = copy.deepcopy(config)
 
     if ratio > 0:
@@ -48,6 +48,7 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, graph_method='base'
         new_config['augmentation']['preprocessor']['source_language'] = src_postfix
         new_config['augmentation']['preprocessor']['target_language'] = tgt_postfix
         new_config['augmentation']['augmentation_ratio'] = ratio
+        new_config['augmentation']['augmentation_size'] = int(ratio * data_size)
         new_config['augmentation']['augmentation_type'] = graph_method
         if threshold:
             new_config['augmentation']['similarity_threshold'] = threshold
@@ -103,16 +104,19 @@ def generate_multi_train_configs(config_file_path: str):
     source_postfix = config['general']['src_postfix']
     target_postfix = config['general']['tgt_postfix']
 
+    with open(config['data']['original']['path_src']) as f:
+        data_size = sum(1 for _ in f)
+
     for ratio in config['multi_train']['augmentation_ratio']:
         if ratio == 0:
             create_config(config, source_postfix, target_postfix)
         else:
             for graph_method in config['multi_train']['graph_method']:
                 if graph_method == 'base':
-                    create_config(config, source_postfix, target_postfix, ratio, graph_method)
+                    create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method)
                 else:
                     for threshold in config['multi_train']['similarity_threshold']:
-                        create_config(config, source_postfix, target_postfix, ratio, graph_method, threshold)
+                        create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method, threshold)
 
 
 if __name__ == '__main__':

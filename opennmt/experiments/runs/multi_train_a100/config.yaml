@@ -29,7 +29,7 @@ multi_train:
     generate_configs: true
 
     # directory where the preprocessed data wil be created
-    data_directory: data/iwslt/iwslt-en-de/
+    data_directory: data/hunglish/
 
     backwards: true
 
@@ -50,7 +50,9 @@ multi_train:
         - 0.4
         - 0.5
 
-    repeat: 3
+    repeat: 1
+
+    repeat_aug: 3
 
 
 
@@ -137,7 +139,7 @@ tgt_words_min_frequency: 0
 transforms: [sentencepiece]
 data:
     # the name of the dataset can be anything
-    hunglish:
+    original:
         path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.hu
         path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.en
         transforms: [sentencepiece]

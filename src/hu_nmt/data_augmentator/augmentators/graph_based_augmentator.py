@@ -27,6 +27,7 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
                  eng_graphs: Optional[List[DependencyGraphWrapper]] = None,
                  hun_graphs: Optional[List[DependencyGraphWrapper]] = None,
                  augmented_data_ratio: float = 0.5,
+                 augmented_data_size: Optional[int] = None,
                  random_seed: int = 123,
                  filters: List[Filter] = None,
                  output_path: str = './augmentations',
@@ -37,7 +38,7 @@ class GraphBasedAugmentator(SubjectObjectAugmentator):
                  filter_nsub_and_obj_have_same_ancestor: bool = True,
                  filter_same_pos_tag: bool = True,
                  filter_for_noun_tags: bool = False):
-        super().__init__(eng_graphs, hun_graphs, augmented_data_ratio, random_seed, filters, output_path, output_format,
+        super().__init__(eng_graphs, hun_graphs, augmented_data_ratio, augmented_data_size, random_seed, filters, output_path, output_format,
                          save_original, separate_augmentation, filter_nsub_and_obj_have_same_ancestor,
                          filter_same_pos_tag, filter_for_noun_tags)
 

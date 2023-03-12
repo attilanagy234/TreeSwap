@@ -3,12 +3,10 @@ from tqdm import tqdm
 
 from hu_nmt.data_augmentator.augmentators.graph_based_augmentator import GraphBasedAugmentator
 from hu_nmt.data_augmentator.augmentators.subject_object_augmentator import SubjectObjectAugmentator
-from hu_nmt.data_augmentator.dependency_parsers.nlp_pipeline_factory import NlpPipelineFactory
+from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
 from hu_nmt.data_augmentator.filters.bleu_filter import BleuFilter
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from hu_nmt.data_augmentator.filters.bleu_filter import BleuFilter
-from hu_nmt.data_augmentator.base.nlp_pipeline_base import NlpPipelineBase
 
 log = get_logger(__name__)
 
@@ -19,7 +17,9 @@ log = get_logger(__name__)
 @click.argument('src_data_folder')
 @click.argument('tgt_data_folder')
 @click.argument('augmentation_output_path')
-@click.argument('augmented_data_ratio')
+@click.argument('augmented_data_ratio', default=0.5)
+@click.argument('augmented_data_size', default=None)
+@click.argument('random_seed')
 # used by filtering
 @click.option('--use_filters', is_flag=True, default=False, help='Use filters after the augmentation')
 @click.option('--filter_quantile', default=0.0,
@@ -38,10 +38,9 @@ log = get_logger(__name__)
 @click.option('--augmentation_type', default='base', type=click.Choice(['base', 'ged', 'edge_mapper']))
 @click.option('--similarity_threshold', default=0.5)
 def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentation_output_path,
-         augmented_data_ratio, use_filters, filter_quantile, src_model_path, tgt_model_path, sp_model_path,
-         filter_batch_size, output_format, save_original, separate_augmentation, filter_same_ancestor,
-         filter_same_pos_tag, filter_for_noun_tags, augmentation_type, similarity_threshold):
-
+         augmented_data_ratio, augmented_data_size, random_seed, use_filters, filter_quantile, src_model_path,
+         tgt_model_path, sp_model_path, filter_batch_size, output_format, save_original, separate_augmentation,
+         filter_same_ancestor, filter_same_pos_tag, filter_for_noun_tags, augmentation_type, similarity_threshold):
     src_dep_tree_generator = NlpPipelineBase.read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
     # log.info(f'Number of source sentences used for augmentation: {len(eng_wrappers)}')
     tgt_dep_tree_generator = NlpPipelineBase.read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
@@ -53,8 +52,9 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
             BleuFilter(filter_quantile, src_model_path, tgt_model_path, sp_model_path, tgt_language, filter_batch_size))
 
     if augmentation_type == 'ged' or augmentation_type == 'edge_mapper':
-        augmentator = GraphBasedAugmentator(src_language, tgt_language, similarity_threshold, None, None, augmented_data_ratio,
-                                            random_seed=15, filters=filters, output_path=augmentation_output_path,
+        augmentator = GraphBasedAugmentator(src_language, tgt_language, similarity_threshold, None, None,
+                                            augmented_data_ratio, augmented_data_size=augmented_data_size, random_seed=random_seed,
+                                            filters=filters, output_path=augmentation_output_path,
                                             output_format=output_format, save_original=save_original,
                                             separate_augmentation=separate_augmentation,
                                             similarity_type=augmentation_type,
@@ -62,9 +62,10 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
                                             filter_same_pos_tag=filter_same_pos_tag,
                                             filter_for_noun_tags=filter_for_noun_tags)
     elif augmentation_type == 'base':
-        augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, random_seed=15, filters=filters,
-                                               output_path=augmentation_output_path, output_format=output_format,
-                                               save_original=save_original, separate_augmentation=separate_augmentation,
+        augmentator = SubjectObjectAugmentator(None, None, augmented_data_ratio, augmented_data_size=augmented_data_size,
+                                               random_seed=random_seed, filters=filters, output_path=augmentation_output_path,
+                                               output_format=output_format, save_original=save_original,
+                                               separate_augmentation=separate_augmentation,
                                                filter_nsub_and_obj_have_same_ancestor=filter_same_ancestor,
                                                filter_same_pos_tag=filter_same_pos_tag,
                                                filter_for_noun_tags=filter_for_noun_tags)

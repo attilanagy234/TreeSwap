@@ -1,18 +1,18 @@
 import copy
+import os
 from itertools import combinations
 from operator import itemgetter
-import os
 from typing import List, Tuple, Dict, Optional
 
 import numpy as np
 from tqdm import tqdm
 
 from hu_nmt.data_augmentator.base.augmentator_base import AugmentatorBase
+from hu_nmt.data_augmentator.filters.filter import Filter
 from hu_nmt.data_augmentator.utils.logger import get_logger
 from hu_nmt.data_augmentator.utils.translation_graph import TranslationGraph
 from hu_nmt.data_augmentator.utils.types.postag import Postag
 from hu_nmt.data_augmentator.wrapper.dependency_graph_wrapper import DependencyGraphWrapper
-from hu_nmt.data_augmentator.filters.filter import Filter
 
 log = get_logger(__name__)
 log.setLevel('DEBUG')
@@ -24,6 +24,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
                  src_graphs: Optional[List[DependencyGraphWrapper]] = None,
                  tgt_graphs: Optional[List[DependencyGraphWrapper]] = None,
                  augmented_data_ratio: float = 0.5,
+                 augmented_data_size: Optional[int] = None,
                  random_seed: int = 123,
                  filters: List[Filter] = None,
                  output_path: str = './augmentations',
@@ -38,6 +39,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
             raise ValueError('Length of sentences must be equal for both langugages')
 
         self.augmented_data_ratio = augmented_data_ratio
+        self.augmented_data_size = augmented_data_size
         if src_graphs is None and tgt_graphs is None:
             self.late_setup = True
             self._num_augmented_sentences_to_generate_per_method = -1
@@ -47,8 +49,11 @@ class SubjectObjectAugmentator(AugmentatorBase):
             self._src_graphs: List[DependencyGraphWrapper] = src_graphs
             self._tgt_graphs: List[DependencyGraphWrapper] = tgt_graphs
             self._pre_filter_sentence_count = len(self._src_graphs)
-            self._num_augmented_sentences_to_generate_per_method = int(
-                self._pre_filter_sentence_count * float(self.augmented_data_ratio))
+            if self.augmented_data_size:
+                self._num_augmented_sentences_to_generate_per_method = augmented_data_size
+            else:
+                self._num_augmented_sentences_to_generate_per_method = int(
+                    self._pre_filter_sentence_count * float(self.augmented_data_ratio))
 
         np.random.seed = random_seed
         self.filters = filters
@@ -108,8 +113,12 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
     def augment(self):
         if self.late_setup:
-            self._num_augmented_sentences_to_generate_per_method = int(
-                self._pre_filter_sentence_count * float(self.augmented_data_ratio))
+            if self.augmented_data_size:
+                self._num_augmented_sentences_to_generate_per_method = self.augmented_data_size
+            else:
+                self._num_augmented_sentences_to_generate_per_method = int(
+                    self._pre_filter_sentence_count * float(self.augmented_data_ratio))
+
         else:
             log.info('Finding augmentable sentence pairs...')
             self._candidate_translations = self.find_candidates(self._tgt_graphs,
@@ -407,7 +416,8 @@ class SubjectObjectAugmentator(AugmentatorBase):
         for k in self._candidate_translations.keys():
             self._candidate_translations[k].extend(new_candidates[k])
 
-    def is_eligible_for_both_augmentation(self, src_graph: DependencyGraphWrapper, tgt_graph: DependencyGraphWrapper) -> bool:
+    def is_eligible_for_both_augmentation(self, src_graph: DependencyGraphWrapper,
+                                          tgt_graph: DependencyGraphWrapper) -> bool:
         """
         Tests if a sentence (graph) pair is eligible for augmentation
         Conditions checked both for nsubj and obj edges
