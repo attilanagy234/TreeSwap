@@ -49,7 +49,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
             self._src_graphs: List[DependencyGraphWrapper] = src_graphs
             self._tgt_graphs: List[DependencyGraphWrapper] = tgt_graphs
             self._pre_filter_sentence_count = len(self._src_graphs)
-            if self.augmented_data_size:
+            if self.augmented_data_size is int:
                 self._num_augmented_sentences_to_generate_per_method = augmented_data_size
             else:
                 self._num_augmented_sentences_to_generate_per_method = int(
@@ -113,7 +113,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
     def augment(self):
         if self.late_setup:
-            if self.augmented_data_size:
+            if self.augmented_data_size is int:
                 self._num_augmented_sentences_to_generate_per_method = self.augmented_data_size
             else:
                 self._num_augmented_sentences_to_generate_per_method = int(

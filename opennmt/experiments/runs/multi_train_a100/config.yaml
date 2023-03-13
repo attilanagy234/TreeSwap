@@ -140,8 +140,7 @@ transforms: [sentencepiece]
 data:
     # the name of the dataset can be anything
     original:
-        #path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.hu
-        path_src: /home/dorka/BME/nmt/all_huen/preprocessed/preprocessed.hu
+        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.hu
         path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.en
         transforms: [sentencepiece]
         weight: 1
