@@ -72,9 +72,9 @@ augmentation:
     # before augmentation
     preprocessor:
         total_wordcount_min: 0
-        total_wordcount_max: 32
-        wordcount_diff: 75
-        wordcount_ratio_threshold: 1.2
+        total_wordcount_max: 100
+        wordcount_diff: 10
+        wordcount_ratio_threshold: 3
         source_language: hu
         target_language: en
         langdetect_model_path: /home1/hu-nmt/patrick/opennmt/experiments/runs/simple_train_example/lid.176.bin
@@ -140,7 +140,8 @@ transforms: [sentencepiece]
 data:
     # the name of the dataset can be anything
     original:
-        path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.hu
+        #path_src: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.hu
+        path_src: /home/dorka/BME/nmt/all_huen/preprocessed/preprocessed.hu
         path_tgt: ../../../../../data/Hunglish2/combined-32-simple/hunglish2-train-100.en
         transforms: [sentencepiece]
         weight: 1

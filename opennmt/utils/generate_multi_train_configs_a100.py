@@ -1,9 +1,18 @@
 import argparse
 import copy
 import os
+import random
 
 import yaml
 
+def is_prime(num):
+    if num == 0 or num == 1:
+        return False
+    for x in range(2, num):
+        if num % x == 0:
+            return False
+    else:
+        return True
 
 def update_relative_paths(config: dict):
     for key, value in config.items():
@@ -39,12 +48,13 @@ def swap_source_target_data(config, dir_name_with_prefix, aug_method=None):
     dump_config_to_yaml(aug_method_dir_name, new_config, 'train_config.yaml')
 
 
-def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_method='base', threshold=None):
+def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_method='base', run=1, seed=1234, threshold=None):
     new_config = copy.deepcopy(config)
+    new_config['seed'] = seed
 
     if ratio > 0:
         new_config['augmentation']['directory'] = os.path.join(config['multi_train']['data_directory'], 'preprocessed')
-        new_config['augmentation']['augmented_folder_prefix'] = f'{graph_method}-{threshold}' if threshold else f'{graph_method}'
+        new_config['augmentation']['augmented_folder_prefix'] = f'{graph_method}-{threshold}-{run}' if threshold else f'{graph_method}-{run}'
         new_config['augmentation']['preprocessor']['source_language'] = src_postfix
         new_config['augmentation']['preprocessor']['target_language'] = tgt_postfix
         new_config['augmentation']['augmentation_ratio'] = ratio
@@ -52,9 +62,9 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_
         new_config['augmentation']['augmentation_type'] = graph_method
         if threshold:
             new_config['augmentation']['similarity_threshold'] = threshold
-            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}-{threshold}'
+            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}-{threshold}-run-{run}'
         else:
-            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}'
+            dir_name_with_prefix = f'{src_postfix}{tgt_postfix}-aug-{ratio}-{graph_method}-run-{run}'
 
         # save config to file
         update_relative_paths(new_config)
@@ -107,16 +117,22 @@ def generate_multi_train_configs(config_file_path: str):
     with open(config['data']['original']['path_src']) as f:
         data_size = sum(1 for _ in f)
 
+    all_primes = [p for p in range(1000) if is_prime(p)]
+    selected_primes = random.sample(all_primes, config['multi_train']['repeat_aug'])
+
     for ratio in config['multi_train']['augmentation_ratio']:
         if ratio == 0:
             create_config(config, source_postfix, target_postfix)
         else:
             for graph_method in config['multi_train']['graph_method']:
-                if graph_method == 'base':
-                    create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method)
-                else:
-                    for threshold in config['multi_train']['similarity_threshold']:
-                        create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method, threshold)
+                for run in range(config['multi_train']['repeat_aug']):
+                    if graph_method == 'base':
+                        create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method, run,
+                                      selected_primes[run])
+                    else:
+                        for threshold in config['multi_train']['similarity_threshold']:
+                            create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method, run,
+                                          selected_primes[run], threshold)
 
 
 if __name__ == '__main__':
