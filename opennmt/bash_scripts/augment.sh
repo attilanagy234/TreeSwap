@@ -12,6 +12,7 @@ preprocess_and_precompute_script=$(yq -r .augmentation.preprocess_and_precompute
 augmentation_script=$(yq -r .augmentation.augmentation_script config.yaml)
 augmentation_ratio=$(yq -r .augmentation.augmentation_ratio config.yaml)
 augmentation_size=$(yq -r .augmentation.augmentation_size config.yaml)
+random_seed=$(yq -r .seed config.yaml)
 augmented_folder_prefix=$(yq -r .augmentation.augmented_folder_prefix config.yaml)
 filter_same_ancestor=$(yq -r .augmentation.filter_same_ancestor config.yaml)
 filter_same_pos_tag=$(yq -r .augmentation.filter_same_pos_tag config.yaml)
@@ -82,6 +83,7 @@ function augment() {
     "$absolute_augmentation_dir"/"$augmented_folder_prefix"-"$augmentation_ratio" \
     "$augmentation_ratio" \
     "$augmentation_size" \
+    "$random_seed" \
     --filter_same_ancestor="$filter_same_ancestor" \
     --filter_same_pos_tag="$filter_same_pos_tag" \
     --filter_for_noun_tags="$filter_for_noun_tags" \
