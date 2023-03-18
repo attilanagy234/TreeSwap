@@ -3,6 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 utils_path=$(yq -r .utils_path config.yaml)
 
 augmentation_active=$(yq  -r .multi_train.active config.yaml)
+generate_configs=$(yq  -r .multi_train.generate_configs config.yaml)
 repeat=$(yq -r .multi_train.repeat config.yaml)
 
 # 1 generating config files
