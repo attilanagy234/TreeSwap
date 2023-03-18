@@ -74,7 +74,7 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_
             aug_method_dir_name = os.path.join(dir_name_with_prefix, f'{aug_method}-{src_postfix}{tgt_postfix}')
 
             aug_method_dir = 'obj_swapping' if aug_method == 'object' else 'subj_swapping'
-            aug_dir = f'{graph_method}-{threshold}-{ratio}' if threshold else f'{graph_method}-{ratio}'
+            aug_dir = f'{graph_method}-{threshold}-{run}-{ratio}' if threshold else f'{graph_method}-{run}-{ratio}'
             augmented_full_path = os.path.join(new_config['augmentation']['directory'], aug_dir, aug_method_dir)
 
             new_config['data']['aug'] = dict()
