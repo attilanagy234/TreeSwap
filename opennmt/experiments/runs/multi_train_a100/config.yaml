@@ -24,7 +24,10 @@ general:
 
 # train multiple models at the same time with different data
 multi_train:
+    # augmentation
     active: true
+
+    training_active: true
 
     generate_configs: true
 

@@ -5,6 +5,7 @@ utils_path=$(yq -r .utils_path config.yaml)
 augmentation_active=$(yq  -r .multi_train.active config.yaml)
 generate_configs=$(yq  -r .multi_train.generate_configs config.yaml)
 repeat=$(yq -r .multi_train.repeat config.yaml)
+training_active=$(yq -r .multi_train.training_active config.yaml)
 
 # 1 generating config files
  if $generate_configs; then
@@ -27,7 +28,7 @@ repeat=$(yq -r .multi_train.repeat config.yaml)
 
 # 3 training
 
-   if $augmentation_active; then
+   if $training_active; then
        for config_file in $(find ~+ -name train_config.yaml)
        do
            pushd $(dirname $config_file)
