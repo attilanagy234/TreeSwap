@@ -101,10 +101,6 @@ def generate_multi_train_configs(config_file_path: str):
     with open(config_file_path, 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    # check that multi train is enabled
-    if config['multi_train']['active'] == False:
-        raise RuntimeError('multi_train.active is not set to true, aborting...')
-
     # check for mandatory fields
     mandatory_fields = ['backwards', 'aug_method', 'graph_method', 'similarity_threshold', 'repeat', 'augmentation_ratio']
     for field in mandatory_fields:
