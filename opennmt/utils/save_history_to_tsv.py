@@ -15,6 +15,8 @@ def flatten_dict(d, parent_key='', sep='.'):
         new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, collections.abc.MutableMapping):
             items.extend(flatten_dict(v, new_key, sep=sep).items())
+        elif isinstance(v, list):
+            items.append((new_key, [v]))
         else:
             items.append((new_key, v))
     return dict(items)
