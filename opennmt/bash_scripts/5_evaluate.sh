@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#src_subword_model=$(yq -r .src_subword_model config.yaml)
+src_subword_model=$(yq -r .src_subword_model config.yaml)
 test_tgt=$(yq -r .test_tgt config.yaml)
-#valid_tgt=$(yq -r .data.valid.path_tgt config.yaml)
+valid_tgt=$(yq -r .data.valid.path_tgt config.yaml)
 utils_path=$(yq -r .utils_path config.yaml)
 
 echo "--Evaluating model--"
-#spm_decode -model=$src_subword_model -input_format=piece < run/pred.txt.sp > run/pred.txt
+spm_decode -model=$src_subword_model -input_format=piece < run/pred.txt.sp > run/pred.txt
 if [ "$test_tgt" == "null" ]; then
     file_to_evaluate_against=$valid_tgt
 else
