@@ -41,6 +41,10 @@ def main(src_language, tgt_language, src_data_folder, tgt_data_folder, augmentat
          augmented_data_ratio, augmented_data_size, random_seed, use_filters, filter_quantile, src_model_path,
          tgt_model_path, sp_model_path, filter_batch_size, output_format, save_original, separate_augmentation,
          filter_same_ancestor, filter_same_pos_tag, filter_for_noun_tags, augmentation_type, similarity_threshold):
+
+    if not separate_augmentation and augmentation_type != 'base':
+        raise ValueError('Graph based augmentation only works with separate augmentation!')
+
     src_dep_tree_generator = NlpPipelineBase.read_parsed_dep_trees_from_files(src_data_folder, per_file=True)
     # log.info(f'Number of source sentences used for augmentation: {len(eng_wrappers)}')
     tgt_dep_tree_generator = NlpPipelineBase.read_parsed_dep_trees_from_files(tgt_data_folder, per_file=True)
