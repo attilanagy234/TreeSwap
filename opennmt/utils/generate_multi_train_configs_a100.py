@@ -3,6 +3,7 @@ import copy
 import os
 import random
 
+from fractions import Fraction
 import yaml
 
 def is_prime(num):
@@ -81,7 +82,13 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_
             new_config['data']['aug']['path_src'] = os.path.join(augmented_full_path, f'{aug_method_dir}.src')
             new_config['data']['aug']['path_tgt'] = os.path.join(augmented_full_path, f'{aug_method_dir}.tgt')
             new_config['data']['aug']['transforms'] = ['sentencepiece']
-            new_config['data']['aug']['weight'] = ratio
+            if ratio >= 1:
+                new_config['data']['aug']['weight'] = ratio
+            else:
+                new_weights = Fraction(1 / ratio)
+                new_config['data']['aug']['weight'] = new_weights.denominator
+                new_config['data']['original']['weight'] = new_weights.numerator
+
 
             update_relative_paths(new_config)
             dump_config_to_yaml(aug_method_dir_name, new_config, 'train_config.yaml')
