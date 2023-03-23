@@ -21,6 +21,7 @@ sacrebleu = "^2.0.0"
 sacremoses = "^0.0.53"
 nltk = "3.7"
 scipy = "1.6.0"
+evaluate = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
 pygraphviz = "1.7"
