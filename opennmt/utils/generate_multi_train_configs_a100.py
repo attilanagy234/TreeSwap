@@ -121,7 +121,7 @@ def generate_multi_train_configs(config_file_path: str):
         data_size = sum(1 for _ in f)
 
     all_primes = [p for p in range(1000) if is_prime(p)]
-    selected_primes = random.sample(all_primes, config['multi_train']['repeat_aug'])
+    selected_seeds = random.sample(all_primes, config['multi_train']['repeat_aug'])
 
     for ratio in config['multi_train']['augmentation_ratio']:
         if ratio == 0:
@@ -131,11 +131,11 @@ def generate_multi_train_configs(config_file_path: str):
                 for run in range(config['multi_train']['repeat_aug']):
                     if graph_method == 'base':
                         create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method, run,
-                                      selected_primes[run])
+                                      selected_seeds[run])
                     else:
                         for threshold in config['multi_train']['similarity_threshold']:
                             create_config(config, source_postfix, target_postfix, ratio, data_size, graph_method, run,
-                                          selected_primes[run], threshold)
+                                          selected_seeds[run], threshold)
 
 
 if __name__ == '__main__':
