@@ -1,4 +1,5 @@
 import argparse
+import os
 from datetime import datetime
 import json
 
@@ -29,8 +30,8 @@ def main(config_path, status, result_path):
         aug_sample = int(config.data.aug.path_src.split('/')[-3].split('-')[-2]) + 1
 
         results = [config.general.src_postfix, config.general.tgt_postfix, aug.augmentation_ratio, aug_type,
-                   aug.augmentation_type, aug.similarity_threshold, status, '-', '-', config_path, aug_sample,
-                   datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+                   aug.augmentation_type, aug.similarity_threshold, status, '-', '-', os.path.abspath(config_path),
+                   aug_sample, datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
         worksheet.update(f'A{row}:L{row}', [results])
 
     else:
@@ -42,7 +43,7 @@ def main(config_path, status, result_path):
         else:
             results.extend(['-', '-'])
 
-        row = worksheet.find(config_path).row
+        row = worksheet.find(os.path.abspath(config_path)).row
         worksheet.batch_update([{'range': f'G{row}:I{row}', 'values': [results]},
                                 {'range': f'M{row}', 'values': [[datetime.now().strftime("%Y-%m-%d %H:%M:%S")]]}])
 
