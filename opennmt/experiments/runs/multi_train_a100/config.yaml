@@ -58,9 +58,11 @@ multi_train:
 
     repeat_aug: 3
 
-
-
-
+#------------------------------------------------------------------------------
+# Google Sheet result config
+results:
+    sheet_name: name
+    sheet_id: id
 
 #------------------------------------------------------------------------------
 # Augmentation config

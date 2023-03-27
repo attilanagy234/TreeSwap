@@ -35,17 +35,20 @@ training_active=$(yq -r .multi_train.training_active config.yaml)
 
            for i in $(seq 1 $repeat)
            do
-             if [ ! -d  run-$i ]; then
-                cp train_config.yaml config.yaml
-                $script_dir/full_train.sh
-                mv run run-$i
+               if [ ! -d  run-$i ]; then
+                   cp train_config.yaml config.yaml
+                   python3 $utils_path/upload_results.py --config_path config.yaml --status in_progress
+                   if $script_dir/full_train.sh; then
+                      python3 $utils_path/upload_results.py --config_path config.yaml --status "done" --result_path run/final_result.txt
+                      mv run run-$i
+                   else
+                      python3 $utils_path/upload_results.py --config_path config.yaml --status failed
+                   fi
                 sleep 0.5
-             else
-               echo "Training already done. Skipping..."
-             fi
-
+               else
+                 echo "Training already done. Skipping..."
+               fi
            done
-
            popd
        done
    fi
