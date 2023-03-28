@@ -10,6 +10,7 @@ from dotmap import DotMap
 
 
 def main(config_path, status, run_folder_path):
+    config_path = os.path.abspath(config_path)
     with open(config_path, 'r') as config_file:
         config_yaml = yaml.load(config_file, Loader=yaml.FullLoader)
     config = DotMap(config_yaml)
@@ -32,7 +33,7 @@ def main(config_path, status, run_folder_path):
 
         results = [config.general.src_postfix, config.general.tgt_postfix, aug.augmentation_ratio, aug_type,
                    aug.augmentation_type, aug.similarity_threshold, aug_sample, '-', '-',
-                   datetime.now().strftime("%Y-%m-%d %H:%M:%S"), '', status, os.path.abspath(config_path)]
+                   datetime.now().strftime("%Y-%m-%d %H:%M:%S"), '', status, config_path]
         worksheet.update(f'A{row}:M{row}', [results])
 
     else:
@@ -45,7 +46,7 @@ def main(config_path, status, run_folder_path):
 
         configs, statuses = worksheet.batch_get(['M:M', 'L:L'], major_dimension='COLUMNS')
         rows = [i+1 for i, (config, status) in enumerate(zip(configs[0], statuses[0])) if
-                config == os.path.abspath(config_path) and status == 'in_progress']
+                config == config_path and status == 'in_progress']
 
         batch_to_update = []
 
@@ -53,14 +54,15 @@ def main(config_path, status, run_folder_path):
             # error!
             row = len(configs[0]) + 1
             batch_to_update.extend([{'range': f'A{row}:G{row}', 'values': [['-' for _ in range(7)]]},
-                                    {'range': f'M{row}', 'values': [[os.path.abspath(config_path)]]}])
+                                    {'range': f'M{row}', 'values': [[config_path]]}])
 
         else:
             row = rows[0]
 
         batch_to_update.extend([{'range': f'H{row}:I{row}', 'values': [results]},
-                                {'range': f'K{row}:L{row}',
-                                 'values': [[datetime.now().strftime("%Y-%m-%d %H:%M:%S"), status]]}])
+                                {'range': f'K{row}:N{row}',
+                                 'values': [[datetime.now().strftime("%Y-%m-%d %H:%M:%S"), status, config_path,
+                                             os.path.abspath(run_folder_path)]]}])
         worksheet.batch_update(batch_to_update)
 
 
