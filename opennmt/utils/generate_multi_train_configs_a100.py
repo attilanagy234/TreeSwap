@@ -98,6 +98,7 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_
 
     else:
         dir_name_with_prefix = f'{src_postfix}{tgt_postfix}'
+        update_relative_paths(new_config)
         dump_config_to_yaml(dir_name_with_prefix, new_config, 'train_config.yaml')
         if config['multi_train']['backwards']:
             dir_name_with_prefix = f'{tgt_postfix}{src_postfix}'
