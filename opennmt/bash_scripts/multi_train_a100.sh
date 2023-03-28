@@ -40,7 +40,6 @@ training_active=$(yq -r .multi_train.training_active config.yaml)
                    utils_path=$(yq -r .utils_path config.yaml)
                    python3 $utils_path/upload_results.py --config_path config.yaml --status in_progress
                    if $script_dir/full_train.sh; then
-                      python3 $utils_path/upload_results.py --config_path config.yaml --status "done" --result_path run/final_result.txt
                       mv run run-$i
                    else
                       python3 $utils_path/upload_results.py --config_path config.yaml --status failed

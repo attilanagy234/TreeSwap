@@ -1,14 +1,15 @@
 import argparse
+import json
 import os
 from datetime import datetime
-import json
+from typing import Dict
 
 import gspread
 import yaml
 from dotmap import DotMap
 
 
-def main(config_path, status, result_path):
+def main(config_path, status, run_folder_path):
     with open(config_path, 'r') as config_file:
         config_yaml = yaml.load(config_file, Loader=yaml.FullLoader)
     config = DotMap(config_yaml)
@@ -26,27 +27,41 @@ def main(config_path, status, result_path):
         row = len(worksheet.col_values(1)) + 1
 
         aug = config.augmentation
-        aug_type = config.data.aug.path_src.split('/')[-1].split('_')[0]
-        aug_sample = int(config.data.aug.path_src.split('/')[-3].split('-')[-2]) + 1
+        aug_type = config.data.aug.path_src.split('/')[-1].split('_')[0] if aug.path_src is str else -1
+        aug_sample = int(config.data.aug.path_src.split('/')[-3].split('-')[-2]) + 1 if aug.path_src is str else -1
 
         results = [config.general.src_postfix, config.general.tgt_postfix, aug.augmentation_ratio, aug_type,
-                   aug.augmentation_type, aug.similarity_threshold, status, '-', '-', os.path.abspath(config_path),
-                   aug_sample, datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
-        worksheet.update(f'A{row}:L{row}', [results])
+                   aug.augmentation_type, aug.similarity_threshold, aug_sample, '-', '-',
+                   datetime.now().strftime("%Y-%m-%d %H:%M:%S"), '', status, os.path.abspath(config_path)]
+        worksheet.update(f'A{row}:M{row}', [results])
 
     else:
-        results = [status]
         if status == 'done':
-            with open(result_path, 'r') as f:
-                final_results = json.loads(f.read())
-            results.extend([final_results['score'], final_results['meteor_score']])
+            with open(os.path.join(run_folder_path, 'final_result.txt'), 'r') as f:
+                final_results: Dict = json.loads(f.read())
+            results = [final_results['score'], final_results.get('meteor_score', -1)]
         else:
-            results.extend(['-', '-'])
+            results = ['-', '-']
 
-        row = worksheet.find(os.path.abspath(config_path)).row
-        worksheet.batch_update([{'range': f'G{row}:I{row}', 'values': [results]},
-                                {'range': f'M{row}', 'values': [[datetime.now().strftime("%Y-%m-%d %H:%M:%S")]]}])
+        configs, statuses = worksheet.batch_get(['M:M', 'L:L'], major_dimension='COLUMNS')
+        rows = [i+1 for i, (config, status) in enumerate(zip(configs[0], statuses[0])) if
+                config == os.path.abspath(config_path) and status == 'in_progress']
 
+        batch_to_update = []
+
+        if len(rows) != 1:
+            # error!
+            row = len(configs[0]) + 1
+            batch_to_update.extend([{'range': f'A{row}:G{row}', 'values': [['-' for _ in range(7)]]},
+                                    {'range': f'M{row}', 'values': [[os.path.abspath(config_path)]]}])
+
+        else:
+            row = rows[0]
+
+        batch_to_update.extend([{'range': f'H{row}:I{row}', 'values': [results]},
+                                {'range': f'K{row}:L{row}',
+                                 'values': [[datetime.now().strftime("%Y-%m-%d %H:%M:%S"), status]]}])
+        worksheet.batch_update(batch_to_update)
 
 
 if __name__ == '__main__':
@@ -54,7 +69,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_path', type=str, required=True, help='[REQUIRED] Path to the config file')
     parser.add_argument('--status', type=str, choices=['failed', 'in_progress', 'done'], required=True,
                         help='[REQUIRED] Training status')
-    parser.add_argument('--result_path', type=str, required=False, help='[REQUIRED] Path to the final results.')
+    parser.add_argument('--run_folder', type=str, required=False, help='[REQUIRED] Path to the run folder.')
 
     args = parser.parse_args()
-    main(args.config_path, args.status, args.result_path)
+    main(args.config_path, args.status, args.run_folder)
