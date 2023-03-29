@@ -15,7 +15,7 @@ def main(config_path, status, run_folder_path):
         config_yaml = yaml.load(config_file, Loader=yaml.FullLoader)
     config = DotMap(config_yaml)
 
-    if config.results.sheet_name is not str:
+    if not isinstance(config.results.sheet_name, str):
         sheet_name = f'{config.general.src_postfix}-{config.general.tgt_postfix}'
     else:
         sheet_name = config.results.sheet_name
@@ -28,8 +28,8 @@ def main(config_path, status, run_folder_path):
         row = len(worksheet.col_values(1)) + 1
 
         aug = config.augmentation
-        aug_type = config.data.aug.path_src.split('/')[-1].split('_')[0] if config.data.aug.path_src is str else -1
-        aug_sample = int(config.data.aug.path_src.split('/')[-3].split('-')[-2]) + 1 if config.data.aug.path_src is str else -1
+        aug_type = config.data.aug.path_src.split('/')[-1].split('_')[0] if isinstance(config.data.aug.path_src, str) else -1
+        aug_sample = int(config.data.aug.path_src.split('/')[-3].split('-')[-2]) + 1 if isinstance(config.data.aug.path_src, str) else -1
 
         results = [config.general.src_postfix, config.general.tgt_postfix, aug.augmentation_ratio, aug_type,
                    aug.augmentation_type, aug.similarity_threshold, aug_sample, '-', '-',
