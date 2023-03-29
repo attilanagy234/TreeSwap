@@ -4,3 +4,4 @@ kihívta_2	VERB	kihív	ROOT	root_0	None	None
 egy_4	DET	egy	det	futóversenyre_5	NOUN	futóverseny
 futóversenyre_5	NOUN	futóverseny	obl	kihívta_2	VERB	kihív
 ._6	PUNCT	.	punct	kihívta_2	VERB	kihív
+

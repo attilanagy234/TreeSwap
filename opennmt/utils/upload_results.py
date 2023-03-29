@@ -41,8 +41,11 @@ def main(config_path, status, run_folder_path):
             with open(os.path.join(run_folder_path, 'final_result.txt'), 'r') as f:
                 final_results: Dict = json.loads(f.read())
             results = [final_results['score'], final_results.get('meteor_score', -1)]
+            run_folder_path = os.path.abspath(run_folder_path)
         else:
             results = ['-', '-']
+            run_folder_path = ''
+
 
         configs, statuses = worksheet.batch_get(['M:M', 'L:L'], major_dimension='COLUMNS')
         rows = [i + 1 for i, (config, status) in enumerate(zip(configs[0], statuses[0])) if
@@ -62,7 +65,7 @@ def main(config_path, status, run_folder_path):
         batch_to_update.extend([{'range': f'H{row}:I{row}', 'values': [results]},
                                 {'range': f'K{row}:N{row}',
                                  'values': [[datetime.now().strftime("%Y-%m-%d %H:%M:%S"), status, config_path,
-                                             os.path.abspath(run_folder_path)]]}])
+                                             run_folder_path]]}])
         worksheet.batch_update(batch_to_update)
 
 

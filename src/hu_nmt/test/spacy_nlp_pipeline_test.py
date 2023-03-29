@@ -55,8 +55,6 @@ class SpacyDependencyParserTest(unittest.TestCase):
         self.assertEqual(expected_file_cnts, output_file_cnts)
         self.assertTrue(filecmp.cmp(str(expected_dir / '1.tsv'), str(output_dir / '1.tsv')))
         self.assertTrue(filecmp.cmp(str(expected_dir / '2.tsv'), str(output_dir / '2.tsv')))
-        with open(str(output_dir / '3.tsv')) as f:
-            print(f.read())
         self.assertTrue(filecmp.cmp(str(expected_dir / '3.tsv'), str(output_dir / '3.tsv')))
 
     def test_sentence_count(self):
