@@ -42,6 +42,10 @@ def swap_source_target_data(config, dir_name_with_prefix, aug_method=None):
 
     src_postfix = config['general']['src_postfix']
     tgt_postfix = config['general']['tgt_postfix']
+
+    new_config['general']['src_postfix'] = tgt_postfix
+    new_config['general']['tgt_postfix'] = src_postfix
+
     if aug_method:
         aug_method_dir_name = os.path.join(dir_name_with_prefix, f'{aug_method}-{tgt_postfix}{src_postfix}')
     else:
