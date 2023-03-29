@@ -45,13 +45,13 @@ def main(config_path, status, run_folder_path):
             results = ['-', '-']
 
         configs, statuses = worksheet.batch_get(['M:M', 'L:L'], major_dimension='COLUMNS')
-        rows = [i+1 for i, (config, status) in enumerate(zip(configs[0], statuses[0])) if
+        rows = [i + 1 for i, (config, status) in enumerate(zip(configs[0], statuses[0])) if
                 config == config_path and status == 'in_progress']
 
         batch_to_update = []
 
         if len(rows) != 1:
-            # error!
+            # error, overwrite an empty row with the results
             row = len(configs[0]) + 1
             batch_to_update.extend([{'range': f'A{row}:G{row}', 'values': [['-' for _ in range(7)]]},
                                     {'range': f'M{row}', 'values': [[config_path]]}])
