@@ -7,6 +7,18 @@ generate_configs=$(yq  -r .multi_train.generate_configs config.yaml)
 repeat=$(yq -r .multi_train.repeat config.yaml)
 training_active=$(yq -r .multi_train.training_active config.yaml)
 
+function trap_ctrlc ()
+{
+    # perform cleanup here
+    echo "Ctrl-C caught...performing clean up"
+
+    python3 $utils_path/upload_results.py --config_path config.yaml --status failed
+
+    # exit shell script with error code 2
+    # if omitted, shell script will continue execution
+    exit 2
+}
+
 # 1 generating config files
  if $generate_configs; then
     python3 $utils_path/generate_multi_train_configs_a100.py || exit 1
@@ -35,17 +47,21 @@ training_active=$(yq -r .multi_train.training_active config.yaml)
 
            for i in $(seq 1 $repeat)
            do
-             if [ ! -d  run-$i ]; then
-                cp train_config.yaml config.yaml
-                $script_dir/full_train.sh
-                mv run run-$i
+               if [ ! -d  run-$i ]; then
+                   cp train_config.yaml config.yaml
+                   utils_path=$(yq -r .utils_path config.yaml)
+                   python3 $utils_path/upload_results.py --config_path config.yaml --status in_progress
+                   trap "trap_ctrlc" 2
+                   if $script_dir/full_train.sh; then
+                      mv run run-$i
+                   else
+                      python3 $utils_path/upload_results.py --config_path config.yaml --status failed
+                   fi
                 sleep 0.5
-             else
-               echo "Training already done. Skipping..."
-             fi
-
+               else
+                 echo "Training already done. Skipping..."
+               fi
            done
-
            popd
        done
    fi

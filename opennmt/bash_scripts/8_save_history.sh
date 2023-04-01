@@ -22,3 +22,8 @@ do
 done
 
 python3 $utils_path/save_history_to_tsv.py --yaml_path $CONFIG_PATH --result_path $FINAL_RESULT_PATH --history_path $save_dir --tsv_path $TSV_PATH
+
+sheet_id=$(yq -r .sheet_id config.yaml)
+if [ "$sheet_id" == "null" ]; then
+  python3 $utils_path/upload_results.py --config_path config.yaml --status "done" --run_folder $save_dir
+fi

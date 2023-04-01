@@ -1,4 +1,4 @@
-Róbert_1	PROPN	Róbert	nsubj	kihívta_2	VERB	kihív
+Róbert_1	PROPN	Róbert	ROOT	root_0	None	None
 kihívta_2	VERB	kihív	ROOT	root_0	None	None
 Ákost_3	PROPN	Ákos	obj	kihívta_2	VERB	kihív
 egy_4	DET	egy	det	futóversenyre_5	NOUN	futóverseny

@@ -42,6 +42,10 @@ def swap_source_target_data(config, dir_name_with_prefix, aug_method=None):
 
     src_postfix = config['general']['src_postfix']
     tgt_postfix = config['general']['tgt_postfix']
+
+    new_config['general']['src_postfix'] = tgt_postfix
+    new_config['general']['tgt_postfix'] = src_postfix
+
     if aug_method:
         aug_method_dir_name = os.path.join(dir_name_with_prefix, f'{aug_method}-{tgt_postfix}{src_postfix}')
     else:
@@ -71,6 +75,7 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_
         update_relative_paths(new_config)
         dump_config_to_yaml(dir_name_with_prefix, new_config, 'aug_config.yaml')
 
+        update_relative_paths(new_config)
         for aug_method in config['multi_train']['aug_method']:
             aug_method_dir_name = os.path.join(dir_name_with_prefix, f'{aug_method}-{src_postfix}{tgt_postfix}')
 
@@ -89,8 +94,6 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_
                 new_config['data']['aug']['weight'] = new_weights.denominator
                 new_config['data']['original']['weight'] = new_weights.numerator
 
-
-            update_relative_paths(new_config)
             dump_config_to_yaml(aug_method_dir_name, new_config, 'train_config.yaml')
 
             if config['multi_train']['backwards']:
@@ -98,6 +101,7 @@ def create_config(config, src_postfix, tgt_postfix, ratio=0, data_size=0, graph_
 
     else:
         dir_name_with_prefix = f'{src_postfix}{tgt_postfix}'
+        update_relative_paths(new_config)
         dump_config_to_yaml(dir_name_with_prefix, new_config, 'train_config.yaml')
         if config['multi_train']['backwards']:
             dir_name_with_prefix = f'{tgt_postfix}{src_postfix}'
