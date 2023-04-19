@@ -113,7 +113,7 @@ class SubjectObjectAugmentator(AugmentatorBase):
 
     def augment(self):
         if self.late_setup:
-            if type(self.augmented_data_size) is int:
+            if type(self.augmented_data_size) == int:
                 self._num_augmented_sentences_to_generate_per_method = self.augmented_data_size
             else:
                 self._num_augmented_sentences_to_generate_per_method = int(
