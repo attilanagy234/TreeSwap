@@ -105,29 +105,3 @@ if [ "$augmentation_active" == "true" ]; then
 else
     echo "Augmentation not enabled. Skipping..."
 fi
-
-# ./preprocess_data.sh /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/hunglish2-75k-train.en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/hunglish2-75k-train.hu /
-# preprocess.yaml /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.hu
-
-# # srun ./precompute_english_dependency_trees.sh /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.en /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/en 10000
-# ./precompute_english_dependency_trees.sh /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/en /
-# 10000
-
-# # srun -p fat2 --gres=mps ./precompute_hungarian_dependency_trees.sh /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.hu /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/hu 10000
-# ./precompute_hungarian_dependency_trees.sh /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.hu /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/hu /
-# 10000
-
-# ./run_subject_object_augmentation.sh /
-# en hu /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/hu /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmented /
-# 0.5

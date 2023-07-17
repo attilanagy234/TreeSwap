@@ -1,0 +1,53 @@
+#------------------------------------------------------------------------------
+# Augmentation config
+# Parameters used by the augmentation script:
+# https://github.com/attilanagy234/syntax-augmentation-nmt/blob/main/opennmt/bash_scripts/augment.sh
+
+seed: 1234
+
+
+_augmentation_description: DE-EN IWSLT baseline config
+
+
+general:
+    src_postfix: de
+    tgt_postfix: en
+
+augmentation:
+    active: true
+    augmented_folder_prefix: aug-0.5
+    # set by the augment.sh script
+    directory: preprocessed
+    preprocessor:
+        total_wordcount_min: 0
+        total_wordcount_max: 100
+        wordcount_diff: 10
+        wordcount_ratio_threshold: 3
+        source_language: de
+        target_language: en
+        # path to the fasttext model
+        langdetect_model_path: /tmp/lid.176.bin
+        use_multiprocessing: false
+        process_count: 1
+        batch_size: 10000
+    scripts_path: ../../../../../../src
+    preprocess_and_precompute_script: preprocess_and_precompute.sh
+    preprocess_data_script: preprocess_data.sh
+    precompute_script: precompute_dependency_trees.sh
+    augmentation_script: run_subject_object_augmentation.sh
+    precompute_batch_size: 10
+    augmentation_ratio: 1
+    filter_same_ancestor: true
+    filter_same_pos_tag: true
+    filter_for_noun_tags: true
+    separate_augmentation: true
+    augmentation_type: ged
+    similarity_threshold: 0.5
+    augmentation_size: 378477
+
+
+data:
+    original:
+        path_src: /home/dorinapetra/data/nmt/iwslt-2023/it/train.de
+        path_tgt: /home/dorinapetra/data/nmt/iwslt-2023/it/train.en
+
