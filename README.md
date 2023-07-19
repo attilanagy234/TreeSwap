@@ -28,6 +28,7 @@ conda create --name my-env python=3.8.5
 conda activate my-env
 
 pip install -r requirements.txt
+pip3 install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2 yq=2.13.0
 conda install libgcc
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/miniconda3/lib/
@@ -105,6 +106,7 @@ conda activate my-env
 Install the required packages:
 ```shell
 pip install -r requirements.txt
+pip3 install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2 yq=2.13.0
 ```
 
