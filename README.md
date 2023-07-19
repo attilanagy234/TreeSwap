@@ -42,6 +42,8 @@ To install all the necessary dependencies, just run:
 ```bash
 cd src/hu_nmt
 poetry install
+pip3 install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+conda install -c conda-forge fasttext=0.9.2 yq=2.13.0
 ```
 
 ### Download model for language detection (used in preprocessing)
