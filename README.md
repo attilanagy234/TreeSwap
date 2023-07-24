@@ -4,11 +4,6 @@
 
 Complimentary code for our papers [Syntax-based data augmentation for Hungarian-English machine translation](https://arxiv.org/abs/2201.06876) and [Data Augmentation for Machine Translation via Dependency Subtree Swapping](https://arxiv.org/abs/2307.07025) submitted to the XVIII. and XIX.  Conference on Hungarian Computational Linguistics.
 
-## Trained models
-Our trained models are available on the HuggingFace Model Hub with usage steps:
-- [HU-EN](https://huggingface.co/SZTAKI-HLT/opennmt-hu-en)
-- [EN-HU](https://huggingface.co/SZTAKI-HLT/opennmt-en-hu)
-
 # Building the data augmentation package
 
 The data augmentator uses [Poetry](https://python-poetry.org/) for packaging and dependency management.
@@ -86,11 +81,9 @@ The `augment.sh` uses the following parameters from `config.yaml`:
 
 ```bash
 # create directory for new experiment
-cd opennmt/experiments/runs
-mkdir new_experiment
-cd new_experiment
+cd opennmt/experiments/runs/simple_aug_example
 
-# create config file
+# set the data path in the config file
 vim config.yaml
 
 ../../../bash_scripts/augment.sh 
@@ -167,6 +160,12 @@ It saves the following in the `history.tsv` file in the history directory:
 - `git_hash` - hash of the git commit that was used
 
 If there is a new parameter added to the config the previous runs will have `None` as a value for that parameter.
+
+
+## Trained models
+Our trained models from the paper `Syntax-based data augmentation for Hungarian-English machine translation` for `hu-en` and `en-hu` specifically, are available on the HuggingFace Model Hub with usage steps:
+- [HU-EN](https://huggingface.co/SZTAKI-HLT/opennmt-hu-en)
+- [EN-HU](https://huggingface.co/SZTAKI-HLT/opennmt-en-hu)
 
 ## Citation
 
