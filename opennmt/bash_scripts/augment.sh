@@ -4,8 +4,8 @@ augmentation_active=$(yq -r .augmentation.active config.yaml)
 src_postfix=$(yq -r .general.src_postfix config.yaml)
 tgt_postfix=$(yq -r .general.tgt_postfix config.yaml)
 augmentation_dir=$(yq -r .augmentation.directory config.yaml)
-all_non_valid_src_paths=$(for dataset in $(yq ".data | keys" config.yaml | grep -v "valid" | grep ","); do dataset=$(echo $dataset | sed "s/\",*//g"); yq -r .data.$dataset.path_src config.yaml; done)
-all_non_valid_tgt_paths=$(for dataset in $(yq ".data | keys" config.yaml | grep -v "valid" | grep ","); do dataset=$(echo $dataset | sed "s/\",*//g"); yq -r .data.$dataset.path_tgt config.yaml; done)
+all_non_valid_src_paths=$(for dataset in $(yq ".data | keys" config.yaml | grep -v "valid" | grep "\""); do dataset=$(echo $dataset | sed "s/\",*//g"); yq -r .data.$dataset.path_src config.yaml; done)
+all_non_valid_tgt_paths=$(for dataset in $(yq ".data | keys" config.yaml | grep -v "valid" | grep "\""); do dataset=$(echo $dataset | sed "s/\",*//g"); yq -r .data.$dataset.path_tgt config.yaml; done)
 scripts_path=$(yq -r .augmentation.scripts_path config.yaml)
 preprocess_and_precompute_script=$(yq -r .augmentation.preprocess_and_precompute_script config.yaml)
 
@@ -105,29 +105,3 @@ if [ "$augmentation_active" == "true" ]; then
 else
     echo "Augmentation not enabled. Skipping..."
 fi
-
-# ./preprocess_data.sh /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/hunglish2-75k-train.en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/hunglish2-75k-train.hu /
-# preprocess.yaml /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.hu
-
-# # srun ./precompute_english_dependency_trees.sh /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.en /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/en 10000
-# ./precompute_english_dependency_trees.sh /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/en /
-# 10000
-
-# # srun -p fat2 --gres=mps ./precompute_hungarian_dependency_trees.sh /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.hu /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/hu 10000
-# ./precompute_hungarian_dependency_trees.sh /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmentation_input_data/preprocessed.hu /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/hu /
-# 10000
-
-# ./run_subject_object_augmentation.sh /
-# en hu /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/en /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/dependency_trees/hu /
-# /home1/hu-nmt/data/Hunglish2/low-resource/training/hunglish2-75k/augmented /
-# 0.5

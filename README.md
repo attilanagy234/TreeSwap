@@ -1,14 +1,10 @@
-# syntax-augmentation-nmt
+# TreeSwap
 
 [![Tests](https://github.com/attilanagy234/syntax-augmentation-nmt/actions/workflows/run-tests.yaml/badge.svg)](https://github.com/attilanagy234/syntax-augmentation-nmt/actions/workflows/run-tests.yaml)
 
-Complimentary code for our paper [Syntax-based data augmentation for Hungarian-English machine translation](https://arxiv.org/abs/2201.06876) submitted to the XVIII. Conference on Hungarian Computational Linguistics.
+Complimentary code for our papers [Syntax-based data augmentation for Hungarian-English machine translation](https://arxiv.org/abs/2201.06876) and [Data Augmentation for Machine Translation via Dependency Subtree Swapping](https://arxiv.org/abs/2307.07025) submitted to the XVIII. and XIX.  Conference on Hungarian Computational Linguistics.
 
-## Trained models
-You can download the trained models reported in our paper from [this link](https://drive.google.com/drive/folders/13t9M0-j96ylqtkH0nd422wVzHmkAjvhk).
-
-
-## Building the data augmentation package
+# Building the data augmentation package
 
 The data augmentator uses [Poetry](https://python-poetry.org/) for packaging and dependency management.
 
@@ -27,6 +23,7 @@ conda create --name my-env python=3.8.5
 conda activate my-env
 
 pip install -r requirements.txt
+pip3 install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2 yq=2.13.0
 conda install libgcc
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/miniconda3/lib/
@@ -40,6 +37,8 @@ To install all the necessary dependencies, just run:
 ```bash
 cd src/hu_nmt
 poetry install
+pip3 install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+conda install -c conda-forge fasttext=0.9.2 yq=2.13.0
 ```
 
 ### Download model for language detection (used in preprocessing)
@@ -70,6 +69,26 @@ You can obtain the path for the virtualenv by:
 poetry env info --path
 ```
 
+## Running augmentation
+The `augment.sh` uses the following parameters from `config.yaml`:
+- `data.original` 
+- augmentation hyperparameters:
+  - `augmentation_type`: `ged`/`edge_mapper`/`base`
+  - `similarity_threshold`
+  - `augmentation_ratio`
+
+[Example augmentation config](https://github.com/attilanagy234/TreeSwap/tree/main/opennmt/experiments/runs/simple_aug_example/config.yaml)
+
+```bash
+# create directory for new experiment
+cd opennmt/experiments/runs/simple_aug_example
+
+# set the data path in the config file
+vim config.yaml
+
+../../../bash_scripts/augment.sh 
+```
+
 # Training models
 
 ## Setup
@@ -82,6 +101,7 @@ conda activate my-env
 Install the required packages:
 ```shell
 pip install -r requirements.txt
+pip3 install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 conda install -c conda-forge sentencepiece=0.1.95 sacrebleu=1.5.1 fasttext=0.9.2 yq=2.13.0
 ```
 
@@ -140,3 +160,31 @@ It saves the following in the `history.tsv` file in the history directory:
 - `git_hash` - hash of the git commit that was used
 
 If there is a new parameter added to the config the previous runs will have `None` as a value for that parameter.
+
+
+## Trained models
+Our trained models from the paper `Syntax-based data augmentation for Hungarian-English machine translation` for `hu-en` and `en-hu` specifically, are available on the HuggingFace Model Hub with usage steps:
+- [HU-EN](https://huggingface.co/SZTAKI-HLT/opennmt-hu-en)
+- [EN-HU](https://huggingface.co/SZTAKI-HLT/opennmt-en-hu)
+
+## Citation
+
+If you use our method please cite the following papers:
+
+```
+@inproceedings{nagy2022syntax,
+  title={Syntax-based data augmentation for Hungarian-English machine translation},
+  author={Nagy, Attila and Nanys, Patrick and Konr{\'a}d, Bal{\'a}zs Frey and Bial, Bence and {\'A}cs, Judit},
+  booktitle = {XVIII. Conference on Hungarian Computational Linguistics.},
+  year={2022}
+}
+```
+
+```
+@inproceedings {nagy2023syntax,
+    title = {{Data Augmentation for Machine Translation via Dependency Subtree Swapping}},
+    author = {Nagy, Attila and Lakatos, Dorina and Barta, Botond and Nanys, Patrick and {\'{A}}cs, Judit},
+    booktitle = {XIX. Conference on Hungarian Computational Linguistics.},
+    year = {2023},
+}
+```

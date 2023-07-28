@@ -1,0 +1,60 @@
+#------------------------------------------------------------------------------
+# Augmentation config
+
+seed: 1234
+
+
+_augmentation_description: DE-EN baseline config
+
+
+general:
+    src_postfix: de
+    tgt_postfix: en
+
+augmentation:
+    active: true
+    augmented_folder_prefix: aug-0.5
+    # set by the augment.sh script
+    directory: preprocessed
+    preprocessor:
+        total_wordcount_min: 0
+        total_wordcount_max: 100
+        wordcount_diff: 10
+        wordcount_ratio_threshold: 3
+        source_language: de
+        target_language: en
+        # path to the fasttext model
+        langdetect_model_path: /tmp/lid.176.bin
+        use_multiprocessing: false
+        process_count: 1
+        batch_size: 10000
+    # the repo's src folder
+    scripts_path: ../../../../../../src
+    preprocess_and_precompute_script: preprocess_and_precompute.sh
+    preprocess_data_script: preprocess_data.sh
+    precompute_script: precompute_dependency_trees.sh
+    augmentation_script: run_subject_object_augmentation.sh
+    precompute_batch_size: 10
+    # the augmentation_ratio is used when the augmentation_size is not set
+    augmentation_ratio: 1
+    augmentation_size: 378477
+    # True if the object and subject subtree must have the same ancestor
+    filter_same_ancestor: true
+    # True if the roots of the subtrees' must have the same pos tag
+    filter_same_pos_tag: true
+    # True if the subtree must contain a noun or a proper noun
+    filter_for_noun_tags: true
+    # True if the sentence must have at least one subject OR object subtree
+    # False if the sentence must have at least one subject AND one object subtree
+    separate_augmentation: true
+    # Sampling method: ged | edge_mapper | base
+    augmentation_type: ged
+    # Similarity threshold for graph-based (ged or edge_mapper) sampling methods.
+    similarity_threshold: 0.5
+
+
+data:
+    original:
+        path_src: ~/data/treeswap/train.de
+        path_tgt: ~/data/treeswap/train.en
+
