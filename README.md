@@ -161,6 +161,9 @@ It saves the following in the `history.tsv` file in the history directory:
 
 If there is a new parameter added to the config the previous runs will have `None` as a value for that parameter.
 
+## Datasets
+The preprocessed datasets and the train/dev/test splits used in the experiments for our paper: `TreeSwap: Data Augmentation for Machine Translation via Dependency Subtree Swapping`
+
 
 ## Trained models
 Our trained models from the paper `Syntax-based data augmentation for Hungarian-English machine translation` for `hu-en` and `en-hu` specifically, are available on the HuggingFace Model Hub with usage steps:
