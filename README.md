@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/attilanagy234/syntax-augmentation-nmt/actions/workflows/run-tests.yaml/badge.svg)](https://github.com/attilanagy234/syntax-augmentation-nmt/actions/workflows/run-tests.yaml)
 
-Complimentary code for our papers [Syntax-based data augmentation for Hungarian-English machine translation](https://arxiv.org/abs/2201.06876) and [Data Augmentation for Machine Translation via Dependency Subtree Swapping](https://arxiv.org/abs/2307.07025) submitted to the XVIII. and XIX.  Conference on Hungarian Computational Linguistics.
+Complimentary code for our paper [TreeSwap: Data Augmentation for Machine Translation via Dependency Subtree Swapping](https://aclanthology.org/2023.ranlp-1.82/) accepted at RANLP 2023.
 
 # Building the data augmentation package
 
@@ -175,12 +175,24 @@ Our trained models from the paper `Syntax-based data augmentation for Hungarian-
 If you use our method please cite the following papers:
 
 ```
-@inproceedings{nagy2022syntax,
-  title={Syntax-based data augmentation for Hungarian-English machine translation},
-  author={Nagy, Attila and Nanys, Patrick and Konr{\'a}d, Bal{\'a}zs Frey and Bial, Bence and {\'A}cs, Judit},
-  booktitle = {XVIII. Conference on Hungarian Computational Linguistics.},
-  year={2022}
+@inproceedings{nagy-etal-2023-treeswap,
+    title = "{T}ree{S}wap: Data Augmentation for Machine Translation via Dependency Subtree Swapping",
+    author = "Nagy, Attila  and
+      Lakatos, Dorina  and
+      Barta, Botond  and
+      {\'A}cs, Judit",
+    editor = "Mitkov, Ruslan  and
+      Angelova, Galia",
+    booktitle = "Proceedings of the 14th International Conference on Recent Advances in Natural Language Processing",
+    month = sep,
+    year = "2023",
+    address = "Varna, Bulgaria",
+    publisher = "INCOMA Ltd., Shoumen, Bulgaria",
+    url = "https://aclanthology.org/2023.ranlp-1.82",
+    pages = "759--768",
+    abstract = "Data augmentation methods for neural machine translation are particularly useful when limited amount of training data is available, which is often the case when dealing with low-resource languages. We introduce a novel augmentation method, which generates new sentences by swapping objects and subjects across bisentences. This is performed simultaneously based on the dependency parse trees of the source and target sentences. We name this method TreeSwap. Our results show that TreeSwap achieves consistent improvements over baseline models in 4 language pairs in both directions on resource-constrained datasets. We also explore domain-specific corpora, but find that our method does not make significant improvements on law, medical and IT data. We report the scores of similar augmentation methods and find that TreeSwap performs comparably. We also analyze the generated sentences qualitatively and find that the augmentation produces a correct translation in most cases. Our code is available on Github.",
 }
+
 ```
 
 ```
